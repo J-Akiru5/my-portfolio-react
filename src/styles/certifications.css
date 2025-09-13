@@ -1,0 +1,13 @@
+:root {
+  --primary-color: blue;
+  --background-gradient: linear-gradient(245deg, #0044ff, #00113f);
+  --text-color: #ffffff;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  /* Choose your font */
+  background: var(--background-gradient);
+  color: var(--text-color);
+  margin: 0;
+}

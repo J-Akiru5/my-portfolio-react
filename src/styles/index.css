@@ -1,0 +1,398 @@
+:root {
+  --primary-color: blue;
+  --background-gradient: linear-gradient(245deg, #0044ff, #00113f);
+  --text-color: #ffffff;
+}
+
+.background-image-layer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  opacity: 0.4;
+  pointer-events: none;
+  background: url('../assets/hex-background.svg') center center/cover no-repeat;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  /* Choose your font */
+  background: var(--background-gradient);
+  color: var(--text-color);
+  margin: 0;
+}
+
+
+/* ======================== HERO SECTION STYLES ========================= */
+.hero-section {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  text-align: center;
+  padding: 0 2rem;
+}
+
+.hero-content {
+  max-width: 700px;
+  background-color: #00bfff1a;
+  padding: 4rem;
+  border-radius: 10px;
+  box-shadow: -2px 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.hero-content:hover {
+  transform: translateY(-5px);
+  transition: transform 0.3s ease-in-out;
+}
+
+
+.hero-name {
+  font-size: 4.5rem;
+  margin: 0;
+}
+
+.hero-subheadline {
+  font-size: 1.7rem;
+  margin: 0.5rem 0;
+  font-weight: 450;
+  margin-bottom: 50px;
+  opacity: 0.9;
+  color: #8cb4ffd0;
+}
+
+.hero-description {
+  font-size: 1.2rem;
+  margin: 1rem 0;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+  opacity: 0.9;
+  line-height: 1.6;
+}
+
+.hero-buttons {
+  display: flex;
+  /* Use flexbox for the buttons too */
+  justify-content: center;
+  gap: 1rem;
+  /* Creates space between the buttons */
+  margin-top: 2rem;
+  flex-wrap: wrap;
+  /* Allows buttons to stack on very small screens */
+}
+
+/* ================= HERO BUTTONS STYLES ================= */
+.work-btn {
+  background-color: #005eff;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  padding: 1.2rem 2.5rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(14, 3, 3, 0.08);
+  transition: background 0.5s, color 0.5s, box-shadow 0.5s;
+  outline: none;
+  cursor: pointer;
+}
+
+.work-btn:hover {
+  background-color: #001842;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.544);
+}
+
+.contact-btn {
+  background: transparent;
+  color: #fff;
+  border: 2px solid #fff;
+  border-radius: 10px;
+  padding: 1.2rem 2.5rem;
+  font-size: 1.3rem;
+  font-weight: bold;
+  text-decoration: none;
+  transition: background 0.5s, color 0.5s, border-color 0.5s;
+  outline: none;
+  cursor: pointer;
+}
+
+.contact-btn:hover {
+  background: #fff;
+  color: #2979ff;
+  border-color: #ffffff;
+}
+
+/* ================= ABOUT ME SECTION ================= */
+.about-section {
+  background-color: #001842;
+  color: #fff;
+  padding: 4rem 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+.about-content {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  max-width: 1500px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.about-left {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-right: 3rem;
+}
+
+.about-initials-circle {
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  display: flex;
+  color: #fff;
+  letter-spacing: 2px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+  object-fit: cover;
+}
+
+.about-right {
+  flex: 2;
+  padding-left: 3rem;
+}
+
+.personal-info-btn {
+  background-color: #005eff;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 0.6rem 1.2rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  text-decoration: none;
+  box-shadow: 0 2px 8px rgba(14, 3, 3, 0.08);
+  transition: background 0.5s, color 0.5s, box-shadow 0.5s;
+  outline: none;
+  cursor: pointer;
+  float: right;
+}
+
+.personal-info-btn:hover {
+  background-color: #001842;
+  color: #fff;
+  box-shadow: 0 4px 16px rgba(255, 255, 255, 0.544);
+}
+
+.about-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.about-title {
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  padding-left: 4vw;
+}
+
+.about-description {
+  font-size: 1.25rem;
+  line-height: 1.7;
+  margin-bottom: 1.5rem;
+  padding-left: 6vw;
+  opacity: 0.9;
+  text-align: left;
+}
+
+/* Responsive adjustments */
+@media (max-width: 900px) {
+  .about-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .about-left,
+  .about-right {
+    padding: 0;
+    width: 100%;
+  }
+
+  .about-right {
+    padding-top: 2rem;
+    padding-left: 0;
+  }
+
+  .about-initials-circle {
+    width: 250px;
+    height: 250px;
+    font-size: 2.2rem;
+  }
+}
+
+/* ================= FEATURED WORK SECTION ================= */
+.featured-work-section {
+  background: transparent;
+  padding: 4rem 0 5rem 0;
+  text-align: center;
+}
+
+.section-title {
+  font-size: 2.7rem;
+  font-weight: bold;
+  margin-bottom: 3rem;
+  color: #fff;
+}
+
+.work-gallery {
+  display: flex;
+  gap: 4rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.work-card {
+  background: #19202b;
+  border-radius: 18px;
+  width: 340px;
+  min-height: 370px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.13);
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.work-card:hover {
+  transform: translateY(-8px) scale(1.03);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22);
+}
+
+.work-card-top {
+  padding: 2.2rem 0 1.2rem 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 18px 18px 0 0;
+}
+
+.webdev-card .work-card-top {
+  background: linear-gradient(135deg, #3a8dff 0%, #00c6fb 100%);
+}
+
+.video-card .work-card-top {
+  background: linear-gradient(135deg, #f5373d 0%, #c5000d 100%);
+}
+
+.art-card .work-card-top {
+  background: linear-gradient(135deg, #1fd655 0%, #00c6a2 100%);
+}
+
+.work-card-bottom {
+  background: #19202b;
+  padding: 2rem 1.5rem 1.5rem 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+}
+
+.work-card-title {
+  font-size: 1.35rem;
+  font-weight: bold;
+  color: #fff;
+  margin: 0 0 0.5rem 0;
+}
+
+.work-card-subtitle {
+  font-size: 1rem;
+  color: #bfc8e2;
+  margin-bottom: 1.5rem;
+}
+
+.work-card-btn {
+  display: inline-block;
+  padding: 0.7rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+  margin-top: 0.5rem;
+  transition: background 0.2s, color 0.2s;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.webdev-btn {
+  background: #2979ff;
+}
+
+.webdev-btn:hover {
+  background: #005eff;
+}
+
+.video-btn {
+  background: #a259ff;
+}
+
+.video-btn:hover {
+  background: #7c3aed;
+}
+
+.art-btn {
+  background: #1fd655;
+}
+
+.art-btn:hover {
+  background: #009e60;
+}
+
+/* Responsive for cards */
+@media (max-width: 1100px) {
+  .work-gallery {
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .work-card {
+    width: 90vw;
+    max-width: 370px;
+  }
+}
+
+/* === SPECIAL LINK STYLE === */
+.sine-link {
+  color: #fff;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.sine-link:hover {
+  color: #00bfff;
+}
+
+/* ===  RESPONSIVENESS (Media Queries) === */
+/* This is where we adapt the design for tablets and desktops. */
+
+/* For tablets and larger (e.g., screens wider than 768px) */
+@media (min-width: 768px) {
+  .hero-content {
+    max-width: 800px;
+    /* Give the hero text a max width so it doesn't get too wide */
+  }
+
+  /* Here you could adjust font sizes for larger screens if needed */
+}
