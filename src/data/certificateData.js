@@ -36,7 +36,7 @@ export const certificates = [
     title: 'Basic Level of Cloud Computing',
     provider: 'DICT',
     category: 'Cloud Computing',
-    image: '/certs/DICT-ICT014 Basic Level of Cloud Computing.svg',
+    image: '/certs/DICT-ICT014 Basic Level of Cloud Computing.png',
     order: 1,
   },
   {
@@ -44,7 +44,7 @@ export const certificates = [
     title: 'Intermediate Level of Cloud Computing',
     provider: 'DICT',
     category: 'Cloud Computing',
-    image: '/certs/DICT-ICT015 Intermediate Level of Cloud Computing.svg',
+    image: '/certs/DICT-ICT015 Intermediate Level of Cloud Computing.png',
     order: 2,
   },
   {
@@ -52,7 +52,7 @@ export const certificates = [
     title: 'Advanced Level of Cloud Computing',
     provider: 'DICT',
     category: 'Cloud Computing',
-    image: '/certs/DICT-ICT016 Advanced Level of Cloud Computing.svg',
+    image: '/certs/DICT-ICT016 Advanced Level of Cloud Computing.png',
     order: 3,
   },
 
@@ -64,7 +64,7 @@ export const certificates = [
     title: 'Digital Innovation in Government',
     provider: 'DICT',
     category: 'ICT & Data',
-    image: '/certs/DICT-ICT001 Digital Innovation in Government.svg',
+    image: '/certs/DICT-ICT001 Digital Innovation in Government.png',
     order: 1,
   },
   {
@@ -72,7 +72,7 @@ export const certificates = [
     title: 'Internet of Things Using Arduino in TinkerCad',
     provider: 'DICT',
     category: 'ICT & Data',
-    image: '/certs/DICT-ICT003 Internet of Things Using Arduino in TinkerCad.svg',
+    image: '/certs/DICT-ICT003 Internet of Things Using Arduino in TinkerCad.png',
     order: 2,
   },
   {
@@ -80,7 +80,7 @@ export const certificates = [
     title: 'Big Data Fundamentals',
     provider: 'DICT',
     category: 'ICT & Data',
-    image: '/certs/DICT-ICT004 Big Data Fundamentals.svg',
+    image: '/certs/DICT-ICT004 Big Data Fundamentals.png',
     order: 3,
   },
   {
@@ -88,7 +88,7 @@ export const certificates = [
     title: 'Introduction to Data Privacy',
     provider: 'DICT',
     category: 'ICT & Data',
-    image: '/certs/DICT-ICT006 Introduction to Data Privacy.svg',
+    image: '/certs/DICT-ICT006 Introduction to Data Privacy.png',
     order: 4,
   },
   {
@@ -96,7 +96,7 @@ export const certificates = [
     title: 'Data Privacy - Good Governance',
     provider: 'DICT',
     category: 'ICT & Data',
-    image: '/certs/DICT-ICT007 Data Privacy - Good Governance.svg',
+    image: '/certs/DICT-ICT007 Data Privacy - Good Governance.png',
     order: 5,
   },
   {
@@ -104,7 +104,7 @@ export const certificates = [
     title: 'Digital Transformation 101: Reimagining Businesses',
     provider: 'DICT',
     category: 'ICT & Data',
-    image: '/certs/DICT-ICT010 Digital Transformation 101 Reimagining Businesses.svg',
+    image: '/certs/DICT-ICT010 Digital Transformation 101 Reimagining Businesses.png',
     order: 6,
   },
   {
@@ -112,7 +112,7 @@ export const certificates = [
     title: 'Intermediate Level of Digital Transformation',
     provider: 'DICT',
     category: 'ICT & Data',
-    image: '/certs/DICT-ICT011 Intermediate Level of Digital Transformation.svg',
+    image: '/certs/DICT-ICT011 Intermediate Level of Digital Transformation.png',
     order: 7,
   },
 
@@ -124,7 +124,7 @@ export const certificates = [
     title: 'Principles of Web Development and Introduction to HTML',
     provider: 'DICT',
     category: 'Web Development',
-    image: '/certs/DICT-WD001 Principles of Web Development and Introduction to HTML.svg',
+    image: '/certs/DICT-WD001 Principles of Web Development and Introduction to HTML.png',
     order: 1,
   },
   {
@@ -132,7 +132,7 @@ export const certificates = [
     title: 'Using HTML and CSS to Design a Website',
     provider: 'DICT',
     category: 'Web Development',
-    image: '/certs/DICT-WD002 Using HTML and CSS to Design a Website .svg',
+    image: '/certs/DICT-WD002 Using HTML and CSS to Design a Website .png',
     order: 2,
   },
   {
@@ -140,7 +140,7 @@ export const certificates = [
     title: 'Basic JavaScript for Web Development',
     provider: 'DICT',
     category: 'Web Development',
-    image: '/certs/DICT-WD003 Basic Javascript for Web Development.svg',
+    image: '/certs/DICT-WD003 Basic Javascript for Web Development.png',
     order: 3,
   },
   {
@@ -148,7 +148,7 @@ export const certificates = [
     title: 'Project 1: Developing a Static Website',
     provider: 'DICT',
     category: 'Web Development',
-    image: '/certs/WD005 Project 1-Developing a Static Website.svg',
+    image: '/certs/WD005 Project 1-Developing a Static Website.png',
     order: 4,
   },
   {
@@ -156,7 +156,7 @@ export const certificates = [
     title: 'Build Python Web Apps with Flask',
     provider: 'Codecademy',
     category: 'Web Development',
-    image: '/certs/Build Python Web Apps with Flask.svg',
+    image: '/certs/Build Python Web Apps with Flask.png',
     order: 5,
   },
 
@@ -168,7 +168,7 @@ export const certificates = [
     title: 'Introduction to Android Application',
     provider: 'DICT',
     category: 'Mobile App Development',
-    image: '/certs/DICT-MAD006 Introduction to Android Application.svg',
+    image: '/certs/DICT-MAD006 Introduction to Android Application.png',
     order: 1,
   },
   {
@@ -176,7 +176,7 @@ export const certificates = [
     title: 'Basic Building Blocks of the User Interface',
     provider: 'DICT',
     category: 'Mobile App Development',
-    image: '/certs/DICT-MAD007 Basic Building Blocks of the User Interface.svg',
+    image: '/certs/DICT-MAD007 Basic Building Blocks of the User Interface.png',
     order: 2,
   },
 
@@ -188,7 +188,7 @@ export const certificates = [
     title: 'Principles of Design',
     provider: 'DICT',
     category: 'Graphic Design',
-    image: '/certs/DICT-GD001 Principles of Design.svg',
+    image: '/certs/DICT-GD001 Principles of Design.png',
     order: 1,
   },
   {
@@ -196,7 +196,7 @@ export const certificates = [
     title: 'Canva for Graphic Design',
     provider: 'DICT',
     category: 'Graphic Design',
-    image: '/certs/DICT-GD002 Canva for Graphic Design.svg',
+    image: '/certs/DICT-GD002 Canva for Graphic Design.png',
     order: 2,
   },
   {
@@ -204,7 +204,7 @@ export const certificates = [
     title: 'Trends in Art and Design',
     provider: 'DICT',
     category: 'Graphic Design',
-    image: '/certs/DICT-GD003 Trends in Art and Design.svg',
+    image: '/certs/DICT-GD003 Trends in Art and Design.png',
     order: 3,
   },
   {
@@ -212,7 +212,7 @@ export const certificates = [
     title: 'Functional Composition',
     provider: 'DICT',
     category: 'Graphic Design',
-    image: '/certs/DICT-GD004 Functional Composition.svg',
+    image: '/certs/DICT-GD004 Functional Composition.png',
     order: 4,
   },
 
@@ -224,7 +224,7 @@ export const certificates = [
     title: 'Fundamentals of Marketing',
     provider: 'DICT',
     category: 'Digital Marketing',
-    image: '/certs/DICT-DM001 Fundamentals of Marketing .svg',
+    image: '/certs/DICT-DM001 Fundamentals of Marketing .png',
     order: 1,
   },
   {
@@ -232,7 +232,7 @@ export const certificates = [
     title: 'Digital Marketing Channels and Funnel',
     provider: 'DICT',
     category: 'Digital Marketing',
-    image: '/certs/DICT-DM002 Digital Marketing Channels and Funnel.svg',
+    image: '/certs/DICT-DM002 Digital Marketing Channels and Funnel.png',
     order: 2,
   },
   {
@@ -240,7 +240,7 @@ export const certificates = [
     title: 'Copywriting Basics: Advertising Copy & Trends',
     provider: 'DICT',
     category: 'Digital Marketing',
-    image: '/certs/DICT-DM003 Copywriting Basics Advertising Copy Trends in Art and Design.svg',
+    image: '/certs/DICT-DM003 Copywriting Basics Advertising Copy Trends in Art and Design.png',
     order: 3,
   },
 
@@ -252,7 +252,7 @@ export const certificates = [
     title: 'Programming for Beginners Using Python',
     provider: 'DICT',
     category: 'Python',
-    image: '/certs/Programming for Beginners Using Python.svg',
+    image: '/certs/Programming for Beginners Using Python.png',
     order: 1,
   },
   {
@@ -260,7 +260,7 @@ export const certificates = [
     title: 'Programming for Intermediate Users Using Python',
     provider: 'DICT',
     category: 'Python',
-    image: '/certs/Programming for Intermediate Users Using Python.svg',
+    image: '/certs/Programming for Intermediate Users Using Python.png',
     order: 2,
   },
   {
@@ -268,7 +268,7 @@ export const certificates = [
     title: 'Learn Basic Statistics with Python',
     provider: 'Codecademy',
     category: 'Python',
-    image: '/certs/Learn Basic Statistics with Python.svg',
+    image: '/certs/Learn Basic Statistics with Python.png',
     order: 3,
   },
   {
@@ -276,7 +276,7 @@ export const certificates = [
     title: 'Analyze Data with Python',
     provider: 'Codecademy',
     category: 'Python',
-    image: '/certs/Analyze Data with Python.svg',
+    image: '/certs/Analyze Data with Python.png',
     order: 4,
   },
   {
@@ -284,7 +284,7 @@ export const certificates = [
     title: 'Visualize Data with Python',
     provider: 'Codecademy',
     category: 'Python',
-    image: '/certs/Visualize Data with Python.svg',
+    image: '/certs/Visualize Data with Python.png',
     order: 5,
   },
 
@@ -296,7 +296,7 @@ export const certificates = [
     title: 'JavaScript Essentials 1',
     provider: 'Cisco Networking Academy',
     category: 'JavaScript',
-    image: '/certs/JavaScript_Essentials_1_certificate_jeffmartinez474-gmail-com_89f79e0e-95b9-467e-aadf-903a1f8baea4.svg',
+    image: '/certs/JavaScript_Essentials_1_certificate_jeffmartinez474-gmail-com_89f79e0e-95b9-467e-aadf-903a1f8baea4.png',
     order: 1,
   },
 ];

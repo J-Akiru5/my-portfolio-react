@@ -26,3 +26,11 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# SVG certificates (use PNG instead to avoid GitHub token detection)
+public/certs/*.svg
+public/certs-png/
+
+# Conversion scripts output
+scripts/convert-certs.js
+scripts/convert-certs.mjs

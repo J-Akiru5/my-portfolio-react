@@ -141,6 +141,15 @@ export default function Dashboard() {
             SETTINGS
           </PixelButton>
         </GlassCard>
+        
+        <GlassCard className="dashboard-card" hoverEffect={true}>
+          <div className="card-icon">📨</div>
+          <h3 className="card-title">INBOX</h3>
+          <p className="card-desc">Read and manage messages from the contact form.</p>
+          <PixelButton variant="outline" color="sunset" onClick={() => navigate('/admin/messages')}>
+            VIEW MESSAGES
+          </PixelButton>
+        </GlassCard>
       </div>
     </section>
   )

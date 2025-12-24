@@ -15,6 +15,7 @@ import Login from './pages/admin/Login'
 import Dashboard from './pages/admin/Dashboard'
 import Analytics from './pages/admin/Analytics'
 import SystemConfig from './pages/admin/SystemConfig'
+import Messages from './pages/admin/Messages'
 import AdminSeed from './pages/AdminSeed'
 
 export default function App() {
@@ -44,6 +45,7 @@ export default function App() {
               <Route path="/admin/seed" element={<AdminSeed />} />
               <Route path="/admin/analytics" element={<Analytics />} />
               <Route path="/admin/settings" element={<SystemConfig />} />
+              <Route path="/admin/messages" element={<Messages />} />
             </Route>
           </Routes>
         </main>

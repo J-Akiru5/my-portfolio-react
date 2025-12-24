@@ -1,14 +1,16 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { SectionTitle, GlassCard, PixelButton, SocialIcon } from '../ui'
+import { SectionTitle, GlassCard, PixelButton } from '../ui'
+import { db } from '../../firebase'
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 
 gsap.registerPlugin(ScrollTrigger)
 
 /**
  * ContactSection - Footer reveal with terminal form
  * 
- * Slides up to reveal the contact form and social links.
+ * Saves messages to Firestore for admin viewing.
  */
 export default function ContactSection() {
   const sectionRef = useRef(null)
@@ -47,26 +49,40 @@ export default function ContactSection() {
     return () => ctx.revert()
   }, [])
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     setIsSubmitting(true)
+    setSubmitStatus('')
     
-    // Simulate form submission
-    setTimeout(() => {
-      setIsSubmitting(false)
+    try {
+      // Save message to Firestore
+      await addDoc(collection(db, 'messages'), {
+        name: formData.name,
+        email: formData.email,
+        message: formData.message,
+        createdAt: serverTimestamp(),
+        read: false,
+      })
+      
       setSubmitStatus('✅ Message sent successfully!')
       setFormData({ name: '', email: '', message: '' })
-      setTimeout(() => setSubmitStatus(''), 3000)
-    }, 1500)
+    } catch (error) {
+      console.error('Error sending message:', error)
+      setSubmitStatus('❌ Failed to send. Please try again.')
+    } finally {
+      setIsSubmitting(false)
+      setTimeout(() => setSubmitStatus(''), 5000)
+    }
   }
 
+  // Social links - placeholder URLs, user will provide real ones later
   const socialLinks = [
-    { platform: 'github', url: 'https://github.com/J-Akiru5' },
-    { platform: 'linkedin', url: 'https://www.linkedin.com/in/jeff-edrick-martinez-888575300/' },
-    { platform: 'x', url: '#' },
-    { platform: 'instagram', url: '#' },
-    { platform: 'youtube', url: '#' },
-    { platform: 'tiktok', url: '#' },
+    { platform: 'github', url: 'https://github.com/J-Akiru5', icon: '🐙' },
+    { platform: 'linkedin', url: 'https://www.linkedin.com/in/jeff-edrick-martinez-888575300/', icon: '💼' },
+    { platform: 'facebook', url: '#', icon: '📘' },
+    { platform: 'instagram', url: '#', icon: '📷' },
+    { platform: 'tiktok', url: '#', icon: '🎵' },
+    { platform: 'youtube', url: '#', icon: '▶️' },
   ]
 
   return (
@@ -178,7 +194,14 @@ export default function ContactSection() {
           margin-top: 1rem;
           font-family: 'JetBrains Mono', monospace;
           font-size: 0.85rem;
+        }
+        
+        .submit-status.success {
           color: #39ff14;
+        }
+        
+        .submit-status.error {
+          color: #ff6b35;
         }
         
         .social-card {
@@ -218,33 +241,66 @@ export default function ContactSection() {
           transform: translateY(-3px);
         }
         
-        .social-item svg {
-          width: 28px;
-          height: 28px;
-          fill: currentColor;
+        .social-item .social-icon {
+          font-size: 1.75rem;
         }
         
-        .social-item span {
+        .social-item .social-label {
           font-family: 'Press Start 2P', cursive;
-          font-size: 0.5rem;
+          font-size: 0.45rem;
           text-transform: uppercase;
+          color: rgba(255, 255, 255, 0.7);
         }
         
-        .footer-bar {
+        /* Console.WriteLine Footer */
+        .console-footer {
           margin-top: 4rem;
-          padding-top: 2rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-          text-align: center;
-        }
-        
-        .footer-text {
+          padding: 2rem;
+          background: rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
           font-family: 'JetBrains Mono', monospace;
-          font-size: 0.8rem;
-          color: rgba(255, 255, 255, 0.4);
         }
         
-        .footer-text a {
+        .console-line {
+          margin-bottom: 0.5rem;
+          font-size: 0.85rem;
+        }
+        
+        .console-line .keyword {
+          color: #9d4edd;
+        }
+        
+        .console-line .method {
           color: #00d4ff;
+        }
+        
+        .console-line .string {
+          color: #39ff14;
+        }
+        
+        .console-line .operator {
+          color: white;
+        }
+        
+        .console-line .comment {
+          color: rgba(255, 255, 255, 0.4);
+          font-style: italic;
+        }
+        
+        .console-cursor {
+          display: inline-block;
+          width: 8px;
+          height: 16px;
+          background: #39ff14;
+          animation: blink 1s step-end infinite;
+          vertical-align: text-bottom;
+          margin-left: 4px;
+        }
+        
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
         }
       `}</style>
       
@@ -307,7 +363,9 @@ export default function ContactSection() {
               </PixelButton>
               
               {submitStatus && (
-                <div className="submit-status">{submitStatus}</div>
+                <div className={`submit-status ${submitStatus.includes('✅') ? 'success' : 'error'}`}>
+                  {submitStatus}
+                </div>
               )}
             </form>
           </GlassCard>
@@ -318,12 +376,16 @@ export default function ContactSection() {
               <h3 className="social-header">📡 CONNECT</h3>
               <div className="social-grid">
                 {socialLinks.map((link) => (
-                  <SocialIcon 
+                  <a 
                     key={link.platform}
-                    platform={link.platform}
-                    url={link.url}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="social-item"
-                  />
+                  >
+                    <span className="social-icon">{link.icon}</span>
+                    <span className="social-label">{link.platform}</span>
+                  </a>
                 ))}
               </div>
             </GlassCard>
@@ -353,10 +415,28 @@ export default function ContactSection() {
           </div>
         </div>
         
-        <div className="footer-bar">
-          <p className="footer-text">
-            © {new Date().getFullYear()} JEFF.DEV • Built with <a href="https://react.dev">React</a> & <a href="https://gsap.com">GSAP</a>
-          </p>
+        {/* Console.WriteLine Footer */}
+        <div className="console-footer">
+          <div className="console-line">
+            <span className="comment">// Built with ❤️ and lots of ☕</span>
+          </div>
+          <div className="console-line">
+            <span className="keyword">Console</span>
+            <span className="operator">.</span>
+            <span className="method">WriteLine</span>
+            <span className="operator">(</span>
+            <span className="string">"© {new Date().getFullYear()} JEFF.DEV | React + GSAP + Firebase"</span>
+            <span className="operator">);</span>
+          </div>
+          <div className="console-line">
+            <span className="keyword">Console</span>
+            <span className="operator">.</span>
+            <span className="method">WriteLine</span>
+            <span className="operator">(</span>
+            <span className="string">"Crafted in the 8-Bit Universe 🚀"</span>
+            <span className="operator">);</span>
+            <span className="console-cursor" />
+          </div>
         </div>
       </div>
     </section>
