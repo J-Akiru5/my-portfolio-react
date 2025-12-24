@@ -12,7 +12,7 @@ export default function Footer() {
       <div className="footer-main">
         <div className="footer-col credentials">
           <h3>Jeff Edrick Martinez</h3>
-          <p>Iloilo State University of Fisheries Science and Technology</p>
+          <a href="https://isufst.edu.ph/" target="_blank" aria-label="LinkedIn">Iloilo State University of Fisheries Science and Technology</a>
           <p>Bachelor of Science in Information Technology</p>
         </div>
         <div className="footer-col navigation">
@@ -39,7 +39,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="footer-bottom">
-        © <span id="footer-year"></span> Jeff Edrick Martinez. Designed and Built by Me.
+        © <span id="footer-year"></span> Jeff Martinez. Designed and Built by Me.
       </div>
     </footer>
   )

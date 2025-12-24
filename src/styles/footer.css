@@ -82,6 +82,19 @@
   background: #2979ff;
 }
 
+.footer-col.credentials a {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+  justify-content: center;
+  color: #fff;
+  transition: background 0.2s;
+}
+
+.footer-col.credentials a:hover {
+  color: #00bfff;
+}
+
 .footer-bottom {
   border-top: 1px solid #222b3a;
   text-align: center;

@@ -1,0 +1,97 @@
+/**
+ * Lenis Smooth Scroll Styles
+ * 
+ * Required CSS for Lenis smooth scrolling to work properly.
+ */
+
+/* Base HTML setup for smooth scroll */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* Ensure smooth scroll works across browsers */
+html {
+  scroll-behavior: auto;
+}
+
+/* Prevent layout shifts during scroll */
+body {
+  overscroll-behavior: none;
+}
+
+/* Animation helper classes */
+.gsap-reveal {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.gsap-reveal.is-revealed {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Character animation helper */
+.char {
+  display: inline-block;
+  will-change: transform, opacity;
+}
+
+/* Pin spacer styling (for GSAP ScrollTrigger pins) */
+.pin-spacer {
+  flex-shrink: 0;
+}
+
+/* Parallax container */
+.parallax-container {
+  overflow: hidden;
+}
+
+/* Scroll progress indicator */
+.scroll-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0%;
+  height: 3px;
+  background: linear-gradient(90deg, var(--pixel-electric, #00d4ff), var(--pixel-purple, #9d4edd));
+  z-index: 9999;
+  transition: width 0.1s linear;
+}
+
+/* Smooth scroll to anchor enhancement */
+[data-scroll-to] {
+  cursor: pointer;
+}
+
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

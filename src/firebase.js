@@ -14,19 +14,22 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || undefined,
 }
 
-const app = initializeApp(firebaseConfig)
+import { getAuth } from 'firebase/auth'
+
+export const app = initializeApp(firebaseConfig)
 export const db = getFirestore(app)
+export const auth = getAuth(app)
 
 // Initialize analytics only if measurementId is provided and window exists
-let analytics
+let _analytics = null
 try {
   if (typeof window !== 'undefined' && firebaseConfig.measurementId) {
-    analytics = getAnalytics(app)
+    _analytics = getAnalytics(app)
   }
-} catch (err) {
+} catch {
   // Analytics may fail in some environments; don't crash the app.
-  // console.warn('Firebase analytics not initialized:', err)
 }
+export { _analytics as analytics }
 
 export default app
 

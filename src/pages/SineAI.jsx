@@ -3,6 +3,7 @@ import React from 'react'
 export default function SineAI() {
   return (
     <section style={{ padding: '2rem', maxWidth: 900, margin: '0 auto' }}>
+      <div className="background-image-layer" />
       <h1>SineAI</h1>
       <p>
         SineAI is an experimental project that explores generative audio and

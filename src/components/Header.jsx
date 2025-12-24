@@ -1,10 +1,22 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link, NavLink } from 'react-router-dom'
 import '../styles/navbar.css'
 
 export default function Header() {
+  // add scroll detection to toggle header background
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => {
+      setScrolled(window.scrollY > 20)
+    }
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
   return (
-    <header className="main-header">
+    <header className={`main-header ${scrolled ? 'scrolled' : ''}`}>
       <nav className="navbar">
         <Link to="/" className="nav-brand">ITPE 3124|Portfolio</Link>
         <ul className="nav-menu">

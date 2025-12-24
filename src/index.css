@@ -1,68 +1,377 @@
+/* Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   CSS CUSTOM PROPERTIES (Design Tokens)
+   ═══════════════════════════════════════════════════════════════════════════ */
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --pixel-void: #0a0a12;
+    --pixel-nebula: #1a1a2e;
+    --pixel-electric: #00d4ff;
+    --pixel-matrix: #39ff14;
+    --pixel-sunset: #ff6b35;
+    --pixel-purple: #9d4edd;
+    --glass-white: rgba(255, 255, 255, 0.08);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --gradient-tech: linear-gradient(135deg, var(--pixel-electric), var(--pixel-purple));
+    --gradient-warm: linear-gradient(135deg, var(--pixel-sunset), var(--pixel-purple));
+    --gradient-matrix: linear-gradient(135deg, var(--pixel-matrix), var(--pixel-electric));
+  }
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* ═══════════════════════════════════════════════════════════════════════════
+   BASE STYLES
+   ═══════════════════════════════════════════════════════════════════════════ */
+* {
+  box-sizing: border-box;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--pixel-void);
+  color: rgba(255, 255, 255, 0.9);
+  overflow-x: hidden;
   min-height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: 'Press Start 2P', cursive;
+  line-height: 1.6;
+  margin: 0;
 }
 
 h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+  font-size: 2rem;
 }
 
-button {
+h2 {
+  font-size: 1.5rem;
+}
+
+h3 {
+  font-size: 1.25rem;
+}
+
+h4 {
+  font-size: 1rem;
+}
+
+code,
+pre {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+a {
+  color: var(--pixel-electric);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+  color: var(--pixel-matrix);
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+     COMPONENT STYLES
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Glass Card Styles */
+  .glass-card {
+    background: var(--glass-white);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+  }
+  
+  .glass-card-strong {
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+  }
+  
+  /* Pixel Button */
+  .pixel-btn {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 0.7rem;
+    padding: 0.75rem 1.5rem;
+    border: 2px solid var(--pixel-electric);
+    background: transparent;
+    color: var(--pixel-electric);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  
+  .pixel-btn:hover {
+    background: var(--pixel-electric);
+    color: var(--pixel-void);
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.4);
+  }
+  
+  .pixel-btn-filled {
+    background: var(--pixel-electric);
+    color: var(--pixel-void);
+  }
+  
+  .pixel-btn-filled:hover {
+    background: var(--pixel-matrix);
+    border-color: var(--pixel-matrix);
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.4);
+  }
+  
+  /* Section Title */
+  .section-title {
+    font-family: 'Press Start 2P', cursive;
+    font-size: clamp(1.2rem, 4vw, 2rem);
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.25rem;
+  }
+  
+  .section-title .title-main {
+    background: linear-gradient(135deg, var(--pixel-electric), var(--pixel-matrix));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .section-title .title-ext {
+    color: var(--pixel-sunset);
+    font-size: 0.8em;
+  }
+  
+  /* Gradient underline */
+  .gradient-underline {
+    display: block;
+    height: 3px;
+    background: var(--gradient-tech);
+    margin-top: 0.5rem;
+    border-radius: 2px;
+  }
+  
+  /* Terminal Input */
+  .terminal-input {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--glass-border);
+    border-radius: 4px;
+    padding: 0.75rem 1rem;
+    color: white;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.9rem;
+    width: 100%;
+    transition: border-color 0.3s ease;
+  }
+  
+  .terminal-input:focus {
+    outline: none;
+    border-color: var(--pixel-electric);
+    box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+  }
+  
+  .terminal-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+  
+  /* Skill Bar */
+  .skill-bar {
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.skill-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease-out;
+  background-size: 20px 20px;
+  background-image: repeating-linear-gradient(90deg,
+      transparent,
+      transparent 8px,
+      rgba(255, 255, 255, 0.1) 8px,
+      rgba(255, 255, 255, 0.1) 10px);
+}
+
+/* Tech Tag */
+.tech-tag {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.7rem;
+  font-family: 'Press Start 2P', cursive;
+  border: 1px solid var(--pixel-electric);
+  color: var(--pixel-electric);
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+/* Social Icon Grid */
+.social-icon-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--glass-white);
+  border: 1px solid var(--glass-border);
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  color: white;
+    font-size: 0.6rem;
+    font-family: 'Press Start 2P', cursive;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
   cursor: pointer;
-  transition: border-color 0.25s;
+  text-decoration: none;
+  }
+  
+  .social-icon-btn:hover {
+    border-color: var(--pixel-electric);
+    box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+    transform: translateY(-3px);
+    color: white;
+  }
+  
+  .social-icon-btn svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+  }
+  
+  /* ═══════════════════════════════════════════════════════════════════════════
+     UTILITY CLASSES
+     ═══════════════════════════════════════════════════════════════════════════ */
+  
+  /* Pixel Border */
+  .pixel-border {
+    border-radius: 0;
+    image-rendering: pixelated;
+  }
+  
+  /* Scanline Effect */
+  .scanline {
+    background: repeating-linear-gradient(0deg,
+        rgba(0, 0, 0, 0.15),
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px);
+    pointer-events: none;
+  }
+  
+  /* Pixel Grid Background */
+  .pixel-grid {
+    background-image:
+      repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 8px),
+      repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.03) 0px, rgba(255, 255, 255, 0.03) 1px, transparent 1px, transparent 8px);
+  }
+  
+  /* Text Gradients */
+  .text-gradient-electric {
+    background: linear-gradient(135deg, var(--pixel-electric), var(--pixel-matrix));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .text-gradient-warm {
+    background: linear-gradient(135deg, var(--pixel-sunset), var(--pixel-purple));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Glows */
+  .glow-electric {
+    box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  }
+  
+  .glow-matrix {
+    box-shadow: 0 0 20px rgba(57, 255, 20, 0.3);
+  }
+  
+  .glow-sunset {
+    box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+  }
+  
+  /* Animation utilities */
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .animate-pulse-glow {
+    animation: pulse-glow 2s ease-in-out infinite;
 }
-button:hover {
-  border-color: #646cff;
+.animate-twinkle {
+  animation: twinkle 3s ease-in-out infinite;
 }
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+/* ═══════════════════════════════════════════════════════════════════════════
+   KEYFRAMES
+   ═══════════════════════════════════════════════════════════════════════════ */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    opacity: 1;
   }
-  a:hover {
-    color: #747bff;
+
+  50% {
+    opacity: 0.7;
   }
-  button {
-    background-color: #f9f9f9;
+}
+@keyframes twinkle {
+
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+@keyframes typewriter {
+  from {
+    width: 0;
+  }
+
+  to {
+    width: 100%;
+  }
+}
+@keyframes blink {
+
+  0%,
+  50% {
+    border-color: var(--pixel-matrix);
+  }
+
+  51%,
+  100% {
+    border-color: transparent;
   }
 }

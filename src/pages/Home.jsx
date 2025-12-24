@@ -1,112 +1,301 @@
-import React from 'react'
-import '../styles/index.css'
+import React, { useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import profilePic from '../assets/profilepic.jpg' // copy original image to src/assets
-import SkillLevel from '../components/SkillLevel'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { PixelButton } from '../components/ui'
 
-const skills = [
-  { name: 'JavaScript', level: 90 },
-  { name: 'React', level: 85 },
-  { name: 'Node.js', level: 75 },
-  { name: 'CSS / Tailwind', level: 80 },
-  { name: 'UI/UX', level: 70 },
-]
+gsap.registerPlugin(ScrollTrigger)
 
+/**
+ * Home Page
+ * 
+ * 8-bit styled hero section with pixel avatar and animated text.
+ */
 export default function Home() {
+  const heroRef = useRef(null)
+  const nameRef = useRef(null)
+  const subtitleRef = useRef(null)
+  const buttonsRef = useRef(null)
+  const avatarRef = useRef(null)
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Avatar float animation
+      gsap.to(avatarRef.current, {
+        y: -15,
+        duration: 2,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut',
+      })
+
+      // Name reveal
+      gsap.fromTo(
+        nameRef.current,
+        { opacity: 0, y: 30 },
+        { opacity: 1, y: 0, duration: 1, delay: 0.3, ease: 'power3.out' }
+      )
+
+      // Subtitle reveal
+      gsap.fromTo(
+        subtitleRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, delay: 0.6, ease: 'power3.out' }
+      )
+
+      // Buttons reveal
+      gsap.fromTo(
+        buttonsRef.current,
+        { opacity: 0, y: 20 },
+        { opacity: 1, y: 0, duration: 0.8, delay: 0.9, ease: 'power3.out' }
+      )
+    })
+
+    return () => ctx.revert()
+  }, [])
+
   return (
-    <section>
-      <div className="background-image-layer" />
-      <section className="hero-section">
-        <div className="hero-content">
-          <h1 className="hero-name">Jeff Edrick Martinez</h1>
-          <p className="hero-subheadline">IT Student | Web Developer | Creative Director</p>
-          <p className="hero-description">
-            A third-year IT student and the Pioneering President of the SineAI Guild, specializing in web development, video production, and digital arts.<br />
-            Passionate about technology, creativity, and leadership.
-          </p>
-          <div className="hero-buttons">
-            <a href="#featured-work" className="work-btn">View My Work</a>
-            <a href="#" className="contact-btn">Contact Me</a>
+    <section className="home-page">
+      <style>{`
+        .home-page {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        .hero-section {
+          min-height: calc(100vh - 60px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+        }
+        
+        .hero-container {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 4rem;
+          max-width: 1200px;
+          width: 100%;
+        }
+        
+        .hero-avatar {
+          flex-shrink: 0;
+        }
+        
+        .pixel-avatar {
+          width: 200px;
+          height: 200px;
+          image-rendering: pixelated;
+          filter: drop-shadow(0 0 30px rgba(0, 212, 255, 0.3));
+        }
+        
+        /* Simple 8-bit avatar using CSS */
+        .pixel-avatar-placeholder {
+          width: 200px;
+          height: 200px;
+          background: linear-gradient(180deg, #00d4ff 0%, #0099cc 100%);
+          border-radius: 50%;
+          position: relative;
+          box-shadow: 0 0 40px rgba(0, 212, 255, 0.4);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .pixel-avatar-face {
+          width: 160px;
+          height: 160px;
+          background: #00bfff;
+          border-radius: 50%;
+          position: relative;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .pixel-eyes {
+          display: flex;
+          gap: 40px;
+          margin-bottom: 10px;
+        }
+        
+        .pixel-eye {
+          width: 24px;
+          height: 24px;
+          background: #ff6b35;
+          border-radius: 4px;
+        }
+        
+        .pixel-mouth {
+          width: 60px;
+          height: 20px;
+          background: #ff6b35;
+          border-radius: 0 0 30px 30px;
+        }
+        
+        .hero-content {
+          flex: 1;
+          max-width: 600px;
+        }
+        
+        .hero-name {
+          margin-bottom: 0.5rem;
+        }
+        
+        .hero-name .first-name {
+          display: block;
+          font-size: clamp(1.5rem, 5vw, 2.5rem);
+          color: white;
+          font-family: 'Press Start 2P', cursive;
+          letter-spacing: 2px;
+        }
+        
+        .hero-name .last-name {
+          display: block;
+          font-size: clamp(1.5rem, 5vw, 2.5rem);
+          font-family: 'Press Start 2P', cursive;
+          background: linear-gradient(135deg, #39ff14, #00d4ff);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          letter-spacing: 2px;
+        }
+        
+        .hero-underline {
+          width: 200px;
+          height: 4px;
+          background: #39ff14;
+          margin: 1rem 0;
+          box-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+        }
+        
+        .hero-title {
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: 1.2rem;
+          color: rgba(255, 255, 255, 0.9);
+          margin-bottom: 0.5rem;
+        }
+        
+        .hero-subtitle {
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: 1rem;
+          color: #39ff14;
+          margin-bottom: 2rem;
+        }
+        
+        .hero-buttons {
+          display: flex;
+          gap: 1rem;
+          flex-wrap: wrap;
+        }
+        
+        .scroll-indicator {
+          position: absolute;
+          bottom: 2rem;
+          left: 50%;
+          transform: translateX(-50%);
+          color: rgba(255, 255, 255, 0.5);
+          font-size: 2rem;
+          animation: bounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes bounce {
+          0%, 100% { transform: translateX(-50%) translateY(0); }
+          50% { transform: translateX(-50%) translateY(10px); }
+        }
+        
+        /* Responsive */
+        @media (max-width: 900px) {
+          .hero-container {
+            flex-direction: column;
+            text-align: center;
+          }
+          
+          .hero-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+          }
+          
+          .hero-buttons {
+            justify-content: center;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .pixel-avatar-placeholder {
+            width: 150px;
+            height: 150px;
+          }
+          
+          .pixel-avatar-face {
+            width: 120px;
+            height: 120px;
+          }
+          
+          .pixel-eyes {
+            gap: 30px;
+          }
+          
+          .pixel-eye {
+            width: 18px;
+            height: 18px;
+          }
+          
+          .pixel-mouth {
+            width: 45px;
+            height: 15px;
+          }
+        }
+      `}</style>
+      
+      {/* Hero Section */}
+      <section className="hero-section" ref={heroRef}>
+        <div className="hero-container">
+          {/* Pixel Avatar */}
+          <div className="hero-avatar" ref={avatarRef}>
+            <div className="pixel-avatar-placeholder">
+              <div className="pixel-avatar-face">
+                <div className="pixel-eyes">
+                  <div className="pixel-eye"></div>
+                  <div className="pixel-eye"></div>
+                </div>
+                <div className="pixel-mouth"></div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Hero Content */}
+          <div className="hero-content">
+            <h1 className="hero-name" ref={nameRef}>
+              <span className="first-name">JEFF EDRICK</span>
+              <span className="last-name">MARTINEZ</span>
+            </h1>
+            <div className="hero-underline"></div>
+            <div ref={subtitleRef}>
+              <p className="hero-title">AI-Powered Developer</p>
+              <p className="hero-subtitle">Vibecoder • Creative Director</p>
+            </div>
+            <div className="hero-buttons" ref={buttonsRef}>
+              <PixelButton variant="outline" color="electric" href="#work">
+                VIEW WORK
+              </PixelButton>
+              <Link to="/contact">
+                <PixelButton variant="filled" color="matrix">
+                  CONTACT
+                </PixelButton>
+              </Link>
+            </div>
           </div>
         </div>
-      </section>
-
-      <section className="about-section">
-        <div className="about-content">
-          <div className="about-left">
-            <img src={profilePic} alt="" className="about-initials-circle" />
-          </div>
-          <div className="about-right">
-            <div className="about-header">
-              <h2 className="about-title">About Me</h2>
-              <a href="#" className="personal-info-btn">Personal Information</a>
-            </div>
-            <p className="about-description"> My journey in technology began with curiosity and has evolved into a passion for creating digital experiences that matter. As a third-year IT student, I've developed expertise in web development, video production, and digital arts.</p>
-            <p className="about-description">Beyond the digital realm, I'm a well-rounded individual who enjoys beatboxing, swimming, and calisthenics. These diverse interests fuel my creativity and bring unique perspectives to my technical work.</p>
-            <p className="about-description">As the Pioneering President of the <Link to="/sine-ai" className="sine-link">SineAI Guild</Link>, I lead initiatives that bridge technology and creativity, fostering innovation in our academic community.</p>
-          </div>
+        
+        {/* Scroll Indicator */}
+        <div className="scroll-indicator">
+          <span>▼</span>
         </div>
-      </section>
-
-      <section className="featured-work-section" id="featured-work">
-        <h2 className="section-title">Featured Work</h2>
-        <div className="work-gallery">
-          <div className="work-card webdev-card">
-            <div className="work-card-top">
-              <svg width="60" height="60" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M16 18l6-6-6-6" /><path d="M8 6l-6 6 6 6" /></svg>
-            </div>
-            <div className="work-card-bottom">
-              <h3 className="work-card-title">IT-Tech Portal</h3>
-              <p className="work-card-subtitle">Web Development</p>
-              <a href="pages/webdev.html" className="work-card-btn webdev-btn">Explore Web Projects</a>
-            </div>
-          </div>
-          <div className="work-card video-card">
-            <div className="work-card-top">
-              <svg width="60" height="60" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="7" width="15" height="10" rx="2" /><polygon points="21 7 21 17 17 14 17 10 21 7" /></svg>
-            </div>
-            <div className="work-card-bottom">
-              <h3 className="work-card-title">Sytem Error: Bayanihan</h3>
-              <p className="work-card-subtitle">Video Production</p>
-              <a href="pages/videos.html" className="work-card-btn video-btn">Watch Films</a>
-            </div>
-          </div>
-          <div className="work-card art-card">
-            <div className="work-card-top">
-              <svg width="60" height="60" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="18" rx="2" /><rect x="14" y="3" width="7" height="18" rx="2" /></svg>
-            </div>
-            <div className="work-card-bottom">
-              <h3 className="work-card-title">Digital Art Collection</h3>
-              <p className="work-card-subtitle">Graphic Design</p>
-              <a href="#" className="work-card-btn art-btn">View Gallery</a>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section style={{ padding: '2rem', maxWidth: 1000, margin: '0 auto' }}>
-        <header>
-          <h1>Full‑Stack Developer / Designer</h1>
-          <p>
-            I build clean, accessible web apps with a focus on performance and
-            delightful UX. This portfolio will show projects, certifications and
-            a few case studies.
-          </p>
-        </header>
-
-        <section style={{ marginTop: '2rem' }}>
-          <h2>About me</h2>
-          <p>
-            I'm a pragmatic developer who enjoys turning ideas into polished
-            products. I work across the stack, prefer component-driven UI, and
-            value automated tests and good developer experience.
-          </p>
-        </section>
-
-        <section style={{ marginTop: '2rem' }}>
-          <h2>Skills & proficiency</h2>
-          <SkillLevel skills={skills} />
-        </section>
       </section>
     </section>
   )
