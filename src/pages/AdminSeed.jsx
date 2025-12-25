@@ -1,6 +1,9 @@
 import React, { useState } from 'react'
 import { SectionTitle, PixelButton, GlassCard } from '../components/ui'
 import { seedAllData, seedCertificates, seedProjects, seedSocialLinks, seedSettings } from '../utils/seedFirebase'
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore'
+import { db } from '../firebase'
+import firstBlogPost from '../data/firstBlogPost'
 
 /**
  * Admin Seed Page
@@ -34,6 +37,37 @@ export default function AdminSeed() {
     try {
       const count = await seedFn()
       setResult({ success: true, message: `Seeded ${count} ${name}` })
+      setStatus('success')
+    } catch (err) {
+      setError(err.message)
+      setStatus('error')
+    }
+  }
+
+  async function handleSeedBlogPost() {
+    setStatus('loading')
+    setError(null)
+    
+    try {
+      // Check if post already exists
+      const postsRef = collection(db, 'posts')
+      const q = query(postsRef, where('slug', '==', firstBlogPost.slug))
+      const snapshot = await getDocs(q)
+      
+      if (!snapshot.empty) {
+        setResult({ success: true, message: 'Blog post already exists!' })
+        setStatus('success')
+        return
+      }
+      
+      // Add the blog post
+      await addDoc(postsRef, {
+        ...firstBlogPost,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      })
+      
+      setResult({ success: true, message: 'First blog post seeded successfully!' })
       setStatus('success')
     } catch (err) {
       setError(err.message)
@@ -193,6 +227,19 @@ export default function AdminSeed() {
             disabled={status === 'loading'}
           >
             SEED SETTINGS
+          </PixelButton>
+        </GlassCard>
+        
+        <GlassCard className="seed-card">
+          <h3>📝 FIRST BLOG POST</h3>
+          <p>Seed the first blog post: "Building Portfolio with Claude Opus 4.5"</p>
+          <PixelButton 
+            variant="filled" 
+            color="sunset"
+            onClick={handleSeedBlogPost}
+            disabled={status === 'loading'}
+          >
+            SEED BLOG POST
           </PixelButton>
         </GlassCard>
       </div>
