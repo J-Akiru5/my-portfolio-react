@@ -24,7 +24,7 @@ export default function ProjectsSection() {
       image: '/projects/sineai-hub.jpg',
       tags: ['Laravel', 'React', 'Firebase', 'OpenAI'],
       liveUrl: 'https://sineai.tech',
-      codeUrl: 'https://github.com/J-Akiru5/sineai-hub',
+      codeUrl: '#',
       color: '#00d4ff',
     },
     {
@@ -38,22 +38,44 @@ export default function ProjectsSection() {
       color: '#39ff14',
     },
     {
-      id: 'design-system',
-      title: 'Design System',
-      description: 'Comprehensive component library with design tokens, documentation, and Storybook integration.',
-      image: '/projects/design-system.jpg',
-      tags: ['Figma', 'React', 'Storybook'],
+      id: 'cict-portal',
+      title: 'CICT Tech Portal',
+      description: 'Technology portal for the College of ICT with student resources and department management.',
+      image: '/assets/image copy.png',
+      tags: ['React', 'Node.js'],
       liveUrl: '#',
+      codeUrl: '#',
       color: '#9d4edd',
     },
     {
-      id: 'ai-assistant',
-      title: 'AI Assistant',
-      description: 'Custom AI-powered chatbot built with OpenAI API, featuring context awareness and multi-turn conversations.',
-      image: '/projects/ai-assistant.jpg',
-      tags: ['Python', 'OpenAI', 'FastAPI'],
+      id: 'gsus',
+      title: 'GSUS',
+      description: 'General Services Unified System - comprehensive service management platform.',
+      image: '/assets/image copy 2.png',
+      tags: ['React', 'Firebase'],
       liveUrl: '#',
+      codeUrl: '#',
       color: '#ff6b35',
+    },
+    {
+      id: 'ebhm-connect',
+      title: 'E-BHM Connect',
+      description: 'Electronic Barangay Health Management System for community healthcare.',
+      image: '/assets/Screenshot 2025-12-18 222001.png',
+      tags: ['PHP', 'MySQL'],
+      liveUrl: '#',
+      codeUrl: '#',
+      color: '#00d4ff',
+    },
+    {
+      id: 'lingsarloka',
+      title: 'LingsarLoka',
+      description: 'High-fidelity Figma prototype with modern UI/UX design principles.',
+      image: '/assets/image.png',
+      tags: ['Figma', 'UI/UX'],
+      liveUrl: 'https://thick-break-42913670.figma.site/',
+      codeUrl: '#',
+      color: '#39ff14',
     },
   ]
 
@@ -64,19 +86,20 @@ export default function ProjectsSection() {
       
       if (!cards || !track) return
 
-      // Calculate how much to scroll horizontally
-      const scrollWidth = cards.scrollWidth - window.innerWidth + 200
+      // Use functional getter to ensure it recalculates
+      const getScrollWidth = () => cards.scrollWidth - window.innerWidth + 200
 
       gsap.to(cards, {
-        x: -scrollWidth,
+        x: () => -getScrollWidth(),
         ease: 'none',
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
-          end: () => `+=${scrollWidth}`,
+          end: () => `+=${getScrollWidth()}`,
           pin: true,
           scrub: 1,
           anticipatePin: 1,
+          invalidateOnRefresh: true,
         }
       })
 

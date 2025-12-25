@@ -68,15 +68,15 @@ export default function AboutSection() {
   ]
 
   const aiTools = [
-    { name: 'ChatGPT', icon: '🤖' },
+    { name: 'GitHub Copilot', icon: '🐙' },
+    { name: 'Antigravity', icon: '🚀' },
     { name: 'Claude', icon: '🧠' },
     { name: 'Gemini', icon: '✨' },
+    { name: 'ChatGPT', icon: '🤖' },
     { name: 'Cursor', icon: '⚡' },
-    { name: 'GitHub Copilot', icon: '🐙' },
-    { name: 'Midjourney', icon: '🎨' },
   ]
 
-  const hobbies = ['Gaming 🎮', 'Music Production 🎵', 'UI Design 🖌️', 'Tech Blogging ✍️']
+  const hobbies = ['UI Design 🖌️', 'Music Production 🎵', 'Web Development 💻', 'AI Agents 🤖', 'Animation 🎬', 'Graphic Design ✨', 'Prototyping 📐', 'Gaming 🎮', 'Filmmaking 🎥', 'Cinematography 📷']
 
   return (
     <section id="about" ref={sectionRef} className="about-section">
