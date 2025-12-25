@@ -18,7 +18,7 @@ const projects = [
     description: 'AI-powered learning management system with real-time chat and collaboration features.',
     image: '/projects/sineai-hub.jpg',
     category: 'web',
-    tags: ['Laravel', 'React', 'Firebase', 'OpenAI'],
+    tags: ['Laravel', 'React', 'Supabase', 'Gemini'],
     liveUrl: 'https://sineai.tech',
     codeUrl: 'https://github.com/J-Akiru5/sineai-hub',
   },

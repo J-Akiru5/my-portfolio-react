@@ -1,385 +1,459 @@
-import React, { useRef, useEffect, useState } from 'react'
+import React, { useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * StorySection - Cinematic Terminal Experience
+ * StorySection - "The Director's Cut"
  * 
- * Pinned scroll with clip-path circle reveal transitions.
- * 4 chapters telling Jeff's developer journey.
+ * Hybrid ScrollTrigger with two distinct phases:
+ * - Phase 1 (Glitch): Circle clip reveal from Origin → Awakening
+ * - Phase 2 (Filmstrip): Horizontal scroll from Creative → Leader
  */
 export default function StorySection() {
-  const sectionRef = useRef(null)
   const containerRef = useRef(null)
-  const [activeChapter, setActiveChapter] = useState(0)
-
-  const chapters = [
-    {
-      id: 'origin',
-      title: 'THE ORIGIN',
-      subtitle: '// WHERE IT ALL BEGAN',
-      text: "It all started with curiosity. That thought came to my mind—'What if I can understand programming language, coding. That would be cool.' And yes, the first programming language I learned was C#, and we developed a Snake game on the console.",
-      icon: '🎮',
-      bgClass: 'chapter-origin',
-    },
-    {
-      id: 'awakening',
-      title: 'THE AI AWAKENING',
-      subtitle: '// THE GAME CHANGER',
-      text: "Then came the shift. I discovered GitHub Copilot and VS Code. It wasn't about replacing code; it was about amplifying creativity. AI Agents handle the heavy lifting while I focus on architecture.",
-      icon: '⚡',
-      bgClass: 'chapter-awakening',
-    },
-    {
-      id: 'creative',
-      title: 'THE CREATIVE HYBRID',
-      subtitle: '// MORE THAN CODE',
-      text: "I'm not just a coder. I'm a filmmaker and UI designer. My hobbies—Music, Animation, Cinematography—bleed into my code. I don't just build apps; I direct user experiences.",
-      icon: '🎬',
-      bgClass: 'chapter-creative',
-    },
-    {
-      id: 'leader',
-      title: 'THE LEADER',
-      subtitle: '// PRESENT DAY',
-      text: "Today, I lead as the President of the SineAI Guild of Western Visayas. We successfully deployed the SineAI Hub. I blend leadership with full-stack capability to drive innovation.",
-      icon: '👑',
-      bgClass: 'chapter-leader',
-    },
-  ]
 
   useEffect(() => {
     const ctx = gsap.context(() => {
-      const panels = gsap.utils.toArray('.chapter-panel')
-      
-      // Main timeline for the pinned scroll
+      // Set initial state for filmstrip (hidden below viewport)
+      gsap.set('#filmstrip-container', { yPercent: 100 })
+
       const tl = gsap.timeline({
         scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: '+=400%',
+          trigger: containerRef.current,
           pin: true,
           scrub: 1,
+          start: 'top top',
+          end: '+=500%',
           anticipatePin: 1,
-          onUpdate: (self) => {
-            const progress = self.progress
-            const newChapter = Math.min(Math.floor(progress * 4), 3)
-            setActiveChapter(newChapter)
-          }
         }
       })
 
-      // Animate each panel with clip-path
-      panels.forEach((panel, i) => {
-        if (i === 0) {
-          // First panel starts visible, then fades out
-          tl.to(panel, {
-            clipPath: 'circle(0% at 50% 50%)',
-            duration: 1,
-            ease: 'power2.inOut',
-          }, i * 1)
-        } else {
-          // Other panels reveal with clip-path
-          tl.fromTo(panel, 
-            { clipPath: 'circle(0% at 50% 50%)' },
-            { 
-              clipPath: 'circle(150% at 50% 50%)',
-              duration: 1,
-              ease: 'power2.inOut',
-            }, 
-            (i - 1) * 1 + 0.5
-          )
-          
-          // Then hide it for next panel (except last)
-          if (i < panels.length - 1) {
-            tl.to(panel, {
-              clipPath: 'circle(0% at 50% 50%)',
-              duration: 1,
-              ease: 'power2.inOut',
-            }, i * 1)
-          }
-        }
+      // STEP 1: Circle clip reveal - Origin → Awakening
+      tl.fromTo('#panel-awakening',
+        { clipPath: 'circle(0% at 50% 50%)' },
+        { clipPath: 'circle(150% at 50% 50%)', duration: 1.5, ease: 'power2.inOut' }
+      )
+
+      // STEP 2: Pause to read awakening content
+      tl.to({}, { duration: 0.5 })
+
+      // STEP 3: Filmstrip slides up and COVERS everything (no fade needed)
+      tl.to('#filmstrip-container', {
+        yPercent: 0,
+        duration: 1,
+        ease: 'power2.out'
       })
 
-    }, sectionRef)
+      // STEP 4: Pause to read creative content
+      tl.to({}, { duration: 0.3 })
+
+      // STEP 5: Horizontal scroll through filmstrip
+      tl.to('#filmstrip-inner', {
+        xPercent: -50,
+        duration: 2.5,
+        ease: 'none',
+      })
+
+      // Parallax backgrounds move slightly opposite
+      tl.to('.film-bg-parallax', {
+        xPercent: 15,
+        duration: 2.5,
+        ease: 'none',
+      }, '<')
+
+    }, containerRef)
 
     return () => ctx.revert()
   }, [])
 
   return (
-    <section id="story" ref={sectionRef} className="story-section">
+    <section id="story" ref={containerRef} className="story-section">
       <style>{`
         .story-section {
           position: relative;
+          height: 100vh;
+          width: 100%;
           overflow: hidden;
         }
-        
-        .story-container {
-          position: relative;
-          width: 100%;
-          height: 100vh;
-        }
-        
-        .chapter-panel {
+
+        /* PANEL 1: ORIGIN */
+        .panel-origin {
           position: absolute;
-          top: 0;
-          left: 0;
-          width: 100%;
-          height: 100%;
+          inset: 0;
           display: flex;
           align-items: center;
           justify-content: center;
-          clip-path: circle(150% at 50% 50%);
-        }
-        
-        .chapter-panel:not(:first-child) {
-          clip-path: circle(0% at 50% 50%);
-        }
-        
-        /* Chapter Backgrounds */
-        .chapter-origin {
+          z-index: 0;
           background: 
             repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(57, 255, 20, 0.03) 2px, rgba(57, 255, 20, 0.03) 4px),
             repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(57, 255, 20, 0.03) 2px, rgba(57, 255, 20, 0.03) 4px),
             linear-gradient(135deg, #0a0a12 0%, #1a1a2e 100%);
         }
-        
-        .chapter-origin::before {
+
+        .panel-origin::before {
           content: '';
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: repeating-linear-gradient(
-            0deg,
-            transparent,
-            transparent 2px,
-            rgba(0, 0, 0, 0.3) 2px,
-            rgba(0, 0, 0, 0.3) 4px
-          );
+          inset: 0;
+          background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.3) 2px, rgba(0, 0, 0, 0.3) 4px);
           pointer-events: none;
           animation: scanline 8s linear infinite;
         }
-        
+
         @keyframes scanline {
           0% { transform: translateY(0); }
           100% { transform: translateY(100vh); }
         }
-        
-        .chapter-awakening {
-          background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 100%);
-          overflow: hidden;
-        }
-        
-        .chapter-awakening::before {
-          content: '01001010 01100101 01100110 01100110 00100000 01000100 01100101 01110110';
+
+        /* PANEL 2: AWAKENING (Clip Reveal) */
+        .panel-awakening {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
+          inset: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+          background: linear-gradient(135deg, #0a0a1a 0%, #1a0a2e 100%);
+          clip-path: circle(0% at 50% 50%);
+        }
+
+        .panel-awakening::before {
+          content: '01001010 01100101 01100110 01100110';
+          position: absolute;
+          inset: 0;
           font-family: 'JetBrains Mono', monospace;
-          font-size: 0.8rem;
-          color: rgba(0, 212, 255, 0.1);
+          font-size: 1rem;
+          color: rgba(0, 212, 255, 0.08);
           word-wrap: break-word;
-          line-height: 1.5;
+          line-height: 2;
           padding: 2rem;
           animation: matrixFade 3s infinite;
           pointer-events: none;
         }
-        
+
         @keyframes matrixFade {
           0%, 100% { opacity: 0.3; }
           50% { opacity: 0.6; }
         }
-        
-        .chapter-creative {
-          background: 
-            linear-gradient(135deg, #1a0a1a 0%, #2a1a3a 100%);
-        }
-        
-        .chapter-creative::before {
-          content: '';
+
+        /* FILMSTRIP CONTAINER */
+        .filmstrip-container {
           position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noise)'/%3E%3C/svg%3E");
-          opacity: 0.05;
+          inset: 0;
+          z-index: 20;
+          background: #000;
+        }
+
+        .filmstrip-inner {
+          display: flex;
+          height: 100%;
+          width: 200%;
+        }
+
+        .film-panel {
+          width: 50%;
+          height: 100%;
+          position: relative;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          overflow: hidden;
+        }
+
+        .film-panel-creative {
+          background: linear-gradient(135deg, #1a0a1a 0%, #2a1a3a 100%);
+          border-right: 8px solid #000;
+        }
+
+        .film-panel-leader {
+          background: linear-gradient(135deg, #0a1a1a 0%, #0a2a3a 100%);
+        }
+
+        .film-bg-parallax {
+          position: absolute;
+          inset: -20%;
+          background-size: cover;
+          background-position: center;
+          opacity: 0.25;
+          filter: blur(3px);
           pointer-events: none;
         }
-        
-        .chapter-leader {
-          background: 
-            radial-gradient(circle at 50% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
-            linear-gradient(135deg, #0a1a1a 0%, #0a2a3a 100%);
-        }
-        
-        .chapter-leader::after {
-          content: '';
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: 300px;
-          height: 300px;
-          background: url('/assets/logo.png') center/contain no-repeat;
-          opacity: 0.1;
-          filter: blur(2px);
-          pointer-events: none;
-        }
-        
-        .chapter-content {
+
+        /* Panel Content */
+        .panel-content {
           position: relative;
           z-index: 2;
-          max-width: 800px;
+          max-width: 700px;
           padding: 2rem;
           text-align: center;
         }
-        
-        .chapter-icon {
+
+        .panel-icon {
           font-size: 4rem;
           margin-bottom: 1rem;
           display: block;
         }
-        
-        .chapter-subtitle {
+
+        .panel-subtitle {
           font-family: 'JetBrains Mono', monospace;
           font-size: 0.75rem;
           color: rgba(0, 212, 255, 0.7);
           letter-spacing: 0.2em;
           margin-bottom: 0.5rem;
         }
-        
-        .chapter-title {
+
+        .panel-title {
           font-family: 'Press Start 2P', cursive;
-          font-size: clamp(1.5rem, 4vw, 2.5rem);
-          margin-bottom: 2rem;
+          font-size: clamp(1.2rem, 3vw, 2rem);
+          margin-bottom: 1.5rem;
           background: linear-gradient(135deg, #00d4ff, #39ff14);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
         }
-        
-        .chapter-text {
-          font-size: 1.15rem;
+
+        .panel-text {
+          font-size: 1.1rem;
           line-height: 1.9;
           color: rgba(255, 255, 255, 0.85);
+        }
+
+        /* Film Content Cards */
+        .film-content {
+          position: relative;
+          z-index: 10;
           max-width: 600px;
-          margin: 0 auto;
+          padding: 2.5rem;
+          background: rgba(0, 0, 0, 0.6);
+          backdrop-filter: blur(10px);
+          border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .chapter-text em {
-          color: #39ff14;
-          font-style: normal;
-        }
-        
-        /* Progress Dots */
-        .progress-dots {
-          position: fixed;
-          right: 2rem;
-          top: 50%;
-          transform: translateY(-50%);
-          display: flex;
-          flex-direction: column;
-          gap: 1rem;
-          z-index: 100;
-        }
-        
-        .progress-dot {
-          width: 12px;
-          height: 12px;
-          border-radius: 50%;
-          border: 2px solid rgba(255, 255, 255, 0.3);
-          background: transparent;
-          transition: all 0.3s;
-          cursor: pointer;
-        }
-        
-        .progress-dot.active {
-          background: #00d4ff;
-          border-color: #00d4ff;
-          box-shadow: 0 0 15px #00d4ff;
-        }
-        
-        .progress-dot-label {
-          position: absolute;
-          right: 100%;
-          top: 50%;
-          transform: translateY(-50%);
-          padding-right: 0.75rem;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 0.6rem;
-          color: rgba(255, 255, 255, 0.5);
-          white-space: nowrap;
-          opacity: 0;
-          transition: opacity 0.3s;
-        }
-        
-        .progress-dot:hover .progress-dot-label,
-        .progress-dot.active .progress-dot-label {
-          opacity: 1;
-        }
-        
-        .scroll-indicator {
-          position: absolute;
-          bottom: 2rem;
-          left: 50%;
-          transform: translateX(-50%);
+
+        .film-scene {
           font-family: 'JetBrains Mono', monospace;
           font-size: 0.7rem;
-          color: rgba(255, 255, 255, 0.4);
-          animation: bounce 2s infinite;
+          color: #ff6b9d;
+          letter-spacing: 0.15em;
+          margin-bottom: 0.75rem;
         }
-        
-        @keyframes bounce {
-          0%, 100% { transform: translateX(-50%) translateY(0); }
-          50% { transform: translateX(-50%) translateY(-10px); }
+
+        .film-title {
+          font-family: 'Press Start 2P', cursive;
+          font-size: clamp(1rem, 2.5vw, 1.5rem);
+          color: white;
+          margin-bottom: 1.25rem;
         }
-        
+
+        .film-text {
+          font-size: 1rem;
+          line-height: 1.8;
+          color: rgba(255, 255, 255, 0.8);
+        }
+
+        .highlight-creative {
+          color: #ff6b9d;
+          font-weight: 600;
+        }
+
+        .highlight-leader {
+          color: #00d4ff;
+          font-weight: 600;
+        }
+
+        /* Filmstrip Sprocket Holes */
+        .sprocket-holes {
+          position: absolute;
+          left: 0;
+          right: 0;
+          height: 24px;
+          z-index: 30;
+          pointer-events: none;
+          background: repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 30px,
+            rgba(30, 30, 30, 0.9) 30px,
+            rgba(30, 30, 30, 0.9) 50px
+          );
+        }
+
+        .sprocket-top { top: 0; }
+        .sprocket-bottom { bottom: 0; }
+
+        .sprocket-holes::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          right: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          height: 12px;
+          background: repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 35px,
+            rgba(60, 60, 60, 0.8) 35px,
+            rgba(60, 60, 60, 0.8) 45px
+          );
+        }
+
         @media (max-width: 768px) {
-          .progress-dots { right: 1rem; }
-          .progress-dot { width: 8px; height: 8px; }
-          .progress-dot-label { display: none; }
-          .chapter-content { padding: 1.5rem; }
+          .panel-content {
+            padding: 1.5rem;
+            max-width: 95%;
+          }
+          
+          .panel-icon { 
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+          }
+          
+          .panel-title {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+          }
+          
+          .panel-subtitle {
+            font-size: 0.65rem;
+          }
+          
+          .panel-text {
+            font-size: 0.9rem;
+            line-height: 1.7;
+          }
+          
+          .film-content {
+            padding: 1.5rem;
+            max-width: 90%;
+            margin: 0 auto;
+          }
+          
+          .film-title {
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+          }
+          
+          .film-scene {
+            font-size: 0.6rem;
+          }
+          
+          .film-text {
+            font-size: 0.85rem;
+            line-height: 1.7;
+          }
+          
+          .sprocket-holes {
+            height: 16px;
+          }
+          
+          .sprocket-holes::before {
+            height: 8px;
+          }
+        }
+        
+        @media (max-width: 480px) {
+          .panel-content {
+            padding: 1rem;
+          }
+          
+          .panel-icon {
+            font-size: 2rem;
+          }
+          
+          .panel-title {
+            font-size: 0.85rem;
+          }
+          
+          .panel-text {
+            font-size: 0.8rem;
+          }
+          
+          .film-content {
+            padding: 1rem;
+          }
+          
+          .film-title {
+            font-size: 0.8rem;
+          }
+          
+          .film-text {
+            font-size: 0.75rem;
+          }
         }
       `}</style>
-      
-      {/* Progress Dots */}
-      <div className="progress-dots">
-        {chapters.map((chapter, index) => (
-          <div 
-            key={chapter.id}
-            className={`progress-dot ${activeChapter === index ? 'active' : ''}`}
-          >
-            <span className="progress-dot-label">{chapter.title}</span>
-          </div>
-        ))}
+
+      {/* PANEL 1: THE ORIGIN */}
+      <div className="panel-origin">
+        <div className="panel-content">
+          <span className="panel-icon">🎮</span>
+          <p className="panel-subtitle">// WHERE IT ALL BEGAN</p>
+          <h2 className="panel-title">THE ORIGIN</h2>
+          <p className="panel-text">
+            It all started with curiosity. That thought came to my mind—"What if I can understand programming language, coding. That would be cool." And yes, the first programming language I learned was C#, and we developed a Snake game on the console.
+          </p>
+        </div>
       </div>
-      
-      {/* Chapters Container */}
-      <div ref={containerRef} className="story-container">
-        {chapters.map((chapter, index) => (
-          <div 
-            key={chapter.id}
-            className={`chapter-panel ${chapter.bgClass}`}
-            style={{ zIndex: index }}
-          >
-            <div className="chapter-content">
-              <span className="chapter-icon">{chapter.icon}</span>
-              <p className="chapter-subtitle">{chapter.subtitle}</p>
-              <h2 className="chapter-title">{chapter.title}</h2>
-              <p className="chapter-text">{chapter.text}</p>
+
+      {/* PANEL 2: THE AI AWAKENING (Clip Reveal) */}
+      <div id="panel-awakening" className="panel-awakening">
+        <div className="panel-content">
+          <span className="panel-icon">⚡</span>
+          <p className="panel-subtitle">// THE GAME CHANGER</p>
+          <h2 className="panel-title">THE AI AWAKENING</h2>
+          <p className="panel-text">
+            Then came the shift. I discovered GitHub Copilot and VS Code. It wasn't about replacing code; it was about amplifying creativity. AI Agents handle the heavy lifting while I focus on architecture.
+          </p>
+        </div>
+      </div>
+
+      {/* FILMSTRIP CONTAINER */}
+      <div id="filmstrip-container" className="filmstrip-container">
+        
+        {/* Sprocket Holes */}
+        <div className="sprocket-holes sprocket-top" />
+        <div className="sprocket-holes sprocket-bottom" />
+
+        <div id="filmstrip-inner" className="filmstrip-inner">
+          
+          {/* SCENE 3: THE CREATIVE HYBRID */}
+          <div className="film-panel film-panel-creative">
+            <div 
+              className="film-bg-parallax" 
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(255,107,157,0.1), rgba(157,78,221,0.1))',
+              }}
+            />
+            <div className="film-content">
+              <p className="film-scene">SCENE 03: THE HYBRID</p>
+              <h2 className="film-title">Filmmaker × Developer</h2>
+              <p className="film-text">
+                I'm not just a coder. I'm a <span className="highlight-creative">filmmaker</span> and <span className="highlight-creative">UI designer</span>. My hobbies—Music, Animation, Cinematography—bleed into my code. I don't just build apps; I <span className="highlight-creative">direct user experiences</span>.
+              </p>
             </div>
           </div>
-        ))}
+
+          {/* SCENE 4: THE LEADER */}
+          <div className="film-panel film-panel-leader">
+            <div 
+              className="film-bg-parallax" 
+              style={{ 
+                backgroundImage: 'url(/assets/Screenshot 2025-12-16 094218.png)',
+              }}
+            />
+            <div className="film-content">
+              <p className="film-scene">SCENE 04: THE LEADER</p>
+              <h2 className="film-title">President, SineAI Guild</h2>
+              <p className="film-text">
+                Today, I lead as the President of the <span className="highlight-leader">SineAI Guild of Western Visayas</span>. We successfully deployed the <span className="highlight-leader">SineAI Hub</span>. I blend leadership with full-stack capability to drive innovation.
+              </p>
+            </div>
+          </div>
+
+        </div>
       </div>
-      
-      <div className="scroll-indicator">↓ SCROLL TO EXPLORE ↓</div>
+
     </section>
   )
 }
