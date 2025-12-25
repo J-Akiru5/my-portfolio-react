@@ -1,5 +1,6 @@
 export { default as HeroSection } from './HeroSection'
 export { default as AboutSection } from './AboutSection'
+export { default as StorySection } from './StorySection'
 export { default as ProjectsSection } from './ProjectsSection'
 export { default as CertificatesSection } from './CertificatesSection'
 export { default as ContactSection } from './ContactSection'

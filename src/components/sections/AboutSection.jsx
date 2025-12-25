@@ -78,7 +78,6 @@ export default function AboutSection() {
     { name: 'Claude', icon: '🧠' },
     { name: 'Gemini', icon: '✨' },
     { name: 'ChatGPT', icon: '🤖' },
-    { name: 'Cursor', icon: '⚡' },
   ]
 
   const hobbies = ['UI Design 🖌️', 'Music Production 🎵', 'Web Development 💻', 'AI Agents 🤖', 'Animation 🎬', 'Graphic Design ✨', 'Prototyping 📐', 'Gaming 🎮', 'Filmmaking 🎥', 'Cinematography 📷']
@@ -247,22 +246,8 @@ export default function AboutSection() {
         <SectionTitle title="ABOUT" extension=".me" />
         
         <div ref={contentRef} className="bento-grid">
-          {/* WHO AM I - Large Card */}
-          <GlassCard className="about-card card-span-8">
-            <h3 className="card-header">📁 WHO_AM_I</h3>
-            <p className="about-text">
-              Third-year IT student at ISUFST and President of the{' '}
-              <a href="https://sineai.tech" target="_blank" rel="noopener noreferrer">
-                Sine AI Guild of Western Visayas
-              </a>. 
-              Passionate about blending AI technology with creative development to build 
-              innovative solutions. I specialize in full-stack web development with a 
-              focus on modern frameworks and AI-powered applications.
-            </p>
-          </GlassCard>
-          
-          {/* AI TOOLKIT - Small Card */}
-          <GlassCard className="about-card card-span-4">
+          {/* AI TOOLKIT - Full Width */}
+          <GlassCard className="about-card card-span-12">
             <h3 className="card-header">🤖 AI_TOOLKIT</h3>
             <div className="ai-tools-grid">
               {aiTools.map((tool) => (

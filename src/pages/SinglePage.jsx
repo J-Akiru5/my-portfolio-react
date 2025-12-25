@@ -4,6 +4,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   HeroSection,
   AboutSection,
+  StorySection,
   ProjectsSection,
   CertificatesSection,
   ContactSection,
@@ -93,6 +94,7 @@ export default function SinglePage() {
       {/* Sections */}
       <HeroSection />
       <AboutSection />
+      <StorySection />
       <ProjectsSection />
       <CertificatesSection />
       <ContactSection />
