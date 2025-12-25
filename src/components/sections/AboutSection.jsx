@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { SectionTitle, GlassCard, SkillBar } from '../ui'
+import { SectionTitle, GlassCard, SkillCard } from '../ui'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -61,10 +61,15 @@ export default function AboutSection() {
   }, [])
 
   const skills = [
-    { name: 'React / Next.js', level: 90, color: '#00d4ff' },
-    { name: 'Laravel / PHP', level: 85, color: '#ff6b35' },
-    { name: 'Python / AI', level: 80, color: '#39ff14' },
-    { name: 'Firebase / Node', level: 75, color: '#9d4edd' },
+    { name: 'Laravel / PHP', level: '89%', color: '#FF2D20', icon: '🔥', featured: true },
+    { name: 'Supabase / PostgreSQL / MySQL', level: '88%', color: '#3ECF8E', icon: '🗄️' },
+    { name: 'Bootstrap', level: '87%', color: '#7952B3', icon: '🎨' },
+    { name: 'Firebase', level: '86%', color: '#FFCA28', icon: '☁️' },
+    { name: 'Windows / C#', level: '85%', color: '#9B4F96', icon: '🖥️' },
+    { name: 'Android / Java', level: '83%', color: '#3DDC84', icon: '📱' },
+    { name: 'React / Native', level: '79%', color: '#61DAFB', icon: '⚛️' },
+    { name: 'Tailwind', level: '73%', color: '#38B2AC', icon: '💨' },
+    { name: 'Python / Data', level: '67%', color: '#3776AB', icon: '🐍' },
   ]
 
   const aiTools = [
@@ -214,6 +219,24 @@ export default function AboutSection() {
           font-size: 0.85rem;
           color: #9d4edd;
         }
+        
+        .skills-bento {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 1rem;
+        }
+        
+        @media (max-width: 768px) {
+          .skills-bento {
+            grid-template-columns: repeat(2, 1fr);
+          }
+        }
+        
+        @media (max-width: 500px) {
+          .skills-bento {
+            grid-template-columns: 1fr;
+          }
+        }
       `}</style>
       
       {/* Parallax layers */}
@@ -251,16 +274,18 @@ export default function AboutSection() {
             </div>
           </GlassCard>
           
-          {/* SKILLS - Half Card */}
-          <GlassCard className="about-card card-span-6">
-            <h3 className="card-header">💻 SKILLS</h3>
-            <div className="skills-list">
+          {/* SKILLS - Full Width Bento Grid */}
+          <GlassCard className="about-card card-span-12">
+            <h3 className="card-header">💻 SKILL_MATRIX</h3>
+            <div className="skills-bento">
               {skills.map((skill) => (
-                <SkillBar 
+                <SkillCard 
                   key={skill.name} 
                   name={skill.name} 
                   level={skill.level} 
                   color={skill.color}
+                  icon={skill.icon}
+                  featured={skill.featured}
                 />
               ))}
             </div>
