@@ -44,6 +44,13 @@ const NavBar = () => {
 
   const scrollToSection = (e, id) => {
     e.preventDefault();
+    
+    // If not on homepage, navigate to homepage with hash
+    if (location.pathname !== '/') {
+      window.location.href = `/#${id}`;
+      return;
+    }
+    
     const element = document.getElementById(id);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
@@ -53,6 +60,7 @@ const NavBar = () => {
 
   const navLinks = [
     { id: 'hero', label: 'HOME' },
+    { id: 'blog', label: 'BLOG', isRoute: true, path: '/blog' },
     { id: 'about', label: 'ABOUT' },
     { id: 'projects', label: 'WORK' },
     { id: 'certificates', label: 'CERTS' },
@@ -236,13 +244,23 @@ const NavBar = () => {
         <ul className={`navbar-nav ${isMobileMenuOpen ? 'open' : ''}`}>
           {navLinks.map((link) => (
             <li key={link.id}>
-              <a 
-                href={`#${link.id}`}
-                onClick={(e) => scrollToSection(e, link.id)}
-                className={`nav-link ${activeSection === link.id ? 'active' : ''}`}
-              >
-                {link.label}
-              </a>
+              {link.isRoute ? (
+                <Link 
+                  to={link.path}
+                  className={`nav-link ${location.pathname === link.path ? 'active' : ''}`}
+                  onClick={() => setIsMobileMenuOpen(false)}
+                >
+                  {link.label}
+                </Link>
+              ) : (
+                <a 
+                  href={`#${link.id}`}
+                  onClick={(e) => scrollToSection(e, link.id)}
+                  className={`nav-link ${activeSection === link.id ? 'active' : ''}`}
+                >
+                  {link.label}
+                </a>
+              )}
             </li>
           ))}
         </ul>

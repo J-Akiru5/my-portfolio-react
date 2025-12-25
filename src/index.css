@@ -136,12 +136,17 @@ a:hover {
   /* Section Title */
   .section-title {
     font-family: 'Press Start 2P', cursive;
-    font-size: clamp(1.2rem, 4vw, 2rem);
+    font-size: clamp(1rem, 3.5vw, 2rem);
     display: inline-flex;
     align-items: baseline;
+    flex-wrap: wrap;
+      justify-content: center;
     gap: 0.25rem;
   }
   
+    .section-title-wrapper {
+      text-align: center;
+    }
   .section-title .title-main {
     background: linear-gradient(135deg, var(--pixel-electric), var(--pixel-matrix));
     -webkit-background-clip: text;
