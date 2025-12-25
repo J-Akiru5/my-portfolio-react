@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom'
 import { collection, query, where, getDocs, doc, updateDoc, increment } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Helmet } from 'react-helmet-async'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import SupportMe from '../components/blog/SupportMe'
 
 /**
@@ -250,6 +252,39 @@ export default function BlogPost() {
           margin-bottom: 0.5rem;
         }
         
+        .post-content table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 1.5rem 0;
+        }
+        
+        .post-content th,
+        .post-content td {
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          padding: 0.75rem 1rem;
+          text-align: left;
+        }
+        
+        .post-content th {
+          background: rgba(0, 212, 255, 0.1);
+          color: #00d4ff;
+          font-weight: bold;
+        }
+        
+        .post-content blockquote {
+          border-left: 4px solid #9d4edd;
+          padding-left: 1rem;
+          margin: 1.5rem 0;
+          color: rgba(255, 255, 255, 0.7);
+          font-style: italic;
+        }
+        
+        .post-content hr {
+          border: none;
+          border-top: 1px solid rgba(255, 255, 255, 0.2);
+          margin: 2rem 0;
+        }
+        
         .affiliate-banner {
           background: linear-gradient(135deg, rgba(157, 78, 221, 0.2), rgba(0, 212, 255, 0.2));
           border: 1px solid rgba(157, 78, 221, 0.3);
@@ -307,10 +342,11 @@ export default function BlogPost() {
       </header>
 
       {/* Article Content */}
-      <div 
-        className="post-content"
-        dangerouslySetInnerHTML={{ __html: post.content }}
-      />
+      <div className="post-content">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {post.content}
+        </ReactMarkdown>
+      </div>
 
       {/* Affiliate Banner (if has affiliate URL) */}
       {post.affiliateUrl && (
