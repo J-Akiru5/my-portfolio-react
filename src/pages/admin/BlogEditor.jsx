@@ -282,12 +282,29 @@ export default function BlogEditor() {
         })
       })
       
+      // Check if response is OK
       if (!response.ok) {
-        const error = await response.json()
-        throw new Error(error.details || error.error || 'AI request failed')
+        // Try to parse error, but handle empty responses
+        const text = await response.text()
+        let errorMsg = 'AI request failed'
+        if (text) {
+          try {
+            const error = JSON.parse(text)
+            errorMsg = error.details || error.error || errorMsg
+          } catch {
+            errorMsg = text.slice(0, 100) // Show first 100 chars of error
+          }
+        }
+        throw new Error(errorMsg)
       }
       
-      const data = await response.json()
+      // Parse response safely
+      const text = await response.text()
+      if (!text) {
+        throw new Error('Empty response from AI')
+      }
+      
+      const data = JSON.parse(text)
       
       if (data.result) {
         // Calculate full modified content
