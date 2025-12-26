@@ -102,7 +102,7 @@ export default function HeroSection() {
           justify-content: center;
           padding: 2rem;
           position: relative;
-          overflow: hidden;
+          overflow: visible;
         }
         
         .hero-content {
@@ -174,6 +174,7 @@ export default function HeroSection() {
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
+          color: #39ff14; /* Fallback for unsupported browsers */
           display: block;
           transition: all 0.3s ease;
           cursor: default;
@@ -282,6 +283,7 @@ export default function HeroSection() {
           gap: 0.5rem;
           cursor: pointer;
           animation: bounce 2s ease-in-out infinite;
+          z-index: 10;
         }
         
         .scroll-indicator-text {

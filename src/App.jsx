@@ -31,8 +31,6 @@ export default function App() {
     <HelmetProvider>
       <AuthProvider>
         <div className="app-wrapper pixel-grid" style={{ minHeight: '100vh', position: 'relative' }}>
-          {/* Skip to content link for keyboard users */}
-          <a href="#main-content" className="skip-link">Skip to main content</a>
           
           {/* Background effects */}
           <FloatingStars count={80} />
