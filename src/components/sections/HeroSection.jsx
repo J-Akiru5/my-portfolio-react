@@ -18,6 +18,8 @@ export default function HeroSection() {
   const sectionRef = useRef(null)
   const contentRef = useRef(null)
   const avatarRef = useRef(null)
+  const firstNameRef = useRef(null)
+  const lastNameRef = useRef(null)
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -47,8 +49,9 @@ export default function HeroSection() {
       })
 
       // Text reveal animation on load
-      gsap.from('.hero-title span', {
-        opacity: 0,
+      // Text reveal animation on load
+      gsap.from([firstNameRef.current, lastNameRef.current], {
+        autoAlpha: 0,
         y: 50,
         stagger: 0.1,
         duration: 0.8,
@@ -317,8 +320,8 @@ export default function HeroSection() {
         
         <div className="hero-text">
           <h1 className="hero-title">
-            <span className="name-white">JEFF EDRICK</span>
-            <span className="name-green" style={{ color: '#39ff14', display: 'block', textShadow: '0 0 10px rgba(57, 255, 20, 0.5)' }}>MARTINEZ</span>
+            <span ref={firstNameRef} className="name-white">JEFF EDRICK</span>
+            <span ref={lastNameRef} className="name-green" style={{ color: '#39ff14', display: 'block', textShadow: '0 0 10px rgba(57, 255, 20, 0.5)' }}>MARTINEZ</span>
           </h1>
           
           <div className="hero-line" />
