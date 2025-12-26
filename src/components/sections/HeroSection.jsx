@@ -170,12 +170,9 @@ export default function HeroSection() {
         }
         
         .hero-title .name-green {
-          background: linear-gradient(135deg, #39ff14, #00d4ff);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          color: #39ff14; /* Fallback for unsupported browsers */
+          color: #39ff14;
           display: block;
+          text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
           transition: all 0.3s ease;
           cursor: default;
         }
