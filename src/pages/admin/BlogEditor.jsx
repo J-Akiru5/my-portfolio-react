@@ -99,7 +99,7 @@ export default function BlogEditor() {
     }
   }
 
-  async function handleSave() {
+  async function handleSave(publishState = isPublished) {
     if (!title || !editor) return
     setSaving(true)
 
@@ -110,7 +110,7 @@ export default function BlogEditor() {
       content: editor.getHTML(),
       coverImage,
       tags: tags.split(',').map(t => t.trim()).filter(Boolean),
-      isPublished,
+      isPublished: publishState,
       isPremium,
       affiliateUrl,
       authorId: currentUser?.uid,
@@ -336,14 +336,46 @@ export default function BlogEditor() {
           >
             CANCEL
           </PixelButton>
+          
+          {/* Save as Draft button */}
           <PixelButton 
-            variant="filled" 
-            color="matrix"
-            onClick={handleSave}
+            variant="outline" 
+            color="electric"
+            onClick={async () => {
+              setIsPublished(false)
+              await handleSave(false)
+            }}
             disabled={saving || !title}
           >
-            {saving ? 'SAVING...' : isPublished ? 'PUBLISH' : 'SAVE DRAFT'}
+            {saving ? 'SAVING...' : '💾 SAVE DRAFT'}
           </PixelButton>
+          
+          {/* Publish/Unpublish button */}
+          {isPublished ? (
+            <PixelButton 
+              variant="outline" 
+              color="fire"
+              onClick={async () => {
+                setIsPublished(false)
+                await handleSave(false)
+              }}
+              disabled={saving || !title}
+            >
+              📤 UNPUBLISH
+            </PixelButton>
+          ) : (
+            <PixelButton 
+              variant="filled" 
+              color="matrix"
+              onClick={async () => {
+                setIsPublished(true)
+                await handleSave(true)
+              }}
+              disabled={saving || !title}
+            >
+              {saving ? 'PUBLISHING...' : '🚀 PUBLISH'}
+            </PixelButton>
+          )}
         </div>
       </div>
 

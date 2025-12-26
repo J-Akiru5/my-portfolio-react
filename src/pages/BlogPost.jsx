@@ -22,7 +22,12 @@ export default function BlogPost() {
     async function fetchPost() {
       try {
         const postsRef = collection(db, 'posts')
-        const q = query(postsRef, where('slug', '==', slug))
+        // Query by slug AND ensure post is published (for public access)
+        const q = query(
+          postsRef, 
+          where('slug', '==', slug),
+          where('isPublished', '==', true)
+        )
         const snapshot = await getDocs(q)
         
         if (snapshot.empty) {
