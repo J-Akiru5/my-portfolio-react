@@ -12,7 +12,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.958.0",
     "@google-analytics/data": "^5.2.1",
-    "@google/generative-ai": "^0.24.1",
     "@monaco-editor/react": "^4.7.0",
     "@studio-freight/lenis": "^1.0.42",
     "@tiptap/extension-code-block-lowlight": "^3.14.0",
