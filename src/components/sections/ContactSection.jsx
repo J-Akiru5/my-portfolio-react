@@ -75,14 +75,14 @@ export default function ContactSection() {
     }
   }
 
-  // Social links - placeholder URLs, user will provide real ones later
+  // Social links - user-provided URLs
   const socialLinks = [
-    { platform: 'github', url: 'https://github.com/J-Akiru5', icon: '🐙' },
-    { platform: 'linkedin', url: 'https://www.linkedin.com/in/jeff-edrick-martinez-888575300/', icon: '💼' },
-    { platform: 'facebook', url: '#', icon: '📘' },
-    { platform: 'instagram', url: '#', icon: '📷' },
-    { platform: 'tiktok', url: '#', icon: '🎵' },
-    { platform: 'youtube', url: '#', icon: '▶️' },
+    { platform: 'GitHub', url: 'https://github.com/J-Akiru5', icon: '🐙' },
+    { platform: 'LinkedIn', url: 'https://www.linkedin.com/in/jeff-edrick-martinez-888575300/', icon: '💼' },
+    { platform: 'Facebook', url: 'https://www.facebook.com/jef.ferson.m', icon: '📘' },
+    { platform: 'Instagram', url: 'https://www.instagram.com/jef.ferson_m/', icon: '📷' },
+    { platform: 'TikTok', url: 'https://www.tiktok.com/@nereus_9', icon: '🎵' },
+    { platform: 'Discord', url: 'https://discord.com', icon: '🎮' }, // Consider creating a Discord server!
   ]
 
   return (
