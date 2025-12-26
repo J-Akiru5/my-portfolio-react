@@ -318,7 +318,7 @@ export default function HeroSection() {
         <div className="hero-text">
           <h1 className="hero-title">
             <span className="name-white">JEFF EDRICK</span>
-            <span className="name-green">MARTINEZ</span>
+            <span className="name-green" style={{ color: '#39ff14', display: 'block', textShadow: '0 0 10px rgba(57, 255, 20, 0.5)' }}>MARTINEZ</span>
           </h1>
           
           <div className="hero-line" />
