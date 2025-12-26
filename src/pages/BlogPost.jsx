@@ -6,6 +6,7 @@ import { Helmet } from 'react-helmet-async'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import SupportMe from '../components/blog/SupportMe'
+import { sanitizeMetaContent, sanitizeMetaUrl, sanitizeMetaTitle } from '../utils/metaSanitizer'
 
 /**
  * BlogPost - Individual blog article page
@@ -98,14 +99,19 @@ export default function BlogPost() {
     )
   }
 
+  // Sanitize dynamic content for meta tags
+  const metaTitle = sanitizeMetaTitle(post.title, ' | Jeff Martinez')
+  const metaDescription = sanitizeMetaContent(post.excerpt || post.title, 160)
+  const metaImage = sanitizeMetaUrl(post.coverImage)
+
   return (
     <article className="blog-post">
       <Helmet>
-        <title>{post.title} | Jeff Martinez</title>
-        <meta name="description" content={post.excerpt || post.title} />
-        <meta property="og:title" content={post.title} />
-        <meta property="og:description" content={post.excerpt || post.title} />
-        {post.coverImage && <meta property="og:image" content={post.coverImage} />}
+        <title>{metaTitle}</title>
+        <meta name="description" content={metaDescription} />
+        <meta property="og:title" content={sanitizeMetaContent(post.title, 70)} />
+        <meta property="og:description" content={metaDescription} />
+        {metaImage && <meta property="og:image" content={metaImage} />}
       </Helmet>
       
       <style>{`

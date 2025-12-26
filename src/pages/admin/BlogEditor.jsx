@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { useAuth } from '../../context/AuthContext'
-import { SectionTitle, GlassCard, PixelButton, ImageUpload, useToast } from '../../components/ui'
+import { SectionTitle, PixelButton, ImageUpload, useToast } from '../../components/ui'
 import { uploadImage } from '../../services/uploadService'
 import MDEditor from '@uiw/react-md-editor'
 import * as Diff from 'diff'
@@ -12,10 +12,11 @@ import * as Diff from 'diff'
  * BlogEditor - 3-Panel Markdown Editor with Advanced AI Assistant
  * 
  * Features:
- * - Chat-style AI conversation
+ * - Smart conversational AI with intent detection
+ * - Undo/Redo with history stack
+ * - Editable diff preview
+ * - Chat persistence per post in Firebase
  * - Selection-based editing
- * - Inline diff preview in editor
- * - Accept/Reject workflow
  */
 export default function BlogEditor() {
   const { id } = useParams()
@@ -54,14 +55,51 @@ export default function BlogEditor() {
   const [selectedText, setSelectedText] = useState('')
   const [selectionRange, setSelectionRange] = useState(null)
   const [pendingChanges, setPendingChanges] = useState(null)
-  // { original: string, modified: string, fullOriginal: string, fullModified: string }
+  const [editableDiff, setEditableDiff] = useState('') // For editing the suggested changes
+  
+  // Undo/Redo history
+  const [undoStack, setUndoStack] = useState([])
+  const [redoStack, setRedoStack] = useState([])
+  const MAX_HISTORY = 50
   
   const inlineImageInputRef = useRef(null)
   const initialLoadRef = useRef(true)
   const chatEndRef = useRef(null)
   const editorRef = useRef(null)
+  const contentBeforeAI = useRef('')
 
-  // Calculate reading time from word count
+  // Push content to undo stack
+  const pushToUndo = useCallback((contentToPush) => {
+    setUndoStack(prev => {
+      const newStack = [...prev, contentToPush]
+      return newStack.slice(-MAX_HISTORY)
+    })
+    setRedoStack([]) // Clear redo when new action is taken
+  }, [])
+
+  // Undo action
+  const handleUndo = useCallback(() => {
+    if (undoStack.length === 0) return
+    
+    const previousContent = undoStack[undoStack.length - 1]
+    setRedoStack(prev => [...prev, content])
+    setUndoStack(prev => prev.slice(0, -1))
+    setContent(previousContent)
+    showToast('Undone', 'info')
+  }, [undoStack, content, showToast])
+
+  // Redo action
+  const handleRedo = useCallback(() => {
+    if (redoStack.length === 0) return
+    
+    const nextContent = redoStack[redoStack.length - 1]
+    setUndoStack(prev => [...prev, content])
+    setRedoStack(prev => prev.slice(0, -1))
+    setContent(nextContent)
+    showToast('Redone', 'info')
+  }, [redoStack, content, showToast])
+
+  // Calculate reading time
   const calculatedReadingTime = useCallback(() => {
     if (!content) return 1
     const wordCount = content.trim().split(/\s+/).length
@@ -72,12 +110,13 @@ export default function BlogEditor() {
     ? readingTimeOverride 
     : calculatedReadingTime()
 
-  // Load existing post
+  // Load existing post and chat history
   useEffect(() => {
     async function fetchPost() {
       if (!id) return
       setLoading(true)
       try {
+        // Load post
         const postRef = doc(db, 'posts', id)
         const snapshot = await getDoc(postRef)
         if (snapshot.exists()) {
@@ -96,6 +135,13 @@ export default function BlogEditor() {
             setUseCustomReadingTime(true)
           }
         }
+        
+        // Load chat history for this post
+        const chatRef = doc(db, 'postChats', id)
+        const chatSnapshot = await getDoc(chatRef)
+        if (chatSnapshot.exists()) {
+          setChatMessages(chatSnapshot.data().messages || [])
+        }
       } catch (error) {
         console.error('Error fetching post:', error)
         showToast('Failed to load post', 'error')
@@ -107,6 +153,28 @@ export default function BlogEditor() {
     fetchPost()
   }, [id, showToast])
 
+  // Save chat history to Firebase when it changes
+  useEffect(() => {
+    async function saveChatHistory() {
+      if (!id || chatMessages.length === 0 || initialLoadRef.current) return
+      
+      try {
+        const chatRef = doc(db, 'postChats', id)
+        await setDoc(chatRef, {
+          postId: id,
+          messages: chatMessages,
+          updatedAt: serverTimestamp()
+        }, { merge: true })
+      } catch (error) {
+        console.error('Error saving chat:', error)
+      }
+    }
+    
+    // Debounce chat save
+    const timer = setTimeout(saveChatHistory, 1000)
+    return () => clearTimeout(timer)
+  }, [id, chatMessages])
+
   // Track unsaved changes
   useEffect(() => {
     if (!initialLoadRef.current) {
@@ -114,33 +182,38 @@ export default function BlogEditor() {
     }
   }, [title, slug, excerpt, content, coverImage, tags, isPublished, isPremium, affiliateUrl])
 
-  // Scroll chat to bottom when new messages arrive
+  // Scroll chat to bottom
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [chatMessages])
 
-  // Track text selection in editor
+  // Track text selection (debounced)
   useEffect(() => {
+    let timeoutId
+    
     const handleSelection = () => {
-      const selection = window.getSelection()
-      const text = selection?.toString() || ''
-      setSelectedText(text)
-      
-      if (text && selection.rangeCount > 0) {
-        // Find selection position in content
-        const start = content.indexOf(text)
-        if (start !== -1) {
-          setSelectionRange({ start, end: start + text.length })
+      clearTimeout(timeoutId)
+      timeoutId = setTimeout(() => {
+        const selection = window.getSelection()
+        const text = selection?.toString() || ''
+        setSelectedText(text)
+        
+        if (text && selection.rangeCount > 0) {
+          const start = content.indexOf(text)
+          if (start !== -1) {
+            setSelectionRange({ start, end: start + text.length })
+          }
+        } else {
+          setSelectionRange(null)
         }
-      } else {
-        setSelectionRange(null)
-      }
+      }, 100) // Debounce by 100ms
     }
 
     document.addEventListener('mouseup', handleSelection)
     document.addEventListener('keyup', handleSelection)
     
     return () => {
+      clearTimeout(timeoutId)
       document.removeEventListener('mouseup', handleSelection)
       document.removeEventListener('keyup', handleSelection)
     }
@@ -192,7 +265,7 @@ export default function BlogEditor() {
       setIsPublished(finalPublishState)
       setHasUnsavedChanges(false)
     } catch (error) {
-      console.error('Error saving post:', error)
+      console.error('Error saving:', error)
       showToast('Failed to save: ' + error.message, 'error')
     } finally {
       setSaving(false)
@@ -201,12 +274,10 @@ export default function BlogEditor() {
 
   async function handlePublish() {
     await handleSave(true)
-    showToast('Post published!', 'success')
   }
 
   async function handleUnpublish() {
     await handleSave(false)
-    showToast('Post unpublished', 'info')
   }
 
   function handleCancel() {
@@ -225,6 +296,7 @@ export default function BlogEditor() {
     try {
       const result = await uploadImage(file)
       if (result.success && result.url) {
+        pushToUndo(content)
         const imageMarkdown = `\n![${file.name}](${result.url})\n`
         setContent(prev => prev + imageMarkdown)
         showToast('Image inserted!', 'success')
@@ -236,33 +308,44 @@ export default function BlogEditor() {
     }
   }
 
-  // Generate diff content for preview
-  function generateDiffContent(original, modified) {
+  // Generate diff HTML for display
+  function generateDiffHtml(original, modified) {
     const diff = Diff.diffWords(original, modified)
     let result = ''
     
     diff.forEach(part => {
       if (part.added) {
-        result += `<ins class="diff-added">${part.value}</ins>`
+        result += `<ins class="diff-added">${escapeHtml(part.value)}</ins>`
       } else if (part.removed) {
-        result += `<del class="diff-removed">${part.value}</del>`
+        result += `<del class="diff-removed">${escapeHtml(part.value)}</del>`
       } else {
-        result += part.value
+        result += escapeHtml(part.value)
       }
     })
     
     return result
   }
 
+  function escapeHtml(text) {
+    return text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
+  }
+
   // AI Actions
   async function callAI(action, customPrompt = null) {
     setAiLoading(true)
     
-    // Determine what text to process
     const textToProcess = selectedText || content
     const isPartialEdit = !!selectedText
     
-    // Add user message to chat
+    // Store content before AI for undo
+    contentBeforeAI.current = content
+    
+    // Add user message
     const userMessage = customPrompt || `${action} the ${isPartialEdit ? 'selected text' : 'content'}`
     setChatMessages(prev => [...prev, { 
       id: Date.now(), 
@@ -278,13 +361,13 @@ export default function BlogEditor() {
           action: customPrompt ? 'custom' : action,
           text: textToProcess,
           customPrompt: customPrompt,
-          title: title
+          title: title,
+          chatHistory: chatMessages.slice(-6) // Send last 6 for context
         })
       })
       
-      // Check if response is OK
+      // Handle response safely
       if (!response.ok) {
-        // Try to parse error, but handle empty responses
         const text = await response.text()
         let errorMsg = 'AI request failed'
         if (text) {
@@ -292,22 +375,27 @@ export default function BlogEditor() {
             const error = JSON.parse(text)
             errorMsg = error.details || error.error || errorMsg
           } catch {
-            errorMsg = text.slice(0, 100) // Show first 100 chars of error
+            errorMsg = text.slice(0, 100)
           }
         }
         throw new Error(errorMsg)
       }
       
-      // Parse response safely
       const text = await response.text()
-      if (!text) {
-        throw new Error('Empty response from AI')
-      }
+      if (!text) throw new Error('Empty response from AI')
       
       const data = JSON.parse(text)
       
-      if (data.result) {
-        // Calculate full modified content
+      if (data.type === 'reply') {
+        // Conversational response - just add to chat
+        setChatMessages(prev => [...prev, { 
+          id: Date.now(), 
+          role: 'ai', 
+          content: data.result,
+          isReply: true
+        }])
+      } else if (data.result) {
+        // Edit response - show diff
         let fullModified = content
         if (isPartialEdit && selectionRange) {
           fullModified = content.slice(0, selectionRange.start) + 
@@ -317,7 +405,6 @@ export default function BlogEditor() {
           fullModified = data.result
         }
         
-        // Set pending changes for review
         setPendingChanges({
           original: textToProcess,
           modified: data.result,
@@ -325,12 +412,12 @@ export default function BlogEditor() {
           fullModified: fullModified,
           isPartialEdit
         })
+        setEditableDiff(data.result) // Allow editing the suggestion
         
-        // Add AI message
         setChatMessages(prev => [...prev, { 
           id: Date.now(), 
           role: 'ai', 
-          content: 'I\'ve made some changes. Please review the diff in the editor and accept or reject.'
+          content: 'I\'ve made some changes. Review the diff in the editor, edit if needed, then accept or reject.'
         }])
       }
     } catch (error) {
@@ -359,8 +446,22 @@ export default function BlogEditor() {
 
   function handleAcceptChanges() {
     if (pendingChanges) {
-      setContent(pendingChanges.fullModified)
+      // Push current content to undo stack
+      pushToUndo(content)
+      
+      // Apply the (possibly edited) changes
+      let newContent
+      if (pendingChanges.isPartialEdit && selectionRange) {
+        newContent = content.slice(0, selectionRange.start) + 
+                    editableDiff + 
+                    content.slice(selectionRange.end)
+      } else {
+        newContent = editableDiff
+      }
+      
+      setContent(newContent)
       setPendingChanges(null)
+      setEditableDiff('')
       showToast('Changes applied!', 'success')
       setChatMessages(prev => [...prev, { 
         id: Date.now(), 
@@ -372,12 +473,20 @@ export default function BlogEditor() {
 
   function handleRejectChanges() {
     setPendingChanges(null)
+    setEditableDiff('')
     showToast('Changes discarded', 'info')
     setChatMessages(prev => [...prev, { 
       id: Date.now(), 
       role: 'system', 
       content: '❌ Changes rejected.'
     }])
+  }
+
+  function handleClearChat() {
+    if (window.confirm('Clear all chat history for this post?')) {
+      setChatMessages([])
+      showToast('Chat cleared', 'info')
+    }
   }
 
   if (loading) {
@@ -394,9 +503,8 @@ export default function BlogEditor() {
     )
   }
 
-  // Show diff content when pending changes
-  const displayContent = pendingChanges 
-    ? generateDiffContent(pendingChanges.original, pendingChanges.modified)
+  const displayDiffHtml = pendingChanges 
+    ? generateDiffHtml(pendingChanges.original, editableDiff)
     : null
 
   return (
@@ -410,7 +518,6 @@ export default function BlogEditor() {
           background: linear-gradient(135deg, #0a0a1a 0%, #1a1a2e 100%);
         }
 
-        /* Header */
         .editor-header {
           display: flex;
           justify-content: space-between;
@@ -422,17 +529,9 @@ export default function BlogEditor() {
           z-index: 100;
         }
 
-        .header-left {
-          display: flex;
-          align-items: center;
-          gap: 1rem;
-        }
-
-        .header-actions {
-          display: flex;
-          gap: 0.75rem;
-        }
-
+        .header-left { display: flex; align-items: center; gap: 1rem; }
+        .header-actions { display: flex; gap: 0.75rem; align-items: center; }
+        
         .unsaved-indicator {
           font-size: 0.75rem;
           color: #ffaa00;
@@ -441,14 +540,35 @@ export default function BlogEditor() {
           border-radius: 4px;
         }
 
-        /* Main Layout */
-        .editor-main {
+        .undo-redo-group {
           display: flex;
-          flex: 1;
-          overflow: hidden;
+          gap: 0.25rem;
+          margin-right: 0.5rem;
         }
 
-        /* Left Sidebar */
+        .undo-redo-btn {
+          padding: 0.5rem 0.75rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 4px;
+          color: rgba(255, 255, 255, 0.7);
+          cursor: pointer;
+          font-size: 1rem;
+          transition: all 0.2s;
+        }
+
+        .undo-redo-btn:hover:not(:disabled) {
+          background: rgba(255, 255, 255, 0.1);
+          color: white;
+        }
+
+        .undo-redo-btn:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+
+        .editor-main { display: flex; flex: 1; overflow: hidden; }
+
         .left-sidebar {
           width: ${leftSidebarCollapsed ? '50px' : '280px'};
           background: rgba(0, 0, 0, 0.3);
@@ -466,12 +586,9 @@ export default function BlogEditor() {
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           cursor: pointer;
           color: #00d4ff;
-          font-size: 1.2rem;
         }
 
-        .sidebar-toggle:hover {
-          background: rgba(0, 212, 255, 0.1);
-        }
+        .sidebar-toggle:hover { background: rgba(0, 212, 255, 0.1); }
 
         .sidebar-content {
           padding: 1rem;
@@ -480,7 +597,6 @@ export default function BlogEditor() {
           display: ${leftSidebarCollapsed ? 'none' : 'block'};
         }
 
-        /* Center Editor */
         .center-editor {
           flex: 1;
           display: flex;
@@ -495,7 +611,6 @@ export default function BlogEditor() {
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
           display: flex;
           gap: 0.5rem;
-          flex-wrap: wrap;
         }
 
         .md-editor-wrapper {
@@ -506,44 +621,23 @@ export default function BlogEditor() {
           position: relative;
         }
 
-        /* Diff Overlay */
         .diff-overlay {
           position: absolute;
           inset: 0;
           background: rgba(0, 0, 0, 0.95);
           z-index: 10;
-          padding: 1.5rem;
-          overflow-y: auto;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 14px;
-          line-height: 1.8;
-          color: rgba(255, 255, 255, 0.9);
-          white-space: pre-wrap;
-        }
-
-        .diff-overlay .diff-added {
-          background: rgba(57, 255, 20, 0.25);
-          color: #39ff14;
-          text-decoration: none;
-          padding: 0 2px;
-          border-radius: 2px;
-        }
-
-        .diff-overlay .diff-removed {
-          background: rgba(255, 107, 107, 0.25);
-          color: #ff6b6b;
-          text-decoration: line-through;
-          padding: 0 2px;
-          border-radius: 2px;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
         }
 
         .diff-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 1rem;
-          padding-bottom: 1rem;
+          padding: 1rem 1.5rem;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          background: rgba(0, 0, 0, 0.3);
         }
 
         .diff-title {
@@ -552,7 +646,70 @@ export default function BlogEditor() {
           color: #00d4ff;
         }
 
-        /* Right AI Panel */
+        .diff-content {
+          flex: 1;
+          overflow-y: auto;
+          padding: 1.5rem;
+        }
+
+        .diff-preview {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 14px;
+          line-height: 1.8;
+          color: rgba(255, 255, 255, 0.9);
+          white-space: pre-wrap;
+          margin-bottom: 1.5rem;
+        }
+
+        .diff-preview .diff-added {
+          background: rgba(57, 255, 20, 0.25);
+          color: #39ff14;
+          padding: 0 2px;
+          border-radius: 2px;
+        }
+
+        .diff-preview .diff-removed {
+          background: rgba(255, 107, 107, 0.25);
+          color: #ff6b6b;
+          text-decoration: line-through;
+          padding: 0 2px;
+          border-radius: 2px;
+        }
+
+        .diff-edit-section {
+          margin-top: 1rem;
+          padding-top: 1rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .diff-edit-label {
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.6rem;
+          color: #39ff14;
+          margin-bottom: 0.75rem;
+          display: block;
+        }
+
+        .diff-edit-textarea {
+          width: 100%;
+          min-height: 200px;
+          padding: 1rem;
+          background: rgba(0, 0, 0, 0.5);
+          border: 1px solid rgba(57, 255, 20, 0.3);
+          border-radius: 8px;
+          color: white;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 14px;
+          line-height: 1.6;
+          resize: vertical;
+        }
+
+        .diff-edit-textarea:focus {
+          outline: none;
+          border-color: #39ff14;
+          box-shadow: 0 0 10px rgba(57, 255, 20, 0.2);
+        }
+
         .right-panel {
           width: 350px;
           background: rgba(0, 0, 0, 0.3);
@@ -570,11 +727,23 @@ export default function BlogEditor() {
           font-size: 0.7rem;
           color: #39ff14;
           display: flex;
+          justify-content: space-between;
           align-items: center;
-          gap: 0.5rem;
         }
 
-        /* Quick Actions */
+        .clear-chat-btn {
+          font-size: 0.5rem;
+          padding: 0.3rem 0.5rem;
+          background: rgba(255, 107, 107, 0.1);
+          border: 1px solid rgba(255, 107, 107, 0.3);
+          border-radius: 4px;
+          color: #ff6b6b;
+          cursor: pointer;
+          font-family: inherit;
+        }
+
+        .clear-chat-btn:hover { background: rgba(255, 107, 107, 0.2); }
+
         .quick-actions {
           padding: 0.75rem 1rem;
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
@@ -583,9 +752,7 @@ export default function BlogEditor() {
           gap: 0.5rem;
         }
 
-        .quick-actions.hidden {
-          display: none;
-        }
+        .quick-actions.hidden { display: none; }
 
         .quick-btn {
           padding: 0.4rem 0.75rem;
@@ -603,10 +770,7 @@ export default function BlogEditor() {
           border-color: #39ff14;
         }
 
-        .quick-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
+        .quick-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
         .selection-hint {
           font-size: 0.65rem;
@@ -616,7 +780,6 @@ export default function BlogEditor() {
           border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Chat Messages */
         .chat-messages {
           flex: 1;
           overflow-y: auto;
@@ -648,6 +811,11 @@ export default function BlogEditor() {
           align-self: flex-start;
         }
 
+        .chat-message.ai.reply {
+          background: rgba(157, 78, 221, 0.1);
+          border-color: rgba(157, 78, 221, 0.3);
+        }
+
         .chat-message.ai.error {
           background: rgba(255, 107, 107, 0.1);
           border-color: rgba(255, 107, 107, 0.3);
@@ -662,7 +830,6 @@ export default function BlogEditor() {
           text-align: center;
         }
 
-        /* Accept/Reject Bar */
         .accept-reject-bar {
           padding: 0.75rem 1rem;
           background: rgba(57, 255, 20, 0.1);
@@ -673,48 +840,33 @@ export default function BlogEditor() {
           justify-content: center;
         }
 
-        .accept-btn {
+        .accept-btn, .reject-btn {
           padding: 0.5rem 1.5rem;
+          border-radius: 4px;
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.6rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .accept-btn {
           background: rgba(57, 255, 20, 0.2);
           border: 1px solid #39ff14;
-          border-radius: 4px;
           color: #39ff14;
-          font-family: 'Press Start 2P', cursive;
-          font-size: 0.6rem;
-          cursor: pointer;
-          transition: all 0.2s;
         }
 
-        .accept-btn:hover {
-          background: rgba(57, 255, 20, 0.4);
-        }
+        .accept-btn:hover { background: rgba(57, 255, 20, 0.4); }
 
         .reject-btn {
-          padding: 0.5rem 1.5rem;
           background: rgba(255, 107, 107, 0.1);
           border: 1px solid rgba(255, 107, 107, 0.5);
-          border-radius: 4px;
           color: #ff6b6b;
-          font-family: 'Press Start 2P', cursive;
-          font-size: 0.6rem;
-          cursor: pointer;
-          transition: all 0.2s;
         }
 
-        .reject-btn:hover {
-          background: rgba(255, 107, 107, 0.2);
-        }
+        .reject-btn:hover { background: rgba(255, 107, 107, 0.2); }
 
-        /* Chat Input */
-        .chat-input-area {
-          padding: 1rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .chat-input-wrapper {
-          display: flex;
-          gap: 0.5rem;
-        }
+        .chat-input-area { padding: 1rem; border-top: 1px solid rgba(255, 255, 255, 0.1); }
+        .chat-input-wrapper { display: flex; gap: 0.5rem; }
 
         .chat-input {
           flex: 1;
@@ -727,14 +879,8 @@ export default function BlogEditor() {
           font-family: 'JetBrains Mono', monospace;
         }
 
-        .chat-input:focus {
-          outline: none;
-          border-color: #39ff14;
-        }
-
-        .chat-input::placeholder {
-          color: rgba(255, 255, 255, 0.3);
-        }
+        .chat-input:focus { outline: none; border-color: #39ff14; }
+        .chat-input::placeholder { color: rgba(255, 255, 255, 0.3); }
 
         .send-btn {
           padding: 0.75rem 1rem;
@@ -743,22 +889,12 @@ export default function BlogEditor() {
           border-radius: 4px;
           color: #39ff14;
           cursor: pointer;
-          transition: all 0.2s;
         }
 
-        .send-btn:hover:not(:disabled) {
-          background: rgba(57, 255, 20, 0.4);
-        }
+        .send-btn:hover:not(:disabled) { background: rgba(57, 255, 20, 0.4); }
+        .send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        .send-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        /* Form Elements */
-        .form-group {
-          margin-bottom: 1.25rem;
-        }
+        .form-group { margin-bottom: 1.25rem; }
 
         .form-label {
           display: block;
@@ -766,7 +902,6 @@ export default function BlogEditor() {
           font-size: 0.6rem;
           color: #00d4ff;
           margin-bottom: 0.4rem;
-          text-transform: uppercase;
         }
 
         .form-input {
@@ -783,13 +918,9 @@ export default function BlogEditor() {
         .form-input:focus {
           outline: none;
           border-color: #00d4ff;
-          box-shadow: 0 0 8px rgba(0, 212, 255, 0.2);
         }
 
-        .form-textarea {
-          min-height: 60px;
-          resize: vertical;
-        }
+        .form-textarea { min-height: 60px; resize: vertical; }
 
         .checkbox-label {
           display: flex;
@@ -801,11 +932,7 @@ export default function BlogEditor() {
           margin-bottom: 0.5rem;
         }
 
-        .checkbox-label input {
-          width: 16px;
-          height: 16px;
-          accent-color: #39ff14;
-        }
+        .checkbox-label input { width: 16px; height: 16px; accent-color: #39ff14; }
 
         .reading-time-display {
           display: flex;
@@ -818,20 +945,9 @@ export default function BlogEditor() {
           color: #00d4ff;
         }
 
-        .reading-time-override {
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-          margin-top: 0.5rem;
-        }
+        .reading-time-override { display: flex; align-items: center; gap: 0.5rem; margin-top: 0.5rem; }
+        .time-input { width: 60px; padding: 0.4rem; text-align: center; }
 
-        .time-input {
-          width: 60px;
-          padding: 0.4rem;
-          text-align: center;
-        }
-
-        /* MD Editor Overrides */
         .w-md-editor {
           flex: 1 !important;
           display: flex !important;
@@ -845,22 +961,13 @@ export default function BlogEditor() {
           border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
         }
 
-        .w-md-editor-content {
-          flex: 1 !important;
-          overflow: hidden !important;
-        }
+        .w-md-editor-content { flex: 1 !important; overflow: hidden !important; }
 
         .w-md-editor-text-pre > code,
         .w-md-editor-text-input,
         .w-md-editor-text {
           font-family: 'JetBrains Mono', monospace !important;
           font-size: 14px !important;
-        }
-
-        .w-md-editor-preview,
-        .w-md-editor-text {
-          height: 100% !important;
-          overflow-y: auto !important;
         }
 
         .wmde-markdown {
@@ -871,7 +978,6 @@ export default function BlogEditor() {
 
         .wmde-markdown h1, .wmde-markdown h2, .wmde-markdown h3 {
           color: #00d4ff !important;
-          border-bottom-color: rgba(255, 255, 255, 0.1) !important;
         }
 
         .wmde-markdown code {
@@ -879,17 +985,9 @@ export default function BlogEditor() {
           color: #39ff14 !important;
         }
 
-        .wmde-markdown pre {
-          background: rgba(0, 0, 0, 0.5) !important;
-        }
-
         @media (max-width: 1024px) {
-          .left-sidebar {
-            width: ${leftSidebarCollapsed ? '50px' : '220px'};
-          }
-          .right-panel {
-            width: 300px;
-          }
+          .left-sidebar { width: ${leftSidebarCollapsed ? '50px' : '220px'}; }
+          .right-panel { width: 300px; }
         }
       `}</style>
 
@@ -901,11 +999,29 @@ export default function BlogEditor() {
             extension=".md"
             style={{ margin: 0 }}
           />
-          {hasUnsavedChanges && (
-            <span className="unsaved-indicator">● Unsaved</span>
-          )}
+          {hasUnsavedChanges && <span className="unsaved-indicator">● Unsaved</span>}
         </div>
         <div className="header-actions">
+          {/* Undo/Redo */}
+          <div className="undo-redo-group">
+            <button 
+              className="undo-redo-btn" 
+              onClick={handleUndo}
+              disabled={undoStack.length === 0}
+              title="Undo (Ctrl+Z)"
+            >
+              ↶
+            </button>
+            <button 
+              className="undo-redo-btn" 
+              onClick={handleRedo}
+              disabled={redoStack.length === 0}
+              title="Redo (Ctrl+Y)"
+            >
+              ↷
+            </button>
+          </div>
+          
           <PixelButton variant="outline" size="small" onClick={handleCancel}>
             Cancel
           </PixelButton>
@@ -942,15 +1058,14 @@ export default function BlogEditor() {
         </div>
       </header>
 
-      {/* Main 3-Panel Layout */}
+      {/* Main Layout */}
       <div className="editor-main">
         
-        {/* Left Sidebar - Metadata */}
+        {/* Left Sidebar */}
         <aside className="left-sidebar">
           <div 
             className="sidebar-toggle" 
             onClick={() => setLeftSidebarCollapsed(!leftSidebarCollapsed)}
-            title={leftSidebarCollapsed ? 'Expand' : 'Collapse'}
           >
             {leftSidebarCollapsed ? '▶' : '◀'}
           </div>
@@ -990,11 +1105,7 @@ export default function BlogEditor() {
 
             <div className="form-group">
               <label className="form-label">Cover Image</label>
-              <ImageUpload
-                value={coverImage}
-                onChange={setCoverImage}
-                placeholder="Drop image"
-              />
+              <ImageUpload value={coverImage} onChange={setCoverImage} placeholder="Drop image" />
             </div>
 
             <div className="form-group">
@@ -1010,9 +1121,7 @@ export default function BlogEditor() {
 
             <div className="form-group">
               <label className="form-label">Reading Time</label>
-              <div className="reading-time-display">
-                ⏱️ {readingTime} min read
-              </div>
+              <div className="reading-time-display">⏱️ {readingTime} min read</div>
               <div className="reading-time-override">
                 <label className="checkbox-label">
                   <input
@@ -1058,7 +1167,7 @@ export default function BlogEditor() {
           </div>
         </aside>
 
-        {/* Center - Markdown Editor */}
+        {/* Center Editor */}
         <main className="center-editor">
           <div className="editor-toolbar-custom">
             <input
@@ -1078,8 +1187,8 @@ export default function BlogEditor() {
           </div>
           
           <div className="md-editor-wrapper" ref={editorRef}>
-            {/* Diff Overlay when pending changes */}
-            {pendingChanges && displayContent && (
+            {/* Diff Overlay */}
+            {pendingChanges && displayDiffHtml && (
               <div className="diff-overlay">
                 <div className="diff-header">
                   <span className="diff-title">📝 REVIEW CHANGES</span>
@@ -1087,7 +1196,22 @@ export default function BlogEditor() {
                     {pendingChanges.isPartialEdit ? 'Selected text' : 'Full content'}
                   </span>
                 </div>
-                <div dangerouslySetInnerHTML={{ __html: displayContent }} />
+                <div className="diff-content">
+                  <div 
+                    className="diff-preview" 
+                    dangerouslySetInnerHTML={{ __html: displayDiffHtml }} 
+                  />
+                  
+                  <div className="diff-edit-section">
+                    <label className="diff-edit-label">✏️ EDIT SUGGESTION BEFORE ACCEPTING</label>
+                    <textarea
+                      className="diff-edit-textarea"
+                      value={editableDiff}
+                      onChange={(e) => setEditableDiff(e.target.value)}
+                      placeholder="Edit the AI's suggestion here..."
+                    />
+                  </div>
+                </div>
               </div>
             )}
             
@@ -1102,84 +1226,57 @@ export default function BlogEditor() {
           </div>
         </main>
 
-        {/* Right Panel - AI Assistant */}
+        {/* Right Panel - AI */}
         <aside className="right-panel">
           <div className="ai-header">
-            🤖 AI_ASSISTANT
+            <span>🤖 AI_ASSISTANT</span>
+            {chatMessages.length > 0 && (
+              <button className="clear-chat-btn" onClick={handleClearChat}>
+                Clear
+              </button>
+            )}
           </div>
           
-          {/* Quick Actions - Only show when text is selected */}
+          {/* Quick Actions */}
           <div className={`quick-actions ${selectedText ? '' : 'hidden'}`}>
-            <button 
-              className="quick-btn" 
-              onClick={() => handleQuickAction('improve')}
-              disabled={aiLoading}
-            >
+            <button className="quick-btn" onClick={() => handleQuickAction('improve')} disabled={aiLoading}>
               ✨ Improve
             </button>
-            <button 
-              className="quick-btn" 
-              onClick={() => handleQuickAction('expand')}
-              disabled={aiLoading}
-            >
+            <button className="quick-btn" onClick={() => handleQuickAction('expand')} disabled={aiLoading}>
               📝 Expand
             </button>
-            <button 
-              className="quick-btn" 
-              onClick={() => handleQuickAction('summarize')}
-              disabled={aiLoading}
-            >
+            <button className="quick-btn" onClick={() => handleQuickAction('summarize')} disabled={aiLoading}>
               📋 Summarize
             </button>
-            <button 
-              className="quick-btn" 
-              onClick={() => handleQuickAction('grammar')}
-              disabled={aiLoading}
-            >
+            <button className="quick-btn" onClick={() => handleQuickAction('grammar')} disabled={aiLoading}>
               🔤 Fix Grammar
             </button>
           </div>
 
-          {/* Selection hint */}
           {!selectedText && (
-            <div className="selection-hint">
-              Select text in editor for quick actions
-            </div>
+            <div className="selection-hint">Select text in editor for quick actions</div>
           )}
 
           {/* Chat Messages */}
           <div className="chat-messages">
             {chatMessages.length === 0 && (
-              <div style={{ 
-                color: 'rgba(255,255,255,0.4)', 
-                textAlign: 'center', 
-                marginTop: '2rem',
-                fontSize: '0.85rem'
-              }}>
-                Start a conversation with the AI assistant.<br/>
-                Select text for quick actions, or type below.
+              <div style={{ color: 'rgba(255,255,255,0.4)', textAlign: 'center', marginTop: '2rem', fontSize: '0.85rem' }}>
+                Start a conversation with the AI.<br/>Select text for quick actions, or type below to chat.
               </div>
             )}
             {chatMessages.map(msg => (
-              <div 
-                key={msg.id} 
-                className={`chat-message ${msg.role} ${msg.isError ? 'error' : ''}`}
-              >
+              <div key={msg.id} className={`chat-message ${msg.role} ${msg.isReply ? 'reply' : ''} ${msg.isError ? 'error' : ''}`}>
                 {msg.content}
               </div>
             ))}
             <div ref={chatEndRef} />
           </div>
 
-          {/* Accept/Reject Bar - Only show when pending changes */}
+          {/* Accept/Reject Bar */}
           {pendingChanges && (
             <div className="accept-reject-bar">
-              <button className="accept-btn" onClick={handleAcceptChanges}>
-                ✓ ACCEPT
-              </button>
-              <button className="reject-btn" onClick={handleRejectChanges}>
-                ✕ REJECT
-              </button>
+              <button className="accept-btn" onClick={handleAcceptChanges}>✓ ACCEPT</button>
+              <button className="reject-btn" onClick={handleRejectChanges}>✕ REJECT</button>
             </div>
           )}
 
