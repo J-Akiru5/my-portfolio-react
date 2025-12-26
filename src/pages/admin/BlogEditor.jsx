@@ -410,7 +410,8 @@ export default function BlogEditor() {
           modified: data.result,
           fullOriginal: content,
           fullModified: fullModified,
-          isPartialEdit
+          isPartialEdit,
+          storedSelectionRange: selectionRange // Store the range at time of AI call
         })
         setEditableDiff(data.result) // Allow editing the suggestion
         
@@ -449,12 +450,14 @@ export default function BlogEditor() {
       // Push current content to undo stack
       pushToUndo(content)
       
-      // Apply the (possibly edited) changes
+      // Apply the (possibly edited) changes using STORED selection range
       let newContent
-      if (pendingChanges.isPartialEdit && selectionRange) {
-        newContent = content.slice(0, selectionRange.start) + 
+      const range = pendingChanges.storedSelectionRange
+      if (pendingChanges.isPartialEdit && range) {
+        // Use the stored range from when AI was called, not current selection
+        newContent = pendingChanges.fullOriginal.slice(0, range.start) + 
                     editableDiff + 
-                    content.slice(selectionRange.end)
+                    pendingChanges.fullOriginal.slice(range.end)
       } else {
         newContent = editableDiff
       }
