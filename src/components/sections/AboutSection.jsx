@@ -83,6 +83,18 @@ export default function AboutSection() {
   const [activeHobby, setActiveHobby] = useState(null)
   const monitorRef = useRef(null)
   const monitorContentRef = useRef(null)
+  const timeoutRef = useRef(null)
+
+  const handleMouseEnter = (hobby) => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current)
+    setActiveHobby(hobby)
+  }
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setActiveHobby(null)
+    }, 500)
+  }
 
   const hobbies = [
     { id: 'ui', label: 'UI Design', icon: '🎨', color: '#F472B6', desc: 'Designing intuitive interfaces with pixel-perfect precision.' },
@@ -302,9 +314,10 @@ export default function AboutSection() {
 
         @media (min-width: 768px) {
           .holo-monitor {
-            width: 320px;
-            height: 280px;
-            flex-shrink: 0;
+            flex: 1;
+            height: auto;
+            min-height: 350px;
+            align-self: stretch;
           }
         }
 
@@ -427,8 +440,8 @@ export default function AboutSection() {
                   <button
                     key={hobby.id}
                     className={`data-cartridge ${activeHobby?.id === hobby.id ? 'active' : ''}`}
-                    onMouseEnter={() => setActiveHobby(hobby)}
-                    onMouseLeave={() => setActiveHobby(null)}
+                    onMouseEnter={() => handleMouseEnter(hobby)}
+                    onMouseLeave={handleMouseLeave}
                     style={{ '--glow-color': hobby.color }}
                   >
                     <span className="cartridge-icon">{hobby.icon}</span>
