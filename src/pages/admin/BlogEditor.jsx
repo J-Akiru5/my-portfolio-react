@@ -6,11 +6,16 @@ import { useAuth } from '../../context/AuthContext'
 import { SectionTitle, GlassCard, PixelButton, ImageUpload, useToast } from '../../components/ui'
 import { uploadImage } from '../../services/uploadService'
 import MDEditor from '@uiw/react-md-editor'
+import * as Diff from 'diff'
 
 /**
- * BlogEditor - 3-Panel Markdown Editor with AI Assistant
+ * BlogEditor - 3-Panel Markdown Editor with Advanced AI Assistant
  * 
- * Layout: Left Sidebar (metadata) | Center (editor) | Right (AI panel)
+ * Features:
+ * - Chat-style AI conversation
+ * - Selection-based editing
+ * - Inline diff preview in editor
+ * - Accept/Reject workflow
  */
 export default function BlogEditor() {
   const { id } = useParams()
@@ -39,15 +44,22 @@ export default function BlogEditor() {
   const [saving, setSaving] = useState(false)
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false)
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false)
-  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(false)
   
-  // AI state
-  const [aiPrompt, setAiPrompt] = useState('')
+  // AI Chat state
+  const [chatMessages, setChatMessages] = useState([])
+  const [chatInput, setChatInput] = useState('')
   const [aiLoading, setAiLoading] = useState(false)
+  
+  // Selection and Diff state
   const [selectedText, setSelectedText] = useState('')
+  const [selectionRange, setSelectionRange] = useState(null)
+  const [pendingChanges, setPendingChanges] = useState(null)
+  // { original: string, modified: string, fullOriginal: string, fullModified: string }
   
   const inlineImageInputRef = useRef(null)
   const initialLoadRef = useRef(true)
+  const chatEndRef = useRef(null)
+  const editorRef = useRef(null)
 
   // Calculate reading time from word count
   const calculatedReadingTime = useCallback(() => {
@@ -101,6 +113,38 @@ export default function BlogEditor() {
       setHasUnsavedChanges(true)
     }
   }, [title, slug, excerpt, content, coverImage, tags, isPublished, isPremium, affiliateUrl])
+
+  // Scroll chat to bottom when new messages arrive
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [chatMessages])
+
+  // Track text selection in editor
+  useEffect(() => {
+    const handleSelection = () => {
+      const selection = window.getSelection()
+      const text = selection?.toString() || ''
+      setSelectedText(text)
+      
+      if (text && selection.rangeCount > 0) {
+        // Find selection position in content
+        const start = content.indexOf(text)
+        if (start !== -1) {
+          setSelectionRange({ start, end: start + text.length })
+        }
+      } else {
+        setSelectionRange(null)
+      }
+    }
+
+    document.addEventListener('mouseup', handleSelection)
+    document.addEventListener('keyup', handleSelection)
+    
+    return () => {
+      document.removeEventListener('mouseup', handleSelection)
+      document.removeEventListener('keyup', handleSelection)
+    }
+  }, [content])
 
   function handleTitleChange(e) {
     const val = e.target.value
@@ -192,37 +236,131 @@ export default function BlogEditor() {
     }
   }
 
+  // Generate diff content for preview
+  function generateDiffContent(original, modified) {
+    const diff = Diff.diffWords(original, modified)
+    let result = ''
+    
+    diff.forEach(part => {
+      if (part.added) {
+        result += `<ins class="diff-added">${part.value}</ins>`
+      } else if (part.removed) {
+        result += `<del class="diff-removed">${part.value}</del>`
+      } else {
+        result += part.value
+      }
+    })
+    
+    return result
+  }
+
   // AI Actions
-  async function handleAIAction(action) {
+  async function callAI(action, customPrompt = null) {
     setAiLoading(true)
+    
+    // Determine what text to process
+    const textToProcess = selectedText || content
+    const isPartialEdit = !!selectedText
+    
+    // Add user message to chat
+    const userMessage = customPrompt || `${action} the ${isPartialEdit ? 'selected text' : 'content'}`
+    setChatMessages(prev => [...prev, { 
+      id: Date.now(), 
+      role: 'user', 
+      content: userMessage 
+    }])
+
     try {
-      const textToProcess = selectedText || content
       const response = await fetch('/api/gemini', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action,
+          action: customPrompt ? 'custom' : action,
           text: textToProcess,
-          customPrompt: action === 'custom' ? aiPrompt : null
+          customPrompt: customPrompt,
+          title: title
         })
       })
       
-      if (!response.ok) throw new Error('AI request failed')
+      if (!response.ok) {
+        const error = await response.json()
+        throw new Error(error.details || error.error || 'AI request failed')
+      }
       
       const data = await response.json()
+      
       if (data.result) {
-        if (selectedText) {
-          setContent(prev => prev.replace(selectedText, data.result))
+        // Calculate full modified content
+        let fullModified = content
+        if (isPartialEdit && selectionRange) {
+          fullModified = content.slice(0, selectionRange.start) + 
+                        data.result + 
+                        content.slice(selectionRange.end)
         } else {
-          setContent(data.result)
+          fullModified = data.result
         }
-        showToast('AI applied!', 'success')
+        
+        // Set pending changes for review
+        setPendingChanges({
+          original: textToProcess,
+          modified: data.result,
+          fullOriginal: content,
+          fullModified: fullModified,
+          isPartialEdit
+        })
+        
+        // Add AI message
+        setChatMessages(prev => [...prev, { 
+          id: Date.now(), 
+          role: 'ai', 
+          content: 'I\'ve made some changes. Please review the diff in the editor and accept or reject.'
+        }])
       }
     } catch (error) {
+      console.error('AI Error:', error)
+      setChatMessages(prev => [...prev, { 
+        id: Date.now(), 
+        role: 'ai', 
+        content: `Error: ${error.message}`,
+        isError: true
+      }])
       showToast('AI error: ' + error.message, 'error')
     } finally {
       setAiLoading(false)
     }
+  }
+
+  function handleQuickAction(action) {
+    callAI(action)
+  }
+
+  function handleSendChat() {
+    if (!chatInput.trim()) return
+    callAI('custom', chatInput.trim())
+    setChatInput('')
+  }
+
+  function handleAcceptChanges() {
+    if (pendingChanges) {
+      setContent(pendingChanges.fullModified)
+      setPendingChanges(null)
+      showToast('Changes applied!', 'success')
+      setChatMessages(prev => [...prev, { 
+        id: Date.now(), 
+        role: 'system', 
+        content: '✅ Changes accepted and applied.'
+      }])
+    }
+  }
+
+  function handleRejectChanges() {
+    setPendingChanges(null)
+    showToast('Changes discarded', 'info')
+    setChatMessages(prev => [...prev, { 
+      id: Date.now(), 
+      role: 'system', 
+      content: '❌ Changes rejected.'
+    }])
   }
 
   if (loading) {
@@ -238,6 +376,11 @@ export default function BlogEditor() {
       </div>
     )
   }
+
+  // Show diff content when pending changes
+  const displayContent = pendingChanges 
+    ? generateDiffContent(pendingChanges.original, pendingChanges.modified)
+    : null
 
   return (
     <div className="blog-editor-container" data-color-mode="dark">
@@ -343,38 +486,256 @@ export default function BlogEditor() {
           display: flex;
           flex-direction: column;
           overflow: hidden;
+          position: relative;
+        }
+
+        /* Diff Overlay */
+        .diff-overlay {
+          position: absolute;
+          inset: 0;
+          background: rgba(0, 0, 0, 0.95);
+          z-index: 10;
+          padding: 1.5rem;
+          overflow-y: auto;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 14px;
+          line-height: 1.8;
+          color: rgba(255, 255, 255, 0.9);
+          white-space: pre-wrap;
+        }
+
+        .diff-overlay .diff-added {
+          background: rgba(57, 255, 20, 0.25);
+          color: #39ff14;
+          text-decoration: none;
+          padding: 0 2px;
+          border-radius: 2px;
+        }
+
+        .diff-overlay .diff-removed {
+          background: rgba(255, 107, 107, 0.25);
+          color: #ff6b6b;
+          text-decoration: line-through;
+          padding: 0 2px;
+          border-radius: 2px;
+        }
+
+        .diff-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 1rem;
+          padding-bottom: 1rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .diff-title {
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.7rem;
+          color: #00d4ff;
         }
 
         /* Right AI Panel */
         .right-panel {
-          width: ${rightPanelCollapsed ? '50px' : '320px'};
+          width: 350px;
           background: rgba(0, 0, 0, 0.3);
           border-left: 1px solid rgba(255, 255, 255, 0.1);
           display: flex;
           flex-direction: column;
-          transition: width 0.3s ease;
           overflow: hidden;
           flex-shrink: 0;
         }
 
-        .panel-toggle {
-          padding: 0.75rem;
-          text-align: center;
-          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-          cursor: pointer;
-          color: #39ff14;
-          font-size: 1.2rem;
-        }
-
-        .panel-toggle:hover {
-          background: rgba(57, 255, 20, 0.1);
-        }
-
-        .panel-content {
+        .ai-header {
           padding: 1rem;
-          overflow-y: auto;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.7rem;
+          color: #39ff14;
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+          padding: 0.75rem 1rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+        }
+
+        .quick-actions.hidden {
+          display: none;
+        }
+
+        .quick-btn {
+          padding: 0.4rem 0.75rem;
+          background: rgba(57, 255, 20, 0.1);
+          border: 1px solid rgba(57, 255, 20, 0.3);
+          border-radius: 4px;
+          color: #39ff14;
+          font-size: 0.7rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .quick-btn:hover:not(:disabled) {
+          background: rgba(57, 255, 20, 0.2);
+          border-color: #39ff14;
+        }
+
+        .quick-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .selection-hint {
+          font-size: 0.65rem;
+          color: rgba(255, 255, 255, 0.4);
+          text-align: center;
+          padding: 0.5rem;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Chat Messages */
+        .chat-messages {
           flex: 1;
-          display: ${rightPanelCollapsed ? 'none' : 'block'};
+          overflow-y: auto;
+          padding: 1rem;
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+
+        .chat-message {
+          padding: 0.75rem 1rem;
+          border-radius: 8px;
+          font-size: 0.85rem;
+          line-height: 1.5;
+          max-width: 90%;
+        }
+
+        .chat-message.user {
+          background: rgba(0, 212, 255, 0.15);
+          border: 1px solid rgba(0, 212, 255, 0.3);
+          color: #00d4ff;
+          align-self: flex-end;
+        }
+
+        .chat-message.ai {
+          background: rgba(57, 255, 20, 0.1);
+          border: 1px solid rgba(57, 255, 20, 0.2);
+          color: rgba(255, 255, 255, 0.9);
+          align-self: flex-start;
+        }
+
+        .chat-message.ai.error {
+          background: rgba(255, 107, 107, 0.1);
+          border-color: rgba(255, 107, 107, 0.3);
+          color: #ff6b6b;
+        }
+
+        .chat-message.system {
+          background: rgba(255, 255, 255, 0.05);
+          color: rgba(255, 255, 255, 0.6);
+          font-size: 0.75rem;
+          align-self: center;
+          text-align: center;
+        }
+
+        /* Accept/Reject Bar */
+        .accept-reject-bar {
+          padding: 0.75rem 1rem;
+          background: rgba(57, 255, 20, 0.1);
+          border-top: 1px solid rgba(57, 255, 20, 0.3);
+          border-bottom: 1px solid rgba(57, 255, 20, 0.3);
+          display: flex;
+          gap: 0.75rem;
+          justify-content: center;
+        }
+
+        .accept-btn {
+          padding: 0.5rem 1.5rem;
+          background: rgba(57, 255, 20, 0.2);
+          border: 1px solid #39ff14;
+          border-radius: 4px;
+          color: #39ff14;
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.6rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .accept-btn:hover {
+          background: rgba(57, 255, 20, 0.4);
+        }
+
+        .reject-btn {
+          padding: 0.5rem 1.5rem;
+          background: rgba(255, 107, 107, 0.1);
+          border: 1px solid rgba(255, 107, 107, 0.5);
+          border-radius: 4px;
+          color: #ff6b6b;
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.6rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .reject-btn:hover {
+          background: rgba(255, 107, 107, 0.2);
+        }
+
+        /* Chat Input */
+        .chat-input-area {
+          padding: 1rem;
+          border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-input-wrapper {
+          display: flex;
+          gap: 0.5rem;
+        }
+
+        .chat-input {
+          flex: 1;
+          padding: 0.75rem 1rem;
+          background: rgba(0, 0, 0, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          border-radius: 4px;
+          color: white;
+          font-size: 0.85rem;
+          font-family: 'JetBrains Mono', monospace;
+        }
+
+        .chat-input:focus {
+          outline: none;
+          border-color: #39ff14;
+        }
+
+        .chat-input::placeholder {
+          color: rgba(255, 255, 255, 0.3);
+        }
+
+        .send-btn {
+          padding: 0.75rem 1rem;
+          background: rgba(57, 255, 20, 0.2);
+          border: 1px solid #39ff14;
+          border-radius: 4px;
+          color: #39ff14;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+
+        .send-btn:hover:not(:disabled) {
+          background: rgba(57, 255, 20, 0.4);
+        }
+
+        .send-btn:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
         }
 
         /* Form Elements */
@@ -429,7 +790,6 @@ export default function BlogEditor() {
           accent-color: #39ff14;
         }
 
-        /* Reading Time */
         .reading-time-display {
           display: flex;
           align-items: center;
@@ -452,76 +812,6 @@ export default function BlogEditor() {
           width: 60px;
           padding: 0.4rem;
           text-align: center;
-        }
-
-        /* AI Panel Styling */
-        .ai-title {
-          font-family: 'Press Start 2P', cursive;
-          font-size: 0.7rem;
-          color: #39ff14;
-          margin-bottom: 1rem;
-          display: flex;
-          align-items: center;
-          gap: 0.5rem;
-        }
-
-        .ai-actions {
-          display: flex;
-          flex-direction: column;
-          gap: 0.5rem;
-          margin-bottom: 1rem;
-        }
-
-        .ai-btn {
-          padding: 0.6rem 1rem;
-          background: rgba(57, 255, 20, 0.1);
-          border: 1px solid rgba(57, 255, 20, 0.3);
-          border-radius: 4px;
-          color: #39ff14;
-          font-size: 0.8rem;
-          cursor: pointer;
-          transition: all 0.2s;
-          text-align: left;
-        }
-
-        .ai-btn:hover:not(:disabled) {
-          background: rgba(57, 255, 20, 0.2);
-          border-color: #39ff14;
-        }
-
-        .ai-btn:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        .ai-custom-prompt {
-          margin-top: 1rem;
-          padding-top: 1rem;
-          border-top: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .ai-textarea {
-          width: 100%;
-          min-height: 80px;
-          padding: 0.75rem;
-          background: rgba(0, 0, 0, 0.4);
-          border: 1px solid rgba(57, 255, 20, 0.2);
-          border-radius: 4px;
-          color: white;
-          font-size: 0.85rem;
-          resize: vertical;
-          margin-bottom: 0.5rem;
-        }
-
-        .ai-textarea:focus {
-          outline: none;
-          border-color: #39ff14;
-        }
-
-        .ai-hint {
-          font-size: 0.7rem;
-          color: rgba(255, 255, 255, 0.5);
-          margin-bottom: 0.75rem;
         }
 
         /* MD Editor Overrides */
@@ -576,28 +866,12 @@ export default function BlogEditor() {
           background: rgba(0, 0, 0, 0.5) !important;
         }
 
-        /* Responsive */
         @media (max-width: 1024px) {
           .left-sidebar {
             width: ${leftSidebarCollapsed ? '50px' : '220px'};
           }
           .right-panel {
-            width: ${rightPanelCollapsed ? '50px' : '260px'};
-          }
-        }
-
-        @media (max-width: 768px) {
-          .left-sidebar, .right-panel {
-            position: absolute;
-            z-index: 50;
-            height: calc(100vh - 60px);
-            top: 60px;
-          }
-          .left-sidebar {
-            left: 0;
-          }
-          .right-panel {
-            right: 0;
+            width: 300px;
           }
         }
       `}</style>
@@ -786,7 +1060,20 @@ export default function BlogEditor() {
             </PixelButton>
           </div>
           
-          <div className="md-editor-wrapper">
+          <div className="md-editor-wrapper" ref={editorRef}>
+            {/* Diff Overlay when pending changes */}
+            {pendingChanges && displayContent && (
+              <div className="diff-overlay">
+                <div className="diff-header">
+                  <span className="diff-title">📝 REVIEW CHANGES</span>
+                  <span style={{ fontSize: '0.75rem', color: 'rgba(255,255,255,0.5)' }}>
+                    {pendingChanges.isPartialEdit ? 'Selected text' : 'Full content'}
+                  </span>
+                </div>
+                <div dangerouslySetInnerHTML={{ __html: displayContent }} />
+              </div>
+            )}
+            
             <MDEditor
               value={content}
               onChange={(val) => setContent(val || '')}
@@ -794,86 +1081,110 @@ export default function BlogEditor() {
               preview="live"
               hideToolbar={false}
               visibleDragbar={false}
-              onTextSelected={(text) => setSelectedText(text)}
             />
           </div>
         </main>
 
         {/* Right Panel - AI Assistant */}
         <aside className="right-panel">
-          <div 
-            className="panel-toggle"
-            onClick={() => setRightPanelCollapsed(!rightPanelCollapsed)}
-            title={rightPanelCollapsed ? 'Expand AI' : 'Collapse AI'}
-          >
-            {rightPanelCollapsed ? '🤖' : '▶'}
+          <div className="ai-header">
+            🤖 AI_ASSISTANT
           </div>
           
-          <div className="panel-content">
-            <h3 className="ai-title">🤖 AI Assistant</h3>
-            
-            <p className="ai-hint">
-              {selectedText 
-                ? `Selected: "${selectedText.substring(0, 30)}..."` 
-                : 'Select text to apply AI, or use on full content'}
-            </p>
+          {/* Quick Actions - Only show when text is selected */}
+          <div className={`quick-actions ${selectedText ? '' : 'hidden'}`}>
+            <button 
+              className="quick-btn" 
+              onClick={() => handleQuickAction('improve')}
+              disabled={aiLoading}
+            >
+              ✨ Improve
+            </button>
+            <button 
+              className="quick-btn" 
+              onClick={() => handleQuickAction('expand')}
+              disabled={aiLoading}
+            >
+              📝 Expand
+            </button>
+            <button 
+              className="quick-btn" 
+              onClick={() => handleQuickAction('summarize')}
+              disabled={aiLoading}
+            >
+              📋 Summarize
+            </button>
+            <button 
+              className="quick-btn" 
+              onClick={() => handleQuickAction('grammar')}
+              disabled={aiLoading}
+            >
+              🔤 Fix Grammar
+            </button>
+          </div>
 
-            <div className="ai-actions">
-              <button 
-                className="ai-btn" 
-                onClick={() => handleAIAction('improve')}
-                disabled={aiLoading || !content}
+          {/* Selection hint */}
+          {!selectedText && (
+            <div className="selection-hint">
+              Select text in editor for quick actions
+            </div>
+          )}
+
+          {/* Chat Messages */}
+          <div className="chat-messages">
+            {chatMessages.length === 0 && (
+              <div style={{ 
+                color: 'rgba(255,255,255,0.4)', 
+                textAlign: 'center', 
+                marginTop: '2rem',
+                fontSize: '0.85rem'
+              }}>
+                Start a conversation with the AI assistant.<br/>
+                Select text for quick actions, or type below.
+              </div>
+            )}
+            {chatMessages.map(msg => (
+              <div 
+                key={msg.id} 
+                className={`chat-message ${msg.role} ${msg.isError ? 'error' : ''}`}
               >
-                ✨ Improve Writing
+                {msg.content}
+              </div>
+            ))}
+            <div ref={chatEndRef} />
+          </div>
+
+          {/* Accept/Reject Bar - Only show when pending changes */}
+          {pendingChanges && (
+            <div className="accept-reject-bar">
+              <button className="accept-btn" onClick={handleAcceptChanges}>
+                ✓ ACCEPT
               </button>
-              <button 
-                className="ai-btn" 
-                onClick={() => handleAIAction('expand')}
-                disabled={aiLoading || !content}
-              >
-                📝 Expand Content
-              </button>
-              <button 
-                className="ai-btn" 
-                onClick={() => handleAIAction('summarize')}
-                disabled={aiLoading || !content}
-              >
-                📋 Summarize
-              </button>
-              <button 
-                className="ai-btn" 
-                onClick={() => handleAIAction('generate')}
-                disabled={aiLoading}
-              >
-                💡 Generate from Title
-              </button>
-              <button 
-                className="ai-btn" 
-                onClick={() => handleAIAction('grammar')}
-                disabled={aiLoading || !content}
-              >
-                🔤 Fix Grammar
+              <button className="reject-btn" onClick={handleRejectChanges}>
+                ✕ REJECT
               </button>
             </div>
+          )}
 
-            <div className="ai-custom-prompt">
-              <label className="form-label">Custom Prompt</label>
-              <textarea
-                className="ai-textarea"
-                placeholder="Enter custom instructions for AI..."
-                value={aiPrompt}
-                onChange={(e) => setAiPrompt(e.target.value)}
+          {/* Chat Input */}
+          <div className="chat-input-area">
+            <div className="chat-input-wrapper">
+              <input
+                type="text"
+                className="chat-input"
+                placeholder="Ask AI anything..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSendChat()}
+                disabled={aiLoading}
               />
-              <PixelButton 
-                variant="filled" 
-                color="matrix" 
-                size="small"
-                onClick={() => handleAIAction('custom')}
-                disabled={aiLoading || !aiPrompt}
-                style={{ width: '100%' }}
+              <button 
+                className="send-btn" 
+                onClick={handleSendChat}
+                disabled={aiLoading || !chatInput.trim()}
               >
-                {aiLoading ? '⏳ Processing...' : '🚀 Run Custom'}
-              </PixelButton>
+                {aiLoading ? '⏳' : '➤'}
+              </button>
             </div>
           </div>
         </aside>

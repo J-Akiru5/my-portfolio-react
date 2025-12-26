@@ -22,6 +22,7 @@
     "@tiptap/react": "^3.14.0",
     "@tiptap/starter-kit": "^3.14.0",
     "@uiw/react-md-editor": "^4.0.11",
+    "diff": "^8.0.2",
     "firebase": "^12.2.1",
     "gsap": "^3.14.2",
     "lowlight": "^3.3.0",
