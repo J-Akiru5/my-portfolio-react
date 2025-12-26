@@ -196,6 +196,10 @@ export default function BlogPost() {
           color: rgba(255, 255, 255, 0.9);
           font-size: 1.1rem;
           line-height: 1.9;
+          background: rgba(10, 10, 18, 0.95);
+          padding: 2rem;
+          border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.05);
         }
         
         .post-content h1,
