@@ -5,6 +5,9 @@ import { PixelButton } from '../ui'
 
 gsap.registerPlugin(ScrollTrigger)
 
+// Taglines for typing animation
+const TAGLINES = ['AI-Powered Developer', 'Vibecoder', 'Creative Director']
+
 /**
  * HeroSection - Pinned hero with profile picture
  * 
@@ -78,6 +81,16 @@ export default function HeroSection() {
       element.scrollIntoView({ behavior: 'smooth' })
     }
   }
+
+  // Typing animation for tagline
+  const [taglineIndex, setTaglineIndex] = React.useState(0)
+  
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTaglineIndex(prev => (prev + 1) % TAGLINES.length)
+    }, 3000)
+    return () => clearInterval(interval)
+  }, [])
 
   return (
     <section id="hero" ref={sectionRef} className="hero-section">
@@ -162,6 +175,21 @@ export default function HeroSection() {
           -webkit-text-fill-color: transparent;
           background-clip: text;
           display: block;
+          transition: all 0.3s ease;
+          cursor: default;
+        }
+        
+        .hero-title:hover .name-green {
+          animation: glitch 0.3s ease;
+        }
+        
+        @keyframes glitch {
+          0% { transform: translate(0); }
+          20% { transform: translate(-2px, 2px); }
+          40% { transform: translate(-2px, -2px); }
+          60% { transform: translate(2px, 2px); }
+          80% { transform: translate(2px, -2px); }
+          100% { transform: translate(0); }
         }
         
         .hero-line {
@@ -183,6 +211,38 @@ export default function HeroSection() {
           font-size: 1rem;
           color: #39ff14;
           margin-bottom: 2rem;
+          min-height: 1.5em;
+        }
+        
+        .typing-text {
+          display: inline-block;
+          animation: fadeInUp 0.5s ease;
+        }
+        
+        .typing-cursor {
+          display: inline-block;
+          width: 2px;
+          height: 1em;
+          background: #39ff14;
+          margin-left: 4px;
+          animation: blink 1s step-end infinite;
+          vertical-align: text-bottom;
+        }
+        
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes blink {
+          0%, 50% { opacity: 1; }
+          51%, 100% { opacity: 0; }
         }
         
         .hero-buttons {
@@ -210,6 +270,43 @@ export default function HeroSection() {
             justify-content: center;
           }
         }
+        
+        .scroll-indicator {
+          position: absolute;
+          bottom: 2rem;
+          left: 50%;
+          transform: translateX(-50%);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.5rem;
+          cursor: pointer;
+          animation: bounce 2s ease-in-out infinite;
+        }
+        
+        .scroll-indicator-text {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.7rem;
+          color: rgba(255, 255, 255, 0.4);
+          letter-spacing: 2px;
+        }
+        
+        .scroll-indicator-arrow {
+          font-size: 1.5rem;
+          color: #00d4ff;
+        }
+        
+        @keyframes bounce {
+          0%, 20%, 50%, 80%, 100% {
+            transform: translateX(-50%) translateY(0);
+          }
+          40% {
+            transform: translateX(-50%) translateY(-10px);
+          }
+          60% {
+            transform: translateX(-50%) translateY(-5px);
+          }
+        }
       `}</style>
       
       <div ref={contentRef} className="hero-content">
@@ -228,7 +325,10 @@ export default function HeroSection() {
           <div className="hero-line" />
           
           <p className="hero-tagline">AI-Powered Developer</p>
-          <p className="hero-subtitle">Vibecoder • Creative Director</p>
+          <p className="hero-subtitle">
+            <span className="typing-text" key={taglineIndex}>{TAGLINES[taglineIndex]}</span>
+            <span className="typing-cursor" />
+          </p>
           
           <div className="hero-buttons">
             <PixelButton variant="outline" color="electric" onClick={() => scrollToSection('projects')}>
@@ -239,6 +339,11 @@ export default function HeroSection() {
             </PixelButton>
           </div>
         </div>
+      </div>
+      
+      <div className="scroll-indicator" onClick={() => scrollToSection('about')}>
+        <span className="scroll-indicator-text">SCROLL</span>
+        <span className="scroll-indicator-arrow">▼</span>
       </div>
     </section>
   )

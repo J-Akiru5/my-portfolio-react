@@ -67,6 +67,7 @@ const PixelButton = ({
           e.currentTarget.style.color = '#0a0a12';
         }
         e.currentTarget.style.boxShadow = `0 0 20px ${colors.hover}`;
+        e.currentTarget.style.transform = 'translateY(-2px) scale(1.02)';
       }}
       onMouseLeave={(e) => {
         if (variant === 'outline') {
@@ -74,6 +75,7 @@ const PixelButton = ({
           e.currentTarget.style.color = colors.border;
         }
         e.currentTarget.style.boxShadow = 'none';
+        e.currentTarget.style.transform = 'translateY(0) scale(1)';
       }}
       {...props}
     >

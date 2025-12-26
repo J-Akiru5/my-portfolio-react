@@ -31,6 +31,9 @@ export default function App() {
     <HelmetProvider>
       <AuthProvider>
         <div className="app-wrapper pixel-grid" style={{ minHeight: '100vh', position: 'relative' }}>
+          {/* Skip to content link for keyboard users */}
+          <a href="#main-content" className="skip-link">Skip to main content</a>
+          
           {/* Background effects */}
           <FloatingStars count={80} />
           
@@ -38,7 +41,7 @@ export default function App() {
           <NavBar />
           
           {/* Main content */}
-          <main style={{ paddingTop: '60px', position: 'relative', zIndex: 1 }}>
+          <main id="main-content" style={{ paddingTop: '60px', position: 'relative', zIndex: 1 }}>
             <Routes>
               {/* One-Page Catalogue */}
               <Route path="/" element={<SinglePage />} />

@@ -10,11 +10,17 @@ const NavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
+  const [scrollProgress, setScrollProgress] = useState(0);
   const location = useLocation();
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
+      
+      // Calculate scroll progress
+      const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const progress = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
+      setScrollProgress(progress);
       
       // Detect active section based on scroll position
       const sections = ['hero', 'about', 'projects', 'certificates', 'contact'];
@@ -132,27 +138,35 @@ const NavBar = () => {
           color: #00d4ff;
         }
         
+        .nav-link::after {
+          content: '';
+          position: absolute;
+          bottom: 0;
+          left: 50%;
+          width: 0;
+          height: 2px;
+          background: #00d4ff;
+          transition: all 0.3s ease;
+          transform: translateX(-50%);
+        }
+        
+        .nav-link:hover::after {
+          width: 100%;
+        }
+        
         .nav-link.active {
           color: #00d4ff;
         }
         
         .nav-link.active::after {
-          content: '';
-          position: absolute;
-          bottom: 0;
-          left: 0;
           width: 100%;
-          height: 2px;
-          background: #00d4ff;
         }
         
-        /* Gradient line at top */
-        .navbar::before {
-          content: '';
+        /* Scroll progress bar */
+        .scroll-progress {
           position: absolute;
           top: 0;
           left: 0;
-          right: 0;
           height: 2px;
           background: linear-gradient(90deg, 
             #ff6b35, 
@@ -160,6 +174,19 @@ const NavBar = () => {
             #00d4ff, 
             #39ff14
           );
+          transition: width 0.1s ease-out;
+          z-index: 10;
+        }
+        
+        /* Gradient line at top (bg track) */
+        .navbar::before {
+          content: '';
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          height: 2px;
+          background: rgba(255, 255, 255, 0.1);
         }
         
         /* Mobile menu button */
@@ -193,7 +220,6 @@ const NavBar = () => {
           transform: rotate(-45deg) translate(5px, -5px);
         }
         
-        /* Mobile styles */
         @media (max-width: 768px) {
           .mobile-menu-btn {
             display: flex;
@@ -204,17 +230,38 @@ const NavBar = () => {
             top: 60px;
             left: 0;
             right: 0;
+            bottom: 0;
             background: rgba(10, 10, 18, 0.98);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             flex-direction: column;
             padding: 2rem;
             gap: 1.5rem;
             transform: translateX(100%);
-            transition: transform 0.3s ease;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
           }
           
           .navbar-nav.open {
             transform: translateX(0);
           }
+          
+          .navbar-nav li {
+            opacity: 0;
+            transform: translateX(20px);
+            transition: all 0.3s ease;
+          }
+          
+          .navbar-nav.open li {
+            opacity: 1;
+            transform: translateX(0);
+          }
+          
+          .navbar-nav.open li:nth-child(1) { transition-delay: 0.1s; }
+          .navbar-nav.open li:nth-child(2) { transition-delay: 0.15s; }
+          .navbar-nav.open li:nth-child(3) { transition-delay: 0.2s; }
+          .navbar-nav.open li:nth-child(4) { transition-delay: 0.25s; }
+          .navbar-nav.open li:nth-child(5) { transition-delay: 0.3s; }
+          .navbar-nav.open li:nth-child(6) { transition-delay: 0.35s; }
         }
         
         @keyframes pulse-glow {
@@ -224,6 +271,7 @@ const NavBar = () => {
       `}</style>
       
       <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
+        <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
         <Link to="/" className="navbar-brand">
           <span className="star">★</span>
           <span>JEFF</span>

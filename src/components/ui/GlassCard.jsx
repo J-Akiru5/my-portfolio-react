@@ -24,13 +24,15 @@ const GlassCard = ({
       onMouseEnter={(e) => {
         if (hoverEffect) {
           e.currentTarget.style.transform = 'translateY(-4px)';
-          e.currentTarget.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.3)';
+          e.currentTarget.style.boxShadow = '0 10px 40px rgba(0, 0, 0, 0.4), 0 0 30px rgba(0, 212, 255, 0.15)';
+          e.currentTarget.style.borderColor = 'rgba(0, 212, 255, 0.4)';
         }
       }}
       onMouseLeave={(e) => {
         if (hoverEffect) {
           e.currentTarget.style.transform = 'translateY(0)';
           e.currentTarget.style.boxShadow = 'none';
+          e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.1)';
         }
       }}
       {...props}
