@@ -417,7 +417,7 @@ export default function AboutSection() {
           </GlassCard>
           
           {/* HOBBIES - Holo-Projector */}
-          <GlassCard className="about-card card-span-6 holo-container">
+          <GlassCard className="about-card card-span-12 holo-container">
             <h3 className="card-header">🎮 HOBBIES & INTERESTS</h3>
             
             <div className="holo-layout">
