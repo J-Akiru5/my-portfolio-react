@@ -12,8 +12,13 @@ import { db } from '../../firebase'
 import { useAuth } from '../../context/AuthContext'
 import { SectionTitle, GlassCard, PixelButton, ImageUpload } from '../../components/ui'
 import { uploadImage } from '../../services/uploadService'
+import TurndownService from 'turndown'
 
 const lowlight = createLowlight(common)
+const turndownService = new TurndownService({
+  headingStyle: 'atx',
+  codeBlockStyle: 'fenced'
+})
 
 /**
  * BlogEditor - Tiptap-based post editor
@@ -110,7 +115,7 @@ export default function BlogEditor() {
       title,
       slug,
       excerpt,
-      content: editor.getHTML(),
+      content: turndownService.turndown(editor.getHTML()),
       coverImage,
       tags: tags.split(',').map(t => t.trim()).filter(Boolean),
       isPublished: publishState,

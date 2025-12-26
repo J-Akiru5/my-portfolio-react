@@ -3,6 +3,8 @@ import { useParams, Link } from 'react-router-dom'
 import { collection, query, where, getDocs, doc, updateDoc, increment } from 'firebase/firestore'
 import { db } from '../firebase'
 import { Helmet } from 'react-helmet-async'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import SupportMe from '../components/blog/SupportMe'
 
 /**
@@ -348,11 +350,12 @@ export default function BlogPost() {
         )}
       </header>
 
-      {/* Article Content - Rendered as HTML from Tiptap editor */}
-      <div 
-        className="post-content"
-        dangerouslySetInnerHTML={{ __html: post.content }}
-      />
+      {/* Article Content - Rendered as Markdown */}
+      <div className="post-content">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {post.content}
+        </ReactMarkdown>
+      </div>
 
       {/* Affiliate Banner (if has affiliate URL) */}
       {post.affiliateUrl && (
