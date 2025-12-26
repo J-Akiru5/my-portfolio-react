@@ -49,7 +49,7 @@ export default function HeroSection() {
       })
 
       // Text reveal animation on load
-      // Text reveal animation on load
+      /*
       gsap.from([firstNameRef.current, lastNameRef.current], {
         autoAlpha: 0,
         y: 50,
@@ -58,6 +58,7 @@ export default function HeroSection() {
         ease: 'power3.out',
         delay: 0.3,
       })
+      */
 
       gsap.from('.hero-subtitle', {
         opacity: 0,
@@ -326,7 +327,7 @@ export default function HeroSection() {
           
           <div className="hero-line" />
           
-          <p className="hero-tagline">AI-Powered Developer</p>
+          {/* <p className="hero-tagline">AI-Powered Developer</p> */}
           <p className="hero-subtitle">
             <span className="typing-text" key={taglineIndex}>{TAGLINES[taglineIndex]}</span>
             <span className="typing-cursor" />
