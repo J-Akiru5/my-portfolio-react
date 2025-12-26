@@ -163,7 +163,14 @@ export default function ContactSection() {
       setFormData({ name: '', email: '', message: '' })
     } catch (error) {
       console.error('Error sending message:', error)
-      setSubmitStatus('❌ Failed to send. Please try again.')
+      // Provide more specific error messages
+      if (error.code === 'permission-denied') {
+        setSubmitStatus('❌ Unable to send. Please try again later.')
+      } else if (error.code === 'unavailable' || !navigator.onLine) {
+        setSubmitStatus('❌ No internet connection. Please check your network.')
+      } else {
+        setSubmitStatus('❌ Failed to send. Please try again or email directly.')
+      }
     } finally {
       setIsSubmitting(false)
       setTimeout(() => setSubmitStatus(''), 5000)

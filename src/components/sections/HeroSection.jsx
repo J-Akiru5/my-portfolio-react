@@ -115,6 +115,12 @@ export default function HeroSection() {
           gap: 4rem;
           max-width: 1200px;
           width: 100%;
+          opacity: 1;
+          visibility: visible;
+        }
+        
+        .hero-subtitle, .hero-buttons {
+          opacity: 1;
         }
         
         .hero-avatar-wrapper {
