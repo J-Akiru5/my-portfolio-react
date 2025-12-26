@@ -70,8 +70,9 @@ export default async function handler(req, res) {
       ContentType: contentType || 'image/png',
     }));
 
-    // Return the public URL (you'll need to set up public access or use a custom domain)
-    const publicUrl = `https://pub-${accountId}.r2.dev/${uniqueFilename}`;
+    // Return the public URL using the enabled r2.dev subdomain
+    const publicBaseUrl = process.env.R2_PUBLIC_URL || 'https://pub-d733b3f300ab42658923aa0f7ed6bac3.r2.dev';
+    const publicUrl = `${publicBaseUrl}/${uniqueFilename}`;
 
     return res.status(200).json({
       success: true,
