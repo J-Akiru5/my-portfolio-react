@@ -87,6 +87,7 @@ const NavBar = () => {
           justify-content: space-between;
           align-items: center;
           transition: all 0.3s ease;
+          overflow: visible;
         }
         
         .navbar.scrolled {
