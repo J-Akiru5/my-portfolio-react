@@ -81,6 +81,7 @@ export default function AboutSection() {
   ]
 
   const [activeHobby, setActiveHobby] = useState(null)
+  // Holo-Projector Experimental Refinement
   const monitorRef = useRef(null)
   const monitorContentRef = useRef(null)
   const timeoutRef = useRef(null)
