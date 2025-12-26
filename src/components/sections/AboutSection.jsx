@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SectionTitle, GlassCard, SkillCard } from '../ui'
@@ -80,7 +80,29 @@ export default function AboutSection() {
     { name: 'ChatGPT', icon: '🤖' },
   ]
 
-  const hobbies = ['UI Design 🖌️', 'Music Production 🎵', 'Web Development 💻', 'AI Agents 🤖', 'Animation 🎬', 'Graphic Design ✨', 'Prototyping 📐', 'Gaming 🎮', 'Filmmaking 🎥', 'Cinematography 📷']
+  const [activeHobby, setActiveHobby] = useState(null)
+  const monitorRef = useRef(null)
+  const monitorContentRef = useRef(null)
+
+  const hobbies = [
+    { id: 'ui', label: 'UI Design', icon: '🎨', color: '#F472B6', desc: 'Designing intuitive interfaces with pixel-perfect precision.' },
+    { id: 'music', label: 'Music Production', icon: '🎵', color: '#A78BFA', desc: 'Composing electronic beats and soundscapes.' },
+    { id: 'film', label: 'Filmmaking', icon: '🎬', color: '#34D399', desc: 'Directing visual stories and cinematic experiences.' },
+    { id: 'ai', label: 'AI Agents', icon: '🤖', color: '#60A5FA', desc: 'Building intelligent autonomous systems.' },
+    { id: 'gaming', label: 'Gaming', icon: '🎮', color: '#F59E0B', desc: 'Interactive entertainment and game mechanics.' },
+    { id: 'animation', label: 'Animation', icon: '🎞️', color: '#EF4444', desc: 'Motion graphics and 2D/3D storytelling.' },
+    { id: 'photo', label: 'Cinematography', icon: '📷', color: '#06B6D4', desc: 'Visual composition and lighting design.' },
+  ]
+
+  // Holo-Monitor Animation
+  useEffect(() => {
+    if (activeHobby && monitorContentRef.current) {
+      gsap.fromTo(monitorContentRef.current,
+        { opacity: 0, scale: 0.95, filter: 'blur(5px)' },
+        { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.4, ease: 'power2.out' }
+      )
+    }
+  }, [activeHobby])
 
   return (
     <section id="about" ref={sectionRef} className="about-section">
@@ -204,19 +226,137 @@ export default function AboutSection() {
           font-size: 1.5rem;
         }
         
-        .hobbies-list {
+        /* Holo-Projector Styles */
+        .holo-container {
+          min-height: 400px;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .holo-layout {
+          display: flex;
+          flex-direction: column;
+          gap: 2rem;
+          margin-top: 1rem;
+        }
+
+        @media (min-width: 768px) {
+          .holo-layout {
+            flex-direction: row;
+            align-items: flex-start;
+          }
+        }
+
+        .control-panel {
+          flex: 1;
           display: flex;
           flex-wrap: wrap;
           gap: 0.75rem;
+          align-content: flex-start;
         }
-        
-        .hobby-tag {
-          padding: 0.5rem 1rem;
-          background: rgba(157, 78, 221, 0.15);
-          border: 1px solid rgba(157, 78, 221, 0.3);
-          border-radius: 20px;
-          font-size: 0.85rem;
-          color: #9d4edd;
+
+        .data-cartridge {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.6rem 1rem;
+          background: rgba(0, 0, 0, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+          color: rgba(255, 255, 255, 0.6);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.8rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          position: relative;
+          overflow: hidden;
+        }
+
+        .data-cartridge:hover {
+          background: rgba(255, 255, 255, 0.05);
+          color: white;
+          border-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .data-cartridge.active {
+          background: rgba(0, 0, 0, 0.8);
+          border-color: var(--glow-color);
+          box-shadow: 0 0 15px var(--glow-color), inset 0 0 10px rgba(0,0,0,0.5);
+          color: white;
+          text-shadow: 0 0 5px var(--glow-color);
+        }
+
+        .holo-monitor {
+          width: 100%;
+          height: 250px;
+          background: #050508;
+          border: 2px solid rgba(0, 212, 255, 0.2);
+          border-radius: 8px;
+          position: relative;
+          overflow: hidden;
+          box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+
+        @media (min-width: 768px) {
+          .holo-monitor {
+            width: 320px;
+            height: 280px;
+            flex-shrink: 0;
+          }
+        }
+
+        .crt-overlay {
+          position: absolute;
+          inset: 0;
+          background: repeating-linear-gradient(
+            0deg,
+            rgba(0, 0, 0, 0.1),
+            rgba(0, 0, 0, 0.1) 1px,
+            transparent 1px,
+            transparent 2px
+          );
+          pointer-events: none;
+          z-index: 10;
+          box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+
+        .monitor-content {
+          padding: 2rem;
+          text-align: center;
+          position: relative;
+          z-index: 5;
+          width: 100%;
+        }
+
+        .standby-mode {
+          color: rgba(0, 212, 255, 0.4);
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.8rem;
+          line-height: 1.6;
+          animation: pulse-glow 2s infinite;
+        }
+
+        .display-icon {
+          font-size: 4rem;
+          display: block;
+          margin-bottom: 1rem;
+          filter: drop-shadow(0 0 10px rgba(255,255,255,0.3));
+        }
+
+        .display-title {
+          font-family: 'Press Start 2P', cursive;
+          font-size: 1rem;
+          margin-bottom: 0.5rem;
+          line-height: 1.4;
+        }
+
+        .display-desc {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.8rem;
+          color: rgba(255, 255, 255, 0.7);
         }
         
         .skills-bento {
@@ -276,13 +416,48 @@ export default function AboutSection() {
             </div>
           </GlassCard>
           
-          {/* HOBBIES - Half Card */}
-          <GlassCard className="about-card card-span-6">
-            <h3 className="card-header">🎮 HOBBIES</h3>
-            <div className="hobbies-list">
-              {hobbies.map((hobby) => (
-                <span key={hobby} className="hobby-tag">{hobby}</span>
-              ))}
+          {/* HOBBIES - Holo-Projector */}
+          <GlassCard className="about-card card-span-6 holo-container">
+            <h3 className="card-header">🎮 HOBBIES & INTERESTS</h3>
+            
+            <div className="holo-layout">
+              {/* Control Panel */}
+              <div className="control-panel">
+                {hobbies.map((hobby) => (
+                  <button
+                    key={hobby.id}
+                    className={`data-cartridge ${activeHobby?.id === hobby.id ? 'active' : ''}`}
+                    onMouseEnter={() => setActiveHobby(hobby)}
+                    onMouseLeave={() => setActiveHobby(null)}
+                    style={{ '--glow-color': hobby.color }}
+                  >
+                    <span className="cartridge-icon">{hobby.icon}</span>
+                    <span className="cartridge-label">{hobby.label}</span>
+                  </button>
+                ))}
+              </div>
+              
+              {/* Holo Monitor */}
+              <div className="holo-monitor" ref={monitorRef}>
+                <div className="crt-overlay" />
+                <div className="monitor-content" ref={monitorContentRef}>
+                  {!activeHobby ? (
+                    <div className="standby-mode">
+                      [ WAITING_FOR_INPUT ]<br/>
+                      &gt; HOVER_MODULE_TO_PREVIEW<br/>
+                      <span className="typing-cursor">_</span>
+                    </div>
+                  ) : (
+                    <div className="active-display">
+                      <span className="display-icon">{activeHobby.icon}</span>
+                      <h4 className="display-title" style={{ color: activeHobby.color, textShadow: `0 0 10px ${activeHobby.color}` }}>
+                        {activeHobby.label}
+                      </h4>
+                      <p className="display-desc">{activeHobby.desc}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </GlassCard>
         </div>
