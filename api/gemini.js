@@ -23,6 +23,7 @@ export default async function handler(req, res) {
   try {
     const { action, text, customPrompt, title } = req.body;
 
+    // eslint-disable-next-line no-undef
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
       return res.status(500).json({ error: 'Gemini API key not configured' });
@@ -83,7 +84,11 @@ ${text || '(No content provided - generate from scratch based on the instruction
     }
 
     // Use direct REST API endpoint (same as SineAI Hub)
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+    // Using gemini-2.5-flash to match SineAI Hub implementation
+    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+    
+    console.log('Gemini API - Action:', action);
+    console.log('Gemini API - Endpoint:', endpoint.replace(apiKey, '***'));
     
     const response = await fetch(endpoint, {
       method: 'POST',
