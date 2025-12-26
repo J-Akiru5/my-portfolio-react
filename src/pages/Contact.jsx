@@ -16,7 +16,7 @@ const STORAGE_KEY = 'profile_contact_messages_v1'
 const socialLinks = [
   { platform: 'github', href: 'https://github.com/J-Akiru5', label: 'GITHUB' },
   { platform: 'linkedin', href: 'https://www.linkedin.com/in/jeff-edrick-martinez-888575300/', label: 'LINKEDIN' },
-  { platform: 'facebook', href: 'https://www.facebook.com/jef.ferson.m', label: 'FACEBOOK' },
+  { platform: 'facebook', href: 'https://www.facebook.com/martinezjeff26', label: 'FACEBOOK' },
   { platform: 'instagram', href: 'https://www.instagram.com/jef.ferson_m/', label: 'INSTAGRAM' },
   { platform: 'tiktok', href: 'https://www.tiktok.com/@nereus_9', label: 'TIKTOK' },
   { platform: 'discord', href: 'https://discord.com/channels/@me', label: 'DISCORD' },
