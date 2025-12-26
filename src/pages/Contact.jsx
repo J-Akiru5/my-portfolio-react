@@ -19,7 +19,7 @@ const socialLinks = [
   { platform: 'facebook', href: 'https://www.facebook.com/jef.ferson.m', label: 'FACEBOOK' },
   { platform: 'instagram', href: 'https://www.instagram.com/jef.ferson_m/', label: 'INSTAGRAM' },
   { platform: 'tiktok', href: 'https://www.tiktok.com/@nereus_9', label: 'TIKTOK' },
-  { platform: 'discord', href: 'https://discord.com', label: 'DISCORD' },
+  { platform: 'discord', href: 'https://discord.com/channels/@me', label: 'DISCORD' },
 ]
 
 export default function Contact() {

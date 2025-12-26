@@ -87,7 +87,7 @@ export default function ContactSection() {
     { platform: 'Facebook', url: 'https://www.facebook.com/jef.ferson.m', icon: '📘' },
     { platform: 'Instagram', url: 'https://www.instagram.com/jef.ferson_m/', icon: '📷' },
     { platform: 'TikTok', url: 'https://www.tiktok.com/@nereus_9', icon: '🎵' },
-    { platform: 'Discord', url: 'https://discord.com', icon: '🎮' }, // Consider creating a Discord server!
+    { platform: 'Discord', url: 'https://discord.com/channels/@me', icon: '🎮' }, // Consider creating a Discord server!
   ]
 
   return (
