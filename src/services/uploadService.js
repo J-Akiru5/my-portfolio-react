@@ -42,9 +42,19 @@ export async function uploadImage(file) {
     }),
   });
 
+  // Check if response is JSON
+  const contentType = response.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    // Likely running in local dev where /api endpoints don't exist
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      throw new Error('Image upload only works on Vercel deployment. Please deploy first or test on your live site.');
+    }
+    throw new Error('Server returned invalid response. Upload may not be supported.');
+  }
+
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.message || 'Upload failed');
+    throw new Error(error.message || error.error || 'Upload failed');
   }
 
   return response.json();
