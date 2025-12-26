@@ -7,7 +7,7 @@ import { getCertificateImagePath } from '../data/certificateData';
  * 
  * Displays a certificate thumbnail that opens a full-view modal on click.
  */
-const CertCard = ({ id, title, provider, filename, category }) => {
+const CertCard = ({ title, provider, filename, category }) => {
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   const imagePath = getCertificateImagePath(filename);
 
