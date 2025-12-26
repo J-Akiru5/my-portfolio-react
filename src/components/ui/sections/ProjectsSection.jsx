@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { SectionTitle, GlassCard, PixelButton } from '../ui'
+import { SectionTitle, GlassCard, PixelButton } from '..'
 
 gsap.registerPlugin(ScrollTrigger)
 

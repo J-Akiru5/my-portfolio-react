@@ -8,7 +8,7 @@ import {
   ProjectsSection,
   CertificatesSection,
   ContactSection,
-} from '../components/sections'
+} from '../components/ui/sections'
 
 gsap.registerPlugin(ScrollTrigger)
 

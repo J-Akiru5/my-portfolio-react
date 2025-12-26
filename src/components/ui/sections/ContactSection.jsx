@@ -1,8 +1,8 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { SectionTitle, GlassCard, PixelButton } from '../ui'
-import { db } from '../../firebase'
+import { SectionTitle, GlassCard, PixelButton } from '..'
+import { db } from '../../../firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 
 gsap.registerPlugin(ScrollTrigger)
