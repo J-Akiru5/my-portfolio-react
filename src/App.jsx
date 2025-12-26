@@ -2,7 +2,7 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider } from './context/AuthContext'
-import { NavBar, FloatingStars } from './components/ui'
+import { NavBar, FloatingStars, ToastProvider } from './components/ui'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // Main page
@@ -30,7 +30,8 @@ export default function App() {
   return (
     <HelmetProvider>
       <AuthProvider>
-        <div className="app-wrapper pixel-grid" style={{ minHeight: '100vh', position: 'relative' }}>
+        <ToastProvider>
+          <div className="app-wrapper pixel-grid" style={{ minHeight: '100vh', position: 'relative' }}>
           
           {/* Background effects */}
           <FloatingStars count={80} />
@@ -69,7 +70,8 @@ export default function App() {
               </Route>
             </Routes>
           </main>
-        </div>
+          </div>
+        </ToastProvider>
       </AuthProvider>
     </HelmetProvider>
   )
