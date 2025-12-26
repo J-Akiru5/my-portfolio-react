@@ -7,3 +7,4 @@ export { default as SectionTitle } from './SectionTitle';
 export { default as SkillBar } from './SkillBar';
 export { default as SkillCard } from './SkillCard';
 export { default as SocialIcon } from './SocialIcon';
+export { default as ImageUpload } from './ImageUpload';

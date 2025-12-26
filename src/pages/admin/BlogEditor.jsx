@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
@@ -10,7 +10,8 @@ import { common, createLowlight } from 'lowlight'
 import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { useAuth } from '../../context/AuthContext'
-import { SectionTitle, GlassCard, PixelButton } from '../../components/ui'
+import { SectionTitle, GlassCard, PixelButton, ImageUpload } from '../../components/ui'
+import { uploadImage } from '../../services/uploadService'
 
 const lowlight = createLowlight(common)
 
@@ -35,6 +36,8 @@ export default function BlogEditor() {
   const [affiliateUrl, setAffiliateUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [inlineImageUploading, setInlineImageUploading] = useState(false)
+  const inlineImageInputRef = useRef(null)
 
   const editor = useEditor({
     extensions: [
@@ -390,7 +393,27 @@ export default function BlogEditor() {
         />
       </div>
 
-      {/* Slug & Excerpt */}
+      {/* Cover Image Upload */}
+      <div className="form-group">
+        <label className="form-label">COVER IMAGE</label>
+        <ImageUpload
+          value={coverImage}
+          onChange={setCoverImage}
+          placeholder="Drag & drop cover image or click to select"
+        />
+        {coverImage && (
+          <input
+            type="text"
+            className="form-input"
+            placeholder="Or paste image URL..."
+            value={coverImage}
+            onChange={(e) => setCoverImage(e.target.value)}
+            style={{ marginTop: '0.5rem' }}
+          />
+        )}
+      </div>
+
+      {/* Slug */}
       <div className="form-row">
         <div className="form-group">
           <label className="form-label">URL SLUG</label>
@@ -400,16 +423,6 @@ export default function BlogEditor() {
             placeholder="url-friendly-slug"
             value={slug}
             onChange={(e) => setSlug(e.target.value)}
-          />
-        </div>
-        <div className="form-group">
-          <label className="form-label">COVER IMAGE URL</label>
-          <input
-            type="text"
-            className="form-input"
-            placeholder="https://..."
-            value={coverImage}
-            onChange={(e) => setCoverImage(e.target.value)}
           />
         </div>
       </div>
@@ -525,14 +538,37 @@ export default function BlogEditor() {
         >
           🔗 Link
         </button>
+        
+        {/* Inline Image Upload */}
+        <input
+          ref={inlineImageInputRef}
+          type="file"
+          accept="image/jpeg,image/png,image/gif,image/webp"
+          style={{ display: 'none' }}
+          onChange={async (e) => {
+            const file = e.target.files?.[0]
+            if (!file || !editor) return
+            
+            setInlineImageUploading(true)
+            try {
+              const result = await uploadImage(file)
+              if (result.success && result.url) {
+                editor.chain().focus().setImage({ src: result.url }).run()
+              }
+            } catch (err) {
+              alert('Image upload failed: ' + err.message)
+            } finally {
+              setInlineImageUploading(false)
+              e.target.value = '' // Reset for same file
+            }
+          }}
+        />
         <button
           className="toolbar-btn"
-          onClick={() => {
-            const url = window.prompt('Enter image URL:')
-            if (url) editor?.chain().focus().setImage({ src: url }).run()
-          }}
+          onClick={() => inlineImageInputRef.current?.click()}
+          disabled={inlineImageUploading}
         >
-          🖼️ Image
+          {inlineImageUploading ? '⏳...' : '🖼️ Image'}
         </button>
       </div>
 
