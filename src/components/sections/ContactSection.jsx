@@ -15,8 +15,70 @@ gsap.registerPlugin(ScrollTrigger)
 export default function ContactSection() {
   const sectionRef = useRef(null)
   const [formData, setFormData] = useState({ name: '', email: '', message: '' })
+  const [honeypot, setHoneypot] = useState('') // Bot trap
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitStatus, setSubmitStatus] = useState('')
+  const [errors, setErrors] = useState({})
+
+  // Rate limiting constants
+  const RATE_LIMIT_KEY = 'contact_form_submissions'
+  const MAX_SUBMISSIONS = 3
+  const TIME_WINDOW = 60 * 60 * 1000 // 1 hour
+
+  // Check if user has exceeded rate limit
+  function checkRateLimit() {
+    try {
+      const submissions = JSON.parse(localStorage.getItem(RATE_LIMIT_KEY) || '[]')
+      const recentSubmissions = submissions.filter(ts => Date.now() - ts < TIME_WINDOW)
+      return recentSubmissions.length < MAX_SUBMISSIONS
+    } catch {
+      return true // Allow on error
+    }
+  }
+
+  // Record a submission timestamp
+  function recordSubmission() {
+    try {
+      const submissions = JSON.parse(localStorage.getItem(RATE_LIMIT_KEY) || '[]')
+      submissions.push(Date.now())
+      localStorage.setItem(RATE_LIMIT_KEY, JSON.stringify(submissions.slice(-10)))
+    } catch {
+      // Silently fail
+    }
+  }
+
+  // Sanitize input - strip HTML tags and limit length
+  function sanitizeInput(str, maxLength = 1000) {
+    return str.replace(/<[^>]*>/g, '').trim().slice(0, maxLength)
+  }
+
+  // Validate form fields
+  function validateForm() {
+    const newErrors = {}
+    
+    // Name validation
+    if (!formData.name.trim()) {
+      newErrors.name = 'Name is required'
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name too short'
+    }
+    
+    // Email validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      newErrors.email = 'Valid email required'
+    }
+    
+    // Message validation
+    const msgLength = formData.message.trim().length
+    if (msgLength < 10) {
+      newErrors.message = 'Message too short (min 10 chars)'
+    } else if (msgLength > 1000) {
+      newErrors.message = 'Message too long (max 1000 chars)'
+    }
+    
+    setErrors(newErrors)
+    return Object.keys(newErrors).length === 0
+  }
 
   useEffect(() => {
     const ctx = gsap.context(() => {
@@ -44,7 +106,7 @@ export default function ContactSection() {
           ease: 'back.out(1.7)',
           scrollTrigger: {
             trigger: '.social-grid',
-            start: 'top 95%', // Trigger earlier to ensure visibility
+            start: 'top 95%',
             toggleActions: 'play none none reverse'
           }
         }
@@ -56,18 +118,46 @@ export default function ContactSection() {
 
   async function handleSubmit(e) {
     e.preventDefault()
-    setIsSubmitting(true)
     setSubmitStatus('')
+    setErrors({})
+    
+    // Honeypot check - silently reject bots
+    if (honeypot) {
+      setSubmitStatus('✅ Message sent successfully!') // Fake success for bots
+      setFormData({ name: '', email: '', message: '' })
+      return
+    }
+    
+    // Rate limit check
+    if (!checkRateLimit()) {
+      setSubmitStatus('⏱️ Too many messages. Please try again later.')
+      return
+    }
+    
+    // Validate form
+    if (!validateForm()) {
+      return
+    }
+    
+    setIsSubmitting(true)
     
     try {
-      // Save message to Firestore
-      await addDoc(collection(db, 'messages'), {
-        name: formData.name,
-        email: formData.email,
-        message: formData.message,
+      // Sanitize inputs before saving
+      const sanitizedData = {
+        name: sanitizeInput(formData.name, 100),
+        email: sanitizeInput(formData.email, 100),
+        message: sanitizeInput(formData.message, 1000),
         createdAt: serverTimestamp(),
         read: false,
-      })
+        clientTimestamp: Date.now(),
+        userAgent: navigator.userAgent.slice(0, 200),
+      }
+      
+      // Save message to Firestore
+      await addDoc(collection(db, 'messages'), sanitizedData)
+      
+      // Record submission for rate limiting
+      recordSubmission()
       
       setSubmitStatus('✅ Message sent successfully!')
       setFormData({ name: '', email: '', message: '' })
@@ -198,6 +288,23 @@ export default function ContactSection() {
         .submit-status {
           margin-top: 1rem;
           font-family: 'JetBrains Mono', monospace;
+        }
+
+        .field-error {
+          color: #ff6b6b;
+          font-size: 0.75rem;
+          font-family: 'JetBrains Mono', monospace;
+          margin-top: 0.25rem;
+        }
+
+        .honeypot-field {
+          position: absolute;
+          left: -9999px;
+          opacity: 0;
+          height: 0;
+          width: 0;
+          pointer-events: none;
+        }
           font-size: 0.85rem;
         }
         
@@ -324,7 +431,7 @@ export default function ContactSection() {
             </div>
             
             <form onSubmit={handleSubmit}>
-              <div className="form-group">
+                <div className="form-group">
                 <label className="form-label">NAME</label>
                 <input 
                   type="text"
@@ -334,7 +441,20 @@ export default function ContactSection() {
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
+                {errors.name && <div className="field-error">{errors.name}</div>}
               </div>
+              
+              {/* Honeypot - invisible to humans, bots fill this */}
+              <input
+                type="text"
+                name="website"
+                value={honeypot}
+                onChange={(e) => setHoneypot(e.target.value)}
+                className="honeypot-field"
+                tabIndex="-1"
+                autoComplete="off"
+                aria-hidden="true"
+              />
               
               <div className="form-group">
                 <label className="form-label">EMAIL</label>
@@ -346,6 +466,7 @@ export default function ContactSection() {
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
                 />
+                {errors.email && <div className="field-error">{errors.email}</div>}
               </div>
               
               <div className="form-group">
@@ -357,6 +478,7 @@ export default function ContactSection() {
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                   required
                 />
+                {errors.message && <div className="field-error">{errors.message}</div>}
               </div>
               
               <PixelButton 
