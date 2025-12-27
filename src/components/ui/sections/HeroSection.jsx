@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { PixelButton } from '..'
@@ -340,9 +341,11 @@ export default function HeroSection() {
           </p>
           
           <div className="hero-buttons">
-            <PixelButton variant="outline" color="electric" onClick={() => scrollToSection('projects')}>
-              VIEW WORK
-            </PixelButton>
+            <Link to="/blog" style={{ textDecoration: 'none' }}>
+              <PixelButton variant="outline" color="electric">
+                EXPLORE MY BLOGS
+              </PixelButton>
+            </Link>
             <PixelButton variant="filled" color="matrix" onClick={() => scrollToSection('contact')}>
               CONTACT
             </PixelButton>

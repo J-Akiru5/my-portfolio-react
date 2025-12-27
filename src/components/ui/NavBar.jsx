@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 /**
@@ -12,9 +12,20 @@ const NavBar = () => {
   const [activeSection, setActiveSection] = useState('hero');
   const [scrollProgress, setScrollProgress] = useState(0);
   const location = useLocation();
+  const rafRef = useRef(null);
+  const lastScrollTime = useRef(0);
 
-  useEffect(() => {
-    const handleScroll = () => {
+  // Debounced scroll handler for INP optimization
+  const handleScroll = useCallback(() => {
+    const now = performance.now();
+    // Throttle to max 60fps (16ms)
+    if (now - lastScrollTime.current < 16) return;
+    lastScrollTime.current = now;
+
+    // Cancel previous RAF
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    
+    rafRef.current = requestAnimationFrame(() => {
       setIsScrolled(window.scrollY > 20);
       
       // Calculate scroll progress
@@ -22,26 +33,34 @@ const NavBar = () => {
       const progress = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
       setScrollProgress(progress);
       
-      // Detect active section based on scroll position
-      const sections = ['hero', 'about', 'projects', 'certificates', 'contact'];
-      const scrollY = window.scrollY + 100;
+      // Update SinglePage progress bar if it exists
+      const progressBar = document.getElementById('scroll-progress-bar');
+      if (progressBar) {
+        progressBar.style.width = `${progress}%`;
+      }
       
-      for (const id of sections) {
-        const element = document.getElementById(id);
-        if (element) {
-          const { offsetTop, offsetHeight } = element;
-          if (scrollY >= offsetTop && scrollY < offsetTop + offsetHeight) {
-            setActiveSection(id);
-            break;
-          }
+      // Detect active section based on scroll position
+      const sections = ['hero', 'about', 'story', 'projects', 'certificates', 'contact'];
+      const scrollY = window.scrollY + 150; // Offset for navbar height
+      
+      for (let i = sections.length - 1; i >= 0; i--) {
+        const element = document.getElementById(sections[i]);
+        if (element && scrollY >= element.offsetTop) {
+          setActiveSection(sections[i]);
+          break;
         }
       }
-    };
-    
+    });
+  }, []);
+
+  useEffect(() => {
     handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+  }, [handleScroll]);
 
   // Close mobile menu on location change
   useEffect(() => {
