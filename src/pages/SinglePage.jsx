@@ -9,6 +9,7 @@ import {
   CertificatesSection,
   ContactSection,
 } from '../components/ui/sections'
+import Seo from '../components/Seo'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -45,6 +46,10 @@ export default function SinglePage() {
 
   return (
     <div className="single-page">
+      <Seo 
+        title="JeffDev Studio | Vibecoder Developer"
+        description="Portfolio of Jeff Martinez - Specializing in High-Performance Web Applications, React Architecture, and 8-bit aesthetic designs."
+      />
       <style>{`
         .single-page {
           overflow-x: hidden;
