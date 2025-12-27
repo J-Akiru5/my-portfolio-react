@@ -56,6 +56,7 @@ export default function BlogEditor() {
   const [selectionRange, setSelectionRange] = useState(null)
   const [pendingChanges, setPendingChanges] = useState(null)
   const [editableDiff, setEditableDiff] = useState('') // For editing the suggested changes
+  const [cursorPosition, setCursorPosition] = useState(null) // Track cursor for image insert
   
   // Undo/Redo history
   const [undoStack, setUndoStack] = useState([])
@@ -293,13 +294,25 @@ export default function BlogEditor() {
     const file = e.target.files?.[0]
     if (!file) return
 
+    showToast('Uploading image...', 'info')
+    
     try {
       const result = await uploadImage(file)
       if (result.success && result.url) {
         pushToUndo(content)
-        const imageMarkdown = `\n![${file.name}](${result.url})\n`
-        setContent(prev => prev + imageMarkdown)
-        showToast('Image inserted!', 'success')
+        const imageMarkdown = `![${file.name}](${result.url})`
+        
+        // Insert at cursor position if available, otherwise append
+        if (cursorPosition !== null && cursorPosition <= content.length) {
+          const before = content.slice(0, cursorPosition)
+          const after = content.slice(cursorPosition)
+          setContent(before + '\n' + imageMarkdown + '\n' + after)
+        } else {
+          setContent(prev => prev + '\n' + imageMarkdown + '\n')
+        }
+        showToast('✅ Image uploaded and inserted!', 'success')
+      } else {
+        showToast('Upload failed: No URL returned', 'error')
       }
     } catch (err) {
       showToast('Image upload failed: ' + err.message, 'error')
@@ -579,7 +592,8 @@ export default function BlogEditor() {
           display: flex;
           flex-direction: column;
           transition: width 0.3s ease;
-          overflow: hidden;
+          overflow-y: auto;
+          overflow-x: hidden;
           flex-shrink: 0;
         }
 
@@ -719,7 +733,8 @@ export default function BlogEditor() {
           border-left: 1px solid rgba(255, 255, 255, 0.1);
           display: flex;
           flex-direction: column;
-          overflow: hidden;
+          overflow-y: auto;
+          overflow-x: hidden;
           flex-shrink: 0;
         }
 
@@ -1189,7 +1204,20 @@ export default function BlogEditor() {
             </PixelButton>
           </div>
           
-          <div className="md-editor-wrapper" ref={editorRef}>
+          <div 
+            className="md-editor-wrapper" 
+            ref={editorRef}
+            onClick={(e) => {
+              // Track cursor position from textarea
+              const textarea = e.currentTarget.querySelector('textarea')
+              if (textarea) setCursorPosition(textarea.selectionStart)
+            }}
+            onKeyUp={(e) => {
+              // Update cursor position on key events
+              const textarea = e.currentTarget.querySelector('textarea')
+              if (textarea) setCursorPosition(textarea.selectionStart)
+            }}
+          >
             {/* Diff Overlay */}
             {pendingChanges && displayDiffHtml && (
               <div className="diff-overlay">
