@@ -41,15 +41,22 @@ const NavBar = () => {
       
       // Detect active section based on scroll position
       const sections = ['hero', 'about', 'story', 'projects', 'certificates', 'contact'];
-      const scrollY = window.scrollY + 150; // Offset for navbar height
+      const scrollY = window.scrollY + 100; // Offset for navbar height
       
-      for (let i = sections.length - 1; i >= 0; i--) {
-        const element = document.getElementById(sections[i]);
-        if (element && scrollY >= element.offsetTop) {
-          setActiveSection(sections[i]);
-          break;
+      // Find the section we're currently in by checking bounds
+      let currentSection = 'hero';
+      for (const sectionId of sections) {
+        const element = document.getElementById(sectionId);
+        if (element) {
+          const top = element.offsetTop;
+          const bottom = top + element.offsetHeight;
+          if (scrollY >= top && scrollY < bottom) {
+            currentSection = sectionId;
+            break;
+          }
         }
       }
+      setActiveSection(currentSection);
     });
   }, []);
 
@@ -85,11 +92,11 @@ const NavBar = () => {
 
   const navLinks = [
     { id: 'hero', label: 'HOME' },
-    { id: 'blog', label: 'BLOG', isRoute: true, path: '/blog' },
     { id: 'about', label: 'ABOUT' },
     { id: 'projects', label: 'WORK' },
     { id: 'certificates', label: 'CERTS' },
     { id: 'contact', label: 'CONTACT' },
+    { id: 'blog', label: 'BLOG', isRoute: true, path: '/blog' },
   ];
 
   return (
