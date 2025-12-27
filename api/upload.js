@@ -77,13 +77,15 @@ export default async function handler(req, res) {
       ContentType: contentType || 'image/png',
     }));
 
-    // Return the public URL using the enabled r2.dev subdomain
-    const publicBaseUrl = process.env.R2_PUBLIC_URL || 'https://pub-d733b3f300ab42658923aa0f7ed6bac3.r2.dev';
-    const publicUrl = `${publicBaseUrl}/${uniqueFilename}`;
+    // Return URL pointing to our Vercel image proxy endpoint
+    // This bypasses R2 public URL issues by proxying through Vercel
+    const host = req.headers.host || 'localhost:3000';
+    const protocol = host.includes('localhost') ? 'http' : 'https';
+    const proxyUrl = `${protocol}://${host}/api/image?key=${encodeURIComponent(uniqueFilename)}`;
 
     return res.status(200).json({
       success: true,
-      url: publicUrl,
+      url: proxyUrl,
       key: uniqueFilename,
     });
 
