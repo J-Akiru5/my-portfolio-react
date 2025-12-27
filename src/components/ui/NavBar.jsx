@@ -56,6 +56,12 @@ const NavBar = () => {
           }
         }
       }
+      
+      // Map story section to about for nav highlighting
+      if (currentSection === 'story') {
+        currentSection = 'about';
+      }
+      
       setActiveSection(currentSection);
     });
   }, []);
@@ -189,12 +195,12 @@ const NavBar = () => {
           width: 100%;
         }
         
-        /* Scroll progress bar */
+        /* Scroll progress bar - above all navbar content */
         .scroll-progress {
           position: absolute;
           top: 0;
           left: 0;
-          height: 2px;
+          height: 3px;
           background: linear-gradient(90deg, 
             #ff6b35, 
             #9d4edd, 
@@ -202,7 +208,8 @@ const NavBar = () => {
             #39ff14
           );
           transition: width 0.1s ease-out;
-          z-index: 10;
+          z-index: 1001;
+          box-shadow: 0 0 8px rgba(0, 212, 255, 0.6);
         }
         
         /* Gradient line at top (bg track) */

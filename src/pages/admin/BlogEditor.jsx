@@ -618,7 +618,8 @@ export default function BlogEditor() {
           flex: 1;
           display: flex;
           flex-direction: column;
-          overflow: hidden;
+          overflow-y: auto;
+          overflow-x: hidden;
           min-width: 0;
         }
 
@@ -634,8 +635,9 @@ export default function BlogEditor() {
           flex: 1;
           display: flex;
           flex-direction: column;
-          overflow: hidden;
+          overflow-y: auto;
           position: relative;
+          min-height: 0;
         }
 
         .diff-overlay {
