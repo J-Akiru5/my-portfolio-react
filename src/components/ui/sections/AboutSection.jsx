@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { SectionTitle, GlassCard, SkillCard } from '..'
+import { SectionTitle, GlassCard, SkillCard, CatIcon } from '..'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -73,7 +73,7 @@ export default function AboutSection() {
   ]
 
   const aiTools = [
-    { name: 'GitHub Copilot', icon: '🐙' },
+    { name: 'GitHub Copilot', icon: <CatIcon /> },
     { name: 'Antigravity', icon: '🚀' },
     { name: 'Claude', icon: '🧠' },
     { name: 'Gemini', icon: '✨' },

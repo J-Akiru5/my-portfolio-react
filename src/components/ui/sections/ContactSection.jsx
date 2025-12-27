@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { SectionTitle, GlassCard, PixelButton } from '..'
+import { SectionTitle, GlassCard, PixelButton, CatIcon } from '..'
 import { db } from '../../../firebase'
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore'
 
@@ -179,7 +179,7 @@ export default function ContactSection() {
 
   // Social links - user-provided URLs
   const socialLinks = [
-    { platform: 'GitHub', url: 'https://github.com/J-Akiru5', icon: '🐙' },
+    { platform: 'GitHub', url: 'https://github.com/J-Akiru5', icon: <CatIcon /> },
     { platform: 'LinkedIn', url: 'https://www.linkedin.com/in/jeff-edrick-martinez-888575300/', icon: '💼' },
     { platform: 'Facebook', url: 'https://www.facebook.com/martinezjeff26', icon: '📘' },
     { platform: 'Instagram', url: 'https://www.instagram.com/jef.ferson_m/', icon: '📷' },
