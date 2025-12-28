@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, doc, getDoc, updateDoc, getDocs, query, where, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { SectionTitle, GlassCard, PixelButton, ImageUpload } from '../../components/ui'
 
@@ -8,7 +8,7 @@ import { SectionTitle, GlassCard, PixelButton, ImageUpload } from '../../compone
  * ProjectEditor - Create/Edit project form
  * 
  * Used for adding new projects or editing existing ones.
- * Supports R2 image upload via ImageUpload component.
+ * Supports R2 image upload, status percentage, and blog post linking.
  */
 export default function ProjectEditor() {
   const { projectId } = useParams()
@@ -24,12 +24,36 @@ export default function ProjectEditor() {
   const [codeUrl, setCodeUrl] = useState('')
   const [color, setColor] = useState('#00d4ff')
   const [order, setOrder] = useState(0)
+  const [status, setStatus] = useState(100) // % complete
+  const [linkedBlogId, setLinkedBlogId] = useState('') // Blog post link
+  
+  // Blog posts for linking
+  const [blogPosts, setBlogPosts] = useState([])
   
   // UI state
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
   const [useManualUrl, setUseManualUrl] = useState(false)
+
+  // Load blog posts for linking
+  useEffect(() => {
+    async function fetchBlogPosts() {
+      try {
+        const postsRef = collection(db, 'posts')
+        const q = query(postsRef, where('status', '==', 'published'))
+        const snapshot = await getDocs(q)
+        const posts = snapshot.docs.map(doc => ({
+          id: doc.id,
+          title: doc.data().title
+        }))
+        setBlogPosts(posts)
+      } catch (err) {
+        console.warn('Could not fetch blog posts:', err)
+      }
+    }
+    fetchBlogPosts()
+  }, [])
 
   // Load existing project if editing
   useEffect(() => {
@@ -54,6 +78,8 @@ export default function ProjectEditor() {
         setCodeUrl(data.codeUrl || '')
         setColor(data.color || '#00d4ff')
         setOrder(data.order || 0)
+        setStatus(data.status ?? 100)
+        setLinkedBlogId(data.linkedBlogId || '')
         // If there's an existing image, show it
         if (data.image && !data.image.startsWith('/api/image')) {
           setUseManualUrl(true)
@@ -89,6 +115,8 @@ export default function ProjectEditor() {
       codeUrl: codeUrl.trim() || '#',
       color: color,
       order: parseInt(order) || 0,
+      status: parseInt(status) || 100,
+      linkedBlogId: linkedBlogId || null,
       updatedAt: serverTimestamp(),
     }
     
@@ -109,6 +137,15 @@ export default function ProjectEditor() {
     } finally {
       setSaving(false)
     }
+  }
+
+  // Get status color based on percentage
+  const getStatusColor = (pct) => {
+    if (pct >= 100) return '#39ff14' // Complete
+    if (pct >= 75) return '#00d4ff' // Almost done
+    if (pct >= 50) return '#ffd700' // Halfway
+    if (pct >= 25) return '#ff9500' // In progress
+    return '#ff6b35' // Just started
   }
 
   return (
@@ -156,7 +193,8 @@ export default function ProjectEditor() {
         }
         
         .form-input,
-        .form-textarea {
+        .form-textarea,
+        .form-select {
           background: rgba(0, 0, 0, 0.3);
           border: 1px solid rgba(255, 255, 255, 0.2);
           border-radius: 4px;
@@ -167,9 +205,19 @@ export default function ProjectEditor() {
         }
         
         .form-input:focus,
-        .form-textarea:focus {
+        .form-textarea:focus,
+        .form-select:focus {
           outline: none;
           border-color: #00d4ff;
+        }
+        
+        .form-select {
+          cursor: pointer;
+        }
+        
+        .form-select option {
+          background: #1a1a2e;
+          color: white;
         }
         
         .form-textarea {
@@ -237,6 +285,58 @@ export default function ProjectEditor() {
           border: 2px solid rgba(255, 255, 255, 0.1);
         }
         
+        /* Status Slider */
+        .status-container {
+          display: flex;
+          flex-direction: column;
+          gap: 0.5rem;
+        }
+        
+        .status-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .status-value {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.9rem;
+          font-weight: bold;
+        }
+        
+        .status-slider {
+          -webkit-appearance: none;
+          width: 100%;
+          height: 8px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+          outline: none;
+        }
+        
+        .status-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 20px;
+          height: 20px;
+          background: var(--status-color);
+          border-radius: 50%;
+          cursor: pointer;
+          border: 2px solid white;
+        }
+        
+        .status-bar {
+          height: 8px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+          overflow: hidden;
+          margin-top: 0.25rem;
+        }
+        
+        .status-fill {
+          height: 100%;
+          border-radius: 4px;
+          transition: width 0.3s, background 0.3s;
+        }
+        
         .form-actions {
           display: flex;
           gap: 1rem;
@@ -261,6 +361,15 @@ export default function ProjectEditor() {
           font-size: 0.7rem;
           color: rgba(255, 255, 255, 0.4);
           font-style: italic;
+        }
+        
+        .link-badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.25rem;
+          font-size: 0.7rem;
+          color: #39ff14;
+          margin-top: 0.25rem;
         }
         
         @media (max-width: 600px) {
@@ -363,6 +472,44 @@ export default function ProjectEditor() {
               )}
             </div>
 
+            {/* Status Slider */}
+            <div className="form-group status-container">
+              <div className="status-header">
+                <label className="form-label">Completion Status</label>
+                <span 
+                  className="status-value"
+                  style={{ color: getStatusColor(status) }}
+                >
+                  {status}%
+                </span>
+              </div>
+              <input
+                type="range"
+                className="status-slider"
+                min="0"
+                max="100"
+                step="5"
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                style={{ '--status-color': getStatusColor(status) }}
+              />
+              <div className="status-bar">
+                <div 
+                  className="status-fill"
+                  style={{ 
+                    width: `${status}%`,
+                    background: getStatusColor(status)
+                  }}
+                />
+              </div>
+              <span className="helper-text">
+                {status >= 100 ? '✅ Complete' : 
+                 status >= 75 ? '🚀 Almost there!' :
+                 status >= 50 ? '⚡ Halfway done' :
+                 status >= 25 ? '🔧 In progress' : '🌱 Just started'}
+              </span>
+            </div>
+
             <div className="form-group">
               <label className="form-label">Tags</label>
               <input
@@ -432,6 +579,31 @@ export default function ProjectEditor() {
                 />
                 <span className="helper-text">Lower numbers appear first</span>
               </div>
+            </div>
+
+            {/* Blog Post Linking */}
+            <div className="form-group">
+              <label className="form-label">🔗 Link to Blog Post</label>
+              <select
+                className="form-select"
+                value={linkedBlogId}
+                onChange={(e) => setLinkedBlogId(e.target.value)}
+              >
+                <option value="">— No linked blog post —</option>
+                {blogPosts.map(post => (
+                  <option key={post.id} value={post.id}>
+                    {post.title}
+                  </option>
+                ))}
+              </select>
+              <span className="helper-text">
+                Link to a case study or development blog post about this project
+              </span>
+              {linkedBlogId && (
+                <span className="link-badge">
+                  ✓ Linked to blog post
+                </span>
+              )}
             </div>
 
             <div className="form-actions">
