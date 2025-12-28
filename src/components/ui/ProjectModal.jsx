@@ -296,9 +296,19 @@ const ProjectModal = ({ project, onClose }) => {
 
           <div className="modal-description">
             <p>{project.description}</p>
-            <p style={{ marginTop: '1rem', opacity: 0.7 }}>
-              Details about architecture, challenges, and implementation would ideally appear here, fetched from a dedicated blog post or markdown file associated with <strong>{project.id}</strong>.
-            </p>
+            {project.details && (
+              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+                <h4 style={{ 
+                  fontFamily: "'Press Start 2P', cursive", 
+                  fontSize: '0.7rem', 
+                  color: 'rgba(255,255,255,0.5)', 
+                  marginBottom: '0.75rem' 
+                }}>
+                  ARCHITECTURE.md
+                </h4>
+                <p style={{ whiteSpace: 'pre-wrap' }}>{project.details}</p>
+              </div>
+            )}
           </div>
 
           {/* Tech Stack */}

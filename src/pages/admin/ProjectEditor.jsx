@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { collection, addDoc, doc, getDoc, updateDoc, getDocs, query, where, serverTimestamp } from 'firebase/firestore'
+import { collection, addDoc, doc, getDoc, updateDoc, getDocs, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { SectionTitle, GlassCard, PixelButton, ImageUpload } from '../../components/ui'
 
@@ -18,6 +18,7 @@ export default function ProjectEditor() {
   // Form state
   const [title, setTitle] = useState('')
   const [description, setDescription] = useState('')
+  const [details, setDetails] = useState('') // Architecture/details content
   const [image, setImage] = useState('')
   const [tags, setTags] = useState('')
   const [liveUrl, setLiveUrl] = useState('')
@@ -36,16 +37,17 @@ export default function ProjectEditor() {
   const [error, setError] = useState('')
   const [useManualUrl, setUseManualUrl] = useState(false)
 
-  // Load blog posts for linking
+  // Load blog posts for linking (fetch ALL posts, not just published)
   useEffect(() => {
     async function fetchBlogPosts() {
       try {
         const postsRef = collection(db, 'posts')
-        const q = query(postsRef, where('status', '==', 'published'))
-        const snapshot = await getDocs(q)
+        const snapshot = await getDocs(postsRef)
         const posts = snapshot.docs.map(doc => ({
           id: doc.id,
-          title: doc.data().title
+          title: doc.data().title || 'Untitled',
+          slug: doc.data().slug || '',
+          status: doc.data().status || 'draft'
         }))
         setBlogPosts(posts)
       } catch (err) {
@@ -72,6 +74,7 @@ export default function ProjectEditor() {
         const data = docSnap.data()
         setTitle(data.title || '')
         setDescription(data.description || '')
+        setDetails(data.details || '')
         setImage(data.image || '')
         setTags((data.tags || []).join(', '))
         setLiveUrl(data.liveUrl || '')
@@ -109,6 +112,7 @@ export default function ProjectEditor() {
     const projectData = {
       title: title.trim(),
       description: description.trim(),
+      details: details.trim(),
       image: image.trim(),
       tags: tags.split(',').map(t => t.trim()).filter(Boolean),
       liveUrl: liveUrl.trim() || '#',
@@ -421,6 +425,20 @@ export default function ProjectEditor() {
               />
             </div>
 
+            <div className="form-group">
+              <label className="form-label">📝 Architecture / Details</label>
+              <textarea
+                className="form-textarea"
+                value={details}
+                onChange={(e) => setDetails(e.target.value)}
+                placeholder="Architecture details, challenges faced, implementation notes, lessons learned..."
+                style={{ minHeight: '150px' }}
+              />
+              <span className="helper-text">
+                Detailed information displayed in the project modal. Supports plain text.
+              </span>
+            </div>
+
             {/* Image Section with Upload or Manual URL */}
             <div className="form-group image-section">
               <label className="form-label">Project Image</label>
@@ -592,7 +610,7 @@ export default function ProjectEditor() {
                 <option value="">— No linked blog post —</option>
                 {blogPosts.map(post => (
                   <option key={post.id} value={post.id}>
-                    {post.title}
+                    {post.title} [{post.status === 'published' ? '✓ Published' : '📝 Draft'}]
                   </option>
                 ))}
               </select>
