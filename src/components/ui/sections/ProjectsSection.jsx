@@ -7,21 +7,16 @@ import { SectionTitle, ProjectModal } from '..'
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * ProjectsSection - Game Console Style Carousel with Pinned Reveal
+ * ProjectsSection - Game Console Style Carousel
  * 
- * Locked reveal sequence with GSAP ScrollTrigger pinning.
  * 3D carousel with retro controller navigation.
+ * Uses clean ScrollTrigger reveal (no pinning) to avoid conflicts.
  */
 export default function ProjectsSection() {
   const sectionRef = useRef(null)
-  const titleRef = useRef(null)
-  const activeCardRef = useRef(null)
-  const prevCardRef = useRef(null)
-  const nextCardRef = useRef(null)
-  const controlsRef = useRef(null)
+  const contentRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [selectedProject, setSelectedProject] = useState(null)
-  const [hasRevealed, setHasRevealed] = useState(false)
 
   const projects = [
     {
@@ -114,64 +109,48 @@ export default function ProjectsSection() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [activeIndex, selectedProject])
 
-  // GSAP Pinned Reveal Sequence
+  // GSAP Reveal (No Pinning)
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // Initial hidden states
-      gsap.set(titleRef.current, { opacity: 0, y: 30 })
-      gsap.set(activeCardRef.current, { opacity: 0, y: 100, scale: 0.8 })
-      gsap.set(prevCardRef.current, { opacity: 0, x: '-100vw' })
-      gsap.set(nextCardRef.current, { opacity: 0, x: '100vw' })
-      gsap.set(controlsRef.current, { opacity: 0, y: 20 })
-
-      // Create timeline with ScrollTrigger pin
-      const tl = gsap.timeline({
+      // Simple reveal animation
+      gsap.fromTo(contentRef.current, 
+        { opacity: 0, y: 100 },
+        {
+          opacity: 1, 
+          y: 0,
+          duration: 1,
+          ease: 'power3.out',
+          scrollTrigger: {
+            trigger: sectionRef.current,
+            start: 'top 60%', // Trigger when section is 60% in view
+            toggleActions: 'play none none reverse'
+          }
+        }
+      )
+      
+      // Animate side cards in
+      gsap.from('.project-card-wrapper.prev', {
+        x: '-100vw',
+        opacity: 0,
+        duration: 1,
+        ease: 'power3.out',
+        delay: 0.2,
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: 'top top',
-          end: '+=1500',
-          pin: true,
-          scrub: 0.5,
-          onLeave: () => setHasRevealed(true),
-          onEnterBack: () => setHasRevealed(true),
+          start: 'top 60%'
         }
       })
-
-      // Sequence
-      tl.to(titleRef.current, { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.3,
-        ease: 'power2.out'
-      })
-      .to(activeCardRef.current, { 
-        opacity: 1, 
-        y: 0, 
-        scale: 1, 
-        duration: 0.5,
-        ease: 'back.out(1.2)'
-      }, '+=0.1')
-      .to([prevCardRef.current, nextCardRef.current], { 
-        opacity: 0.5, 
-        x: 0, 
-        duration: 0.5,
-        stagger: 0.15,
-        ease: 'power3.out'
-      }, '-=0.2')
-      .to(controlsRef.current, { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.3,
-        ease: 'power2.out'
-      }, '-=0.1')
-      // Glitch effect on controls
-      .to(controlsRef.current, {
-        keyframes: [
-          { x: -3, duration: 0.05 },
-          { x: 3, duration: 0.05 },
-          { x: -2, duration: 0.05 },
-          { x: 0, duration: 0.05 },
-        ]
+      
+      gsap.from('.project-card-wrapper.next', {
+        x: '100vw',
+        opacity: 0,
+        duration: 1,
+        ease: 'power3.out',
+        delay: 0.2,
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top 60%'
+        }
       })
 
     }, sectionRef)
@@ -249,10 +228,10 @@ export default function ProjectsSection() {
           width: 55%;
           max-width: 700px;
           height: 400px;
-          transform: translateX(0) scale(1);
+          left: 50%;
+          transform: translateX(-50%) scale(1);
           opacity: 1;
           filter: brightness(1.1);
-          cursor: pointer;
         }
 
         /* Active Glow */
@@ -280,17 +259,21 @@ export default function ProjectsSection() {
           width: 30%;
           max-width: 350px;
           height: 220px;
+          top: 50%;
+          margin-top: -110px; /* Half height to center vertically */
           opacity: 0.4;
           filter: brightness(0.4) saturate(0.5);
           pointer-events: none;
         }
 
         .project-card-wrapper.prev {
-          transform: translateX(-65%) scale(0.6) rotateY(20deg);
+          left: 5%; /* Fixed position instead of translate */
+          transform: perspective(1000px) rotateY(25deg) scale(0.9);
         }
 
         .project-card-wrapper.next {
-          transform: translateX(65%) scale(0.6) rotateY(-20deg);
+          right: 5%; /* Fixed position instead of translate */
+          transform: perspective(1000px) rotateY(-25deg) scale(0.9);
         }
         
         /* Card Visual - Sharp Corners */
@@ -474,65 +457,66 @@ export default function ProjectsSection() {
         }
       `}</style>
       
-      <div className="projects-header-container" ref={titleRef}>
-        <SectionTitle title="PROJECTS" extension=".work" />
-      </div>
+      <div ref={contentRef}>
+        <div className="projects-header-container">
+          <SectionTitle title="PROJECTS" extension=".work" />
+        </div>
 
-      <div className="console-frame" {...handlers}>
-        <div className="scanlines"></div>
-        <div className="carousel-track">
-          
-          {/* Previous Project (Left) */}
-          <div className="project-card-wrapper prev" ref={prevCardRef}>
-             <div className="project-visual">
-               <img src={projects[prev].image} alt="" />
-             </div>
-          </div>
-
-          {/* Active Project (Center) */}
-          <div 
-            className="project-card-wrapper active"
-            ref={activeCardRef}
-            style={{ '--glow-color': projects[current].color }}
-          >
-             <div className="project-visual">
-               <img src={projects[current].image} alt={projects[current].title} />
-               <div className="project-info-overlay">
-                 <h3 className="project-title">{projects[current].title}</h3>
-                 <p className="click-hint">[ PRESS A TO SELECT ]</p>
+        <div className="console-frame" {...handlers}>
+          <div className="scanlines"></div>
+          <div className="carousel-track">
+            
+            {/* Previous Project (Left) */}
+            <div className="project-card-wrapper prev">
+               <div className="project-visual">
+                 <img src={projects[prev].image} alt="" />
                </div>
-             </div>
+            </div>
+
+            {/* Active Project (Center) */}
+            <div 
+              className="project-card-wrapper active"
+              style={{ '--glow-color': projects[current].color }}
+            >
+               <div className="project-visual">
+                 <img src={projects[current].image} alt={projects[current].title} />
+                 <div className="project-info-overlay">
+                   <h3 className="project-title">{projects[current].title}</h3>
+                   <p className="click-hint">[ PRESS A TO SELECT ]</p>
+                 </div>
+               </div>
+            </div>
+
+            {/* Next Project (Right) */}
+            <div className="project-card-wrapper next">
+               <div className="project-visual">
+                 <img src={projects[next].image} alt="" />
+               </div>
+            </div>
+
           </div>
+        </div>
 
-          {/* Next Project (Right) */}
-          <div className="project-card-wrapper next" ref={nextCardRef}>
-             <div className="project-visual">
-               <img src={projects[next].image} alt="" />
-             </div>
+        <div className="console-controls">
+          <div className="d-pad">
+            <button className="control-btn" onClick={prevProject} aria-label="Previous">
+              ◀
+            </button>
+            <button className="control-btn" onClick={nextProject} aria-label="Next">
+               ▶
+            </button>
           </div>
-
+          
+          <div className="action-btns">
+            <button className="select-btn" onClick={() => setSelectedProject(projects[current])}>
+              [A] SELECT
+            </button>
+          </div>
         </div>
-      </div>
 
-      <div className="console-controls" ref={controlsRef}>
-        <div className="d-pad">
-          <button className="control-btn" onClick={prevProject} aria-label="Previous">
-            ◀
-          </button>
-          <button className="control-btn" onClick={nextProject} aria-label="Next">
-             ▶
-          </button>
+        <div className="mobile-hint">
+          ◀ SWIPE ▶ • TAP TO SELECT
         </div>
-        
-        <div className="action-btns">
-          <button className="select-btn" onClick={() => setSelectedProject(projects[current])}>
-            [A] SELECT
-          </button>
-        </div>
-      </div>
-
-      <div className="mobile-hint">
-        ◀ SWIPE ▶ • TAP TO SELECT
       </div>
 
       {/* Modal */}
