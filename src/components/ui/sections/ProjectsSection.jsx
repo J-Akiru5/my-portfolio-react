@@ -19,6 +19,7 @@ const FALLBACK_PROJECTS = [
     liveUrl: 'https://sineai.tech',
     codeUrl: 'https://github.com/J-Akiru5/sineai-hub',
     color: '#00d4ff',
+    status: 100,
   },
   {
     id: 'portfolio',
@@ -29,6 +30,7 @@ const FALLBACK_PROJECTS = [
     liveUrl: '#',
     codeUrl: 'https://github.com/J-Akiru5/my-portfolio-react',
     color: '#39ff14',
+    status: 100,
   },
   {
     id: 'cict-portal',
@@ -39,6 +41,7 @@ const FALLBACK_PROJECTS = [
     liveUrl: '#',
     codeUrl: 'https://github.com/J-Akiru5/cict-tech-portal',
     color: '#9d4edd',
+    status: 100,
   },
   {
     id: 'gsus',
@@ -49,6 +52,7 @@ const FALLBACK_PROJECTS = [
     liveUrl: '#',
     codeUrl: 'https://github.com/J-Akiru5/GSUS-Hackathon-Project',
     color: '#ff6b35',
+    status: 100,
   },
   {
     id: 'ebhm-connect',
@@ -59,6 +63,7 @@ const FALLBACK_PROJECTS = [
     liveUrl: '#',
     codeUrl: 'https://github.com/J-Akiru5/e-bhm_connect',
     color: '#00d4ff',
+    status: 100,
   },
   {
     id: 'lingsarloka',
@@ -69,6 +74,7 @@ const FALLBACK_PROJECTS = [
     liveUrl: 'https://thick-break-42913670.figma.site/',
     codeUrl: 'https://github.com/J-Akiru5/LingsarLoka',
     color: '#39ff14',
+    status: 100,
   },
 ]
 
@@ -77,8 +83,8 @@ const FALLBACK_PROJECTS = [
  * 
  * Features:
  * - Clean 3-card layout with CSS transitions
- * - Terminal-style info bar (better contrast)
- * - Scroll hint when controls are off-screen
+ * - Terminal-style info bar with status and live indicator
+ * - Scroll hint hidden once controls are visible
  * - Dynamic data from Firestore with fallback
  */
 export default function ProjectsSection() {
@@ -89,6 +95,7 @@ export default function ProjectsSection() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [selectedProject, setSelectedProject] = useState(null)
   const [projects, setProjects] = useState(FALLBACK_PROJECTS)
+  const [controlsVisible, setControlsVisible] = useState(false)
 
   // Fetch projects from Firestore
   useEffect(() => {
@@ -159,7 +166,15 @@ export default function ProjectsSection() {
           pin: true,
           scrub: 1,
           refreshPriority: -1,
-          anticipatePin: 1
+          anticipatePin: 1,
+          onUpdate: (self) => {
+            // Show controls visible when animation is past 80%
+            if (self.progress > 0.6) {
+              setControlsVisible(true)
+            } else {
+              setControlsVisible(false)
+            }
+          }
         }
       })
 
@@ -182,6 +197,11 @@ export default function ProjectsSection() {
   }
 
   const { prev, current, next } = getVisibleProjects()
+  const currentProject = projects[current]
+
+  // Check if project has a live URL (not "#")
+  const isLive = currentProject.liveUrl && currentProject.liveUrl !== '#'
+  const status = currentProject.status ?? 100
 
   return (
     <section id="projects" ref={sectionRef} className="projects-section">
@@ -312,7 +332,7 @@ export default function ProjectsSection() {
           object-fit: cover;
         }
 
-        /* ===== TERMINAL INFO BAR ===== */
+        /* ===== TERMINAL INFO BAR (Redesigned) ===== */
         .terminal-bar {
           max-width: 700px;
           margin: 1rem auto 0;
@@ -322,24 +342,16 @@ export default function ProjectsSection() {
           padding: 0.75rem 1.25rem;
           display: flex;
           align-items: center;
-          justify-content: space-between;
           gap: 1rem;
           box-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
-        }
-
-        .terminal-prompt {
-          display: flex;
-          align-items: center;
-          gap: 0.75rem;
-          flex: 1;
-          min-width: 0;
         }
 
         .terminal-cursor {
           color: var(--terminal-color, #00d4ff);
           font-family: 'JetBrains Mono', monospace;
-          font-size: 0.9rem;
+          font-size: 1rem;
           animation: blink 1s infinite;
+          flex-shrink: 0;
         }
 
         @keyframes blink {
@@ -349,29 +361,68 @@ export default function ProjectsSection() {
 
         .terminal-title {
           font-family: 'Press Start 2P', cursive;
-          font-size: 0.7rem;
+          font-size: 0.85rem;
           color: white;
+          flex: 1;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
-        .terminal-action {
+        .terminal-badges {
+          display: flex;
+          align-items: center;
+          gap: 0.5rem;
+          flex-shrink: 0;
+        }
+
+        .status-badge {
           font-family: 'JetBrains Mono', monospace;
-          font-size: 0.7rem;
-          color: #39ff14;
-          white-space: nowrap;
-          padding: 0.4rem 0.75rem;
-          border: 1px solid #39ff14;
+          font-size: 0.65rem;
+          padding: 0.3rem 0.5rem;
           border-radius: 3px;
-          background: rgba(57, 255, 20, 0.1);
-          cursor: pointer;
-          transition: all 0.2s;
+          background: rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          color: rgba(255, 255, 255, 0.7);
         }
 
-        .terminal-action:hover {
-          background: rgba(57, 255, 20, 0.2);
-          box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        .status-badge.complete {
+          background: rgba(57, 255, 20, 0.15);
+          border-color: rgba(57, 255, 20, 0.4);
+          color: #39ff14;
+        }
+
+        .status-badge.progress {
+          background: rgba(255, 170, 0, 0.15);
+          border-color: rgba(255, 170, 0, 0.4);
+          color: #ffaa00;
+        }
+
+        .live-badge {
+          display: flex;
+          align-items: center;
+          gap: 0.35rem;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.65rem;
+          padding: 0.3rem 0.6rem;
+          border-radius: 3px;
+          background: rgba(57, 255, 20, 0.15);
+          border: 1px solid rgba(57, 255, 20, 0.4);
+          color: #39ff14;
+        }
+
+        .live-dot {
+          width: 6px;
+          height: 6px;
+          background: #39ff14;
+          border-radius: 50%;
+          animation: pulse-dot 1.5s infinite;
+        }
+
+        @keyframes pulse-dot {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.5; transform: scale(0.8); }
         }
 
         /* ===== CONTROLLER BUTTONS ===== */
@@ -457,7 +508,7 @@ export default function ProjectsSection() {
           color: rgba(255, 255, 255, 0.4);
         }
 
-        /* Scroll Hint */
+        /* Scroll Hint - Hidden when controls visible */
         .scroll-hint {
           text-align: center;
           color: rgba(255, 255, 255, 0.3);
@@ -465,6 +516,12 @@ export default function ProjectsSection() {
           font-size: 0.7rem;
           margin-top: 1.5rem;
           animation: bounce-down 2s infinite;
+          transition: opacity 0.3s;
+        }
+
+        .scroll-hint.hidden {
+          opacity: 0;
+          pointer-events: none;
         }
 
         @keyframes bounce-down {
@@ -497,14 +554,12 @@ export default function ProjectsSection() {
           }
           .terminal-bar {
             margin: 0.75rem 1rem 0;
-            flex-direction: column;
-            gap: 0.5rem;
-          }
-          .terminal-prompt {
-            justify-content: center;
           }
           .terminal-title {
-            font-size: 0.6rem;
+            font-size: 0.65rem;
+          }
+          .terminal-badges {
+            display: none;
           }
           .console-controls {
             display: none;
@@ -536,10 +591,10 @@ export default function ProjectsSection() {
           {/* Active Project (Center) - No overlay */}
           <div 
             className="project-card-wrapper active"
-            style={{ '--glow-color': projects[current].color }}
+            style={{ '--glow-color': currentProject.color }}
           >
              <div className="project-visual">
-               <img src={projects[current].image} alt={projects[current].title} />
+               <img src={currentProject.image} alt={currentProject.title} />
              </div>
           </div>
 
@@ -553,21 +608,26 @@ export default function ProjectsSection() {
         </div>
       </div>
 
-      {/* Terminal-Style Info Bar */}
+      {/* Terminal-Style Info Bar - Redesigned */}
       <div 
         className="terminal-bar"
-        style={{ '--terminal-color': projects[current].color }}
+        style={{ '--terminal-color': currentProject.color }}
       >
-        <div className="terminal-prompt">
-          <span className="terminal-cursor">❯</span>
-          <span className="terminal-title">{projects[current].title}</span>
+        <span className="terminal-cursor">❯</span>
+        <span className="terminal-title">{currentProject.title}</span>
+        <div className="terminal-badges">
+          {/* Status Badge */}
+          <span className={`status-badge ${status >= 100 ? 'complete' : 'progress'}`}>
+            {status >= 100 ? '✓ Complete' : `${status}%`}
+          </span>
+          {/* Live Badge (if available) */}
+          {isLive && (
+            <span className="live-badge">
+              <span className="live-dot"></span>
+              LIVE
+            </span>
+          )}
         </div>
-        <button 
-          className="terminal-action"
-          onClick={() => setSelectedProject(projects[current])}
-        >
-          [A] SELECT
-        </button>
       </div>
 
       {/* Controller Buttons */}
@@ -586,14 +646,14 @@ export default function ProjectsSection() {
         </div>
         
         <div className="action-btns">
-          <button className="select-btn" onClick={() => setSelectedProject(projects[current])}>
+          <button className="select-btn" onClick={() => setSelectedProject(currentProject)}>
             [A] SELECT
           </button>
         </div>
       </div>
 
-      {/* Scroll Hint (Desktop) */}
-      <div className="scroll-hint">
+      {/* Scroll Hint (Desktop) - Hidden when controls visible */}
+      <div className={`scroll-hint ${controlsVisible ? 'hidden' : ''}`}>
         ↓ Scroll to reveal controls ↓
       </div>
 

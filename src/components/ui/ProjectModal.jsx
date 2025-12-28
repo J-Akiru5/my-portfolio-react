@@ -65,10 +65,10 @@ const ProjectModal = ({ project, onClose }) => {
           background: rgba(10, 10, 18, 0.95);
           backdrop-filter: blur(8px);
           display: flex;
-          align-items: flex-start;
+          align-items: center;
           justify-content: center;
-          padding: 5rem 2rem 2rem;
-          overflow-y: auto;
+          padding: 2rem;
+          overflow: hidden;
         }
 
         .project-modal-content {
@@ -77,10 +77,30 @@ const ProjectModal = ({ project, onClose }) => {
           border-radius: 20px;
           max-width: 900px;
           width: 100%;
-          max-height: 90vh;
+          max-height: calc(100vh - 4rem);
           overflow-y: auto;
+          overflow-x: hidden;
           position: relative;
           box-shadow: 0 0 50px rgba(0, 212, 255, 0.15);
+          scrollbar-width: thin;
+          scrollbar-color: rgba(0, 212, 255, 0.3) transparent;
+        }
+
+        .project-modal-content::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        .project-modal-content::-webkit-scrollbar-track {
+          background: transparent;
+        }
+
+        .project-modal-content::-webkit-scrollbar-thumb {
+          background: rgba(0, 212, 255, 0.3);
+          border-radius: 4px;
+        }
+
+        .project-modal-content::-webkit-scrollbar-thumb:hover {
+          background: rgba(0, 212, 255, 0.5);
         }
 
         .project-modal-close {
