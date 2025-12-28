@@ -1,52 +1,82 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { collection, query, where, orderBy, getDocs } from 'firebase/firestore'
+import { db } from '../../../firebase'
 import { SectionTitle, GlassCard, PixelButton } from '..'
 
 gsap.registerPlugin(ScrollTrigger)
 
+// Fallback services if Firestore fails
+const FALLBACK_SERVICES = [
+  {
+    id: 'web-development',
+    icon: '💻',
+    title: 'Web Development',
+    description: 'Full-stack web applications with Laravel + React + Inertia.js architecture.',
+    features: ['Laravel', 'React', 'Inertia.js', 'Tailwind CSS', 'Firebase'],
+    color: '#00d4ff',
+    ctaText: 'START PROJECT',
+    slug: 'web-development'
+  },
+  {
+    id: 'ui-ux-design',
+    icon: '🎨', 
+    title: 'UI/UX Design',
+    description: 'User-centered interfaces with Figma prototypes, design systems, and modern aesthetics.',
+    features: ['Figma', 'Design Systems', 'Prototyping', 'User Research'],
+    color: '#9d4edd',
+    ctaText: 'VIEW PROCESS',
+    slug: 'ui-ux-design'
+  },
+  {
+    id: 'mobile-apps',
+    icon: '📱',
+    title: 'Mobile Development',
+    description: 'Native Android apps with Java and cross-platform solutions using React Native.',
+    features: ['Java', 'React Native', 'Firebase', 'Play Store Ready'],
+    color: '#39ff14',
+    ctaText: 'DISCUSS APP',
+    slug: 'mobile-apps'
+  }
+]
+
 /**
  * ServicesSection - Freelance services showcase
  * 
- * Displays available freelance services with contact CTA.
+ * Fetches services from Firestore with fallback to hardcoded data.
  */
 export default function ServicesSection() {
   const sectionRef = useRef(null)
   const cardsRef = useRef(null)
+  const [services, setServices] = useState(FALLBACK_SERVICES)
 
-  const services = [
-    {
-      id: 'web-development',
-      icon: '💻',
-      title: 'Web Development',
-      description: 'Full-stack web applications with Laravel + React + Inertia.js architecture.',
-      features: ['Laravel', 'React', 'Inertia.js', 'Tailwind CSS', 'Firebase'],
-      accent: '#00d4ff',
-      ctaText: 'START PROJECT',
-      ctaLink: '/services/web-development'
-    },
-    {
-      id: 'ui-ux-design',
-      icon: '🎨', 
-      title: 'UI/UX Design',
-      description: 'User-centered interfaces with Figma prototypes, design systems, and modern aesthetics.',
-      features: ['Figma', 'Design Systems', 'Prototyping', 'User Research'],
-      accent: '#9d4edd',
-      ctaText: 'VIEW PROCESS',
-      ctaLink: '/services/ui-ux-design'
-    },
-    {
-      id: 'mobile-apps',
-      icon: '📱',
-      title: 'Mobile Development',
-      description: 'Native Android apps with Java and cross-platform solutions using React Native.',
-      features: ['Java', 'React Native', 'Firebase', 'Play Store Ready'],
-      accent: '#39ff14',
-      ctaText: 'DISCUSS APP',
-      ctaLink: '/services/mobile-apps'
+  // Fetch services from Firestore
+  useEffect(() => {
+    async function fetchServices() {
+      try {
+        const servicesRef = collection(db, 'services')
+        const q = query(
+          servicesRef, 
+          where('active', '==', true),
+          orderBy('order', 'asc')
+        )
+        const snapshot = await getDocs(q)
+        
+        if (!snapshot.empty) {
+          const servicesData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          setServices(servicesData)
+        }
+      } catch (error) {
+        console.warn('Firestore fetch failed, using fallback services:', error.message)
+      }
     }
-  ]
+    fetchServices()
+  }, [])
 
   // Simplified animation for better INP
   useEffect(() => {
@@ -221,28 +251,28 @@ export default function ServicesSection() {
           {services.map((service) => (
             <GlassCard 
               key={service.id} 
-              className={`service-card ${service.comingSoon ? 'coming-soon' : ''}`}
+              className="service-card"
             >
               <span className="service-icon">{service.icon}</span>
-              <h3 className="service-title" style={{ color: service.accent }}>
+              <h3 className="service-title" style={{ color: service.color }}>
                 {service.title}
               </h3>
               <p className="service-description">{service.description}</p>
               <div className="service-features">
-                {service.features.map((feature, idx) => (
+                {(service.features || service.tech || []).map((feature, idx) => (
                   <span 
                     key={idx} 
                     className="service-feature"
-                    style={{ borderColor: `${service.accent}40` }}
+                    style={{ borderColor: `${service.color}40` }}
                   >
                     {feature}
                   </span>
                 ))}
               </div>
               <div className="service-cta">
-                <Link to={service.ctaLink} style={{ textDecoration: 'none' }}>
+                <Link to={`/services/${service.slug || service.id}`} style={{ textDecoration: 'none' }}>
                   <PixelButton size="small">
-                    {service.ctaText}
+                    {service.ctaText || 'LEARN MORE'}
                   </PixelButton>
                 </Link>
               </div>

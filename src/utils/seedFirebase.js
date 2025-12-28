@@ -182,6 +182,109 @@ export async function seedSettings() {
   return 1;
 }
 
+// Services data
+const services = [
+  {
+    id: 'web-development',
+    slug: 'web-development',
+    title: 'Web Development',
+    icon: '💻',
+    description: 'Transform your ideas into robust, high-performance web applications using Laravel, React, and Inertia.js.',
+    features: [
+      'Full-Stack Architecture',
+      'Database Design & Optimization',
+      'Real-time Features (WebSockets)',
+      'API Development & Integration',
+      'Payment Gateway Integration',
+      'Admin Dashboards'
+    ],
+    tech: ['Laravel', 'React', 'Inertia.js', 'MySQL', 'Redis', 'Tailwind CSS'],
+    color: '#00d4ff',
+    starterPrice: 500,
+    packages: [
+      { name: 'Starter', price: 500, description: 'Landing page or simple site' },
+      { name: 'Standard', price: 1500, description: 'Full web app with auth & dashboard' },
+      { name: 'Premium', price: 3000, description: 'Complex system with API integrations' }
+    ],
+    ctaText: 'START PROJECT',
+    order: 1,
+    active: true
+  },
+  {
+    id: 'ui-ux-design',
+    slug: 'ui-ux-design',
+    title: 'UI/UX Design',
+    icon: '🎨',
+    description: 'Create intuitive, engaging user experiences with pixel-perfect designs and modern aesthetics.',
+    features: [
+      'User Research & Personas',
+      'Wireframing & Prototyping',
+      'Design Systems',
+      'Interactive Mockups',
+      'Mobile-First Design',
+      'Accessibility Compliance'
+    ],
+    tech: ['Figma', 'Adobe XD', 'Protopie'],
+    color: '#9d4edd',
+    starterPrice: 300,
+    packages: [
+      { name: 'Starter', price: 300, description: 'UI mockups for 3-5 screens' },
+      { name: 'Standard', price: 800, description: 'Full app design with components' },
+      { name: 'Premium', price: 1500, description: 'Complete design system + prototypes' }
+    ],
+    ctaText: 'VIEW PROCESS',
+    order: 2,
+    active: true
+  },
+  {
+    id: 'mobile-apps',
+    slug: 'mobile-apps',
+    title: 'Mobile Development',
+    icon: '📱',
+    description: 'Build native-quality mobile applications for Android using Java or cross-platform solutions with React Native.',
+    features: [
+      'Native Android Development',
+      'Cross-Platform (React Native)',
+      'Offline Functionality',
+      'Push Notifications',
+      'Google Maps Integration',
+      'Play Store Deployment'
+    ],
+    tech: ['Java', 'React Native', 'Android Studio', 'Firebase'],
+    color: '#39ff14',
+    starterPrice: 600,
+    packages: [
+      { name: 'Starter', price: 600, description: 'Simple utility app' },
+      { name: 'Standard', price: 2000, description: 'Full app with backend integration' },
+      { name: 'Premium', price: 4000, description: 'Enterprise app with complex features' }
+    ],
+    ctaText: 'DISCUSS APP',
+    order: 3,
+    active: true
+  }
+];
+
+/**
+ * Seed services collection
+ */
+export async function seedServices() {
+  console.log('🛠️ Seeding services...');
+  const batch = writeBatch(db);
+  
+  for (const service of services) {
+    const docRef = doc(db, 'services', service.id);
+    batch.set(docRef, {
+      ...service,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    });
+  }
+  
+  await batch.commit();
+  console.log(`✅ Added ${services.length} services`);
+  return services.length;
+}
+
 /**
  * Seed all collections
  */

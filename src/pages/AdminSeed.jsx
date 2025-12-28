@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { SectionTitle, PixelButton, GlassCard, useToast } from '../components/ui'
-import { seedAllData, seedCertificates, seedProjects, seedSocialLinks, seedSettings } from '../utils/seedFirebase'
+import { seedAllData, seedCertificates, seedProjects, seedSocialLinks, seedSettings, seedServices } from '../utils/seedFirebase'
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore'
 import { db } from '../firebase'
 import firstBlogPost from '../data/firstBlogPost'
@@ -198,6 +198,19 @@ export default function AdminSeed() {
             disabled={loading}
           >
             SEED BLOG POST
+          </PixelButton>
+        </GlassCard>
+        
+        <GlassCard className="seed-card">
+          <h3>🛠️ SERVICES</h3>
+          <p>Seed the services collection (Web Dev, UI/UX, Mobile Apps).</p>
+          <PixelButton 
+            variant="outline" 
+            color="electric"
+            onClick={() => handleSeedCollection(seedServices, 'services')}
+            disabled={loading}
+          >
+            SEED SERVICES
           </PixelButton>
         </GlassCard>
       </div>

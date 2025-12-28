@@ -1,13 +1,17 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useParams, Link } from 'react-router-dom'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from '../firebase'
 import Seo from '../components/Seo'
 import { PixelButton, GlassCard } from '../components/ui'
 
 /**
  * ServiceInquiry - Dedicated service page with tailored form
+ * Fetches service data from Firestore with fallback to hardcoded data.
  */
 
-const SERVICES_DATA = {
+// Fallback services data
+const FALLBACK_SERVICES = {
   'web-development': {
     title: 'Web Development',
     icon: '💻',
@@ -22,7 +26,7 @@ const SERVICES_DATA = {
     ],
     tech: ['Laravel', 'React', 'Inertia.js', 'MySQL', 'Redis'],
     color: '#00d4ff',
-    starterPrice: '$500+'
+    starterPrice: 500
   },
   'ui-ux-design': {
     title: 'UI/UX Design',
@@ -38,7 +42,7 @@ const SERVICES_DATA = {
     ],
     tech: ['Figma', 'Adobe XD', 'Protopie'],
     color: '#9d4edd',
-    starterPrice: '$300+'
+    starterPrice: 300
   },
   'mobile-apps': {
     title: 'Mobile Development',
@@ -54,14 +58,14 @@ const SERVICES_DATA = {
     ],
     tech: ['Java', 'React Native', 'Android Studio', 'Firebase'],
     color: '#39ff14',
-    starterPrice: '$600+'
+    starterPrice: 600
   }
 }
 
 export default function ServiceInquiry() {
   const { slug } = useParams()
-  const navigate = useNavigate()
   const [service, setService] = useState(null)
+  const [loading, setLoading] = useState(true)
   
   // Form State
   const [formData, setFormData] = useState({
@@ -72,14 +76,30 @@ export default function ServiceInquiry() {
     description: ''
   })
 
+  // Fetch service from Firestore
   useEffect(() => {
-    if (SERVICES_DATA[slug]) {
-      setService(SERVICES_DATA[slug])
-      window.scrollTo(0, 0)
-    } else {
-      navigate('/#services')
+    async function fetchService() {
+      try {
+        const docRef = doc(db, 'services', slug)
+        const docSnap = await getDoc(docRef)
+        
+        if (docSnap.exists()) {
+          setService({ id: docSnap.id, ...docSnap.data() })
+        } else {
+          // Try fallback
+          setService(FALLBACK_SERVICES[slug] || null)
+        }
+      } catch (error) {
+        console.warn('Firestore fetch failed, using fallback:', error.message)
+        setService(FALLBACK_SERVICES[slug] || null)
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [slug, navigate])
+    
+    fetchService()
+    window.scrollTo(0, 0)
+  }, [slug])
 
   const handleInputChange = (e) => {
     const { name, value } = e.target
@@ -108,7 +128,22 @@ Contact Info:
     window.location.href = `mailto:jeffdev.studio@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
   }
 
-  if (!service) return null
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontFamily: 'Press Start 2P', color: '#00d4ff', fontSize: '0.8rem' }}>LOADING...</span>
+      </div>
+    )
+  }
+
+  if (!service) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '2rem' }}>
+        <span style={{ fontFamily: 'Press Start 2P', color: '#ff6b35', fontSize: '1rem' }}>SERVICE NOT FOUND</span>
+        <a href="/#services" style={{ color: '#00d4ff' }}>← Back to Services</a>
+      </div>
+    )
+  }
 
   return (
     <div className="service-inquiry-page">
@@ -256,6 +291,31 @@ Contact Info:
           resize: vertical;
         }
 
+        /* Custom Select Dropdown Styling */
+        .form-select {
+          appearance: none;
+          -webkit-appearance: none;
+          -moz-appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2300d4ff' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 1rem center;
+          padding-right: 2.5rem;
+          cursor: pointer;
+        }
+
+        .form-select option {
+          background: #0a0a12;
+          color: white;
+          padding: 1rem;
+        }
+
+        .form-select option:hover,
+        .form-select option:focus,
+        .form-select option:checked {
+          background: ${service.color};
+          color: #0a0a12;
+        }
+
         /* Responsive */
         @media (max-width: 900px) {
           .service-container {
@@ -274,7 +334,7 @@ Contact Info:
       <div className="service-container">
         {/* Info Column */}
         <div className="service-info">
-          <Link to="/#services" className="back-link">← Back to Services</Link>
+          <a href="/#services" className="back-link">← Back to Services</a>
           <span className="service-icon">{service.icon}</span>
           <h1 className="service-title">{service.title}</h1>
           <p className="service-desc">{service.description}</p>
