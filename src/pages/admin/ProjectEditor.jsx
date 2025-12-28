@@ -435,7 +435,7 @@ export default function ProjectEditor() {
                 style={{ minHeight: '150px' }}
               />
               <span className="helper-text">
-                Detailed information displayed in the project modal. Supports plain text.
+                Supports **Markdown**! Use # headers, - lists, **bold**, `code`, and more.
               </span>
             </div>
 

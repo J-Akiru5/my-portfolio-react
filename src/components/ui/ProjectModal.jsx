@@ -1,5 +1,6 @@
 import React, { useEffect, useRef } from 'react'
 import { gsap } from 'gsap'
+import ReactMarkdown from 'react-markdown'
 import { PixelButton } from './'
 
 /**
@@ -241,6 +242,124 @@ const ProjectModal = ({ project, onClose }) => {
           font-size: 0.9rem;
         }
 
+        /* Status Pill */
+        .status-pill {
+          display: inline-block;
+          margin-top: 0.5rem;
+          padding: 0.4rem 0.8rem;
+          border-radius: 4px;
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.7rem;
+        }
+
+        .status-pill.complete {
+          background: rgba(57, 255, 20, 0.15);
+          border: 1px solid rgba(57, 255, 20, 0.4);
+          color: #39ff14;
+        }
+
+        .status-pill.progress {
+          background: rgba(255, 170, 0, 0.15);
+          border: 1px solid rgba(255, 170, 0, 0.4);
+          color: #ffaa00;
+        }
+
+        /* Modal Details Section */
+        .modal-details {
+          margin-bottom: 2rem;
+          padding: 1.5rem;
+          background: rgba(0, 0, 0, 0.3);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 8px;
+        }
+
+        /* Markdown Content Styles */
+        .markdown-content {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.9rem;
+          line-height: 1.8;
+          color: rgba(255, 255, 255, 0.85);
+        }
+
+        .markdown-content h1,
+        .markdown-content h2,
+        .markdown-content h3,
+        .markdown-content h4 {
+          color: #00d4ff;
+          margin: 1.5rem 0 0.75rem;
+          font-family: 'Press Start 2P', cursive;
+        }
+
+        .markdown-content h1 { font-size: 1rem; }
+        .markdown-content h2 { font-size: 0.85rem; }
+        .markdown-content h3 { font-size: 0.75rem; }
+        .markdown-content h4 { font-size: 0.65rem; color: #39ff14; }
+
+        .markdown-content p {
+          margin-bottom: 1rem;
+        }
+
+        .markdown-content ul,
+        .markdown-content ol {
+          margin: 1rem 0;
+          padding-left: 1.5rem;
+        }
+
+        .markdown-content li {
+          margin-bottom: 0.5rem;
+        }
+
+        .markdown-content li::marker {
+          color: #39ff14;
+        }
+
+        .markdown-content code {
+          background: rgba(0, 212, 255, 0.15);
+          padding: 0.15rem 0.4rem;
+          border-radius: 3px;
+          color: #00d4ff;
+          font-size: 0.85em;
+        }
+
+        .markdown-content pre {
+          background: rgba(0, 0, 0, 0.5);
+          border: 1px solid rgba(0, 212, 255, 0.3);
+          border-radius: 6px;
+          padding: 1rem;
+          overflow-x: auto;
+          margin: 1rem 0;
+        }
+
+        .markdown-content pre code {
+          background: none;
+          padding: 0;
+        }
+
+        .markdown-content a {
+          color: #00d4ff;
+          text-decoration: underline;
+        }
+
+        .markdown-content a:hover {
+          color: #39ff14;
+        }
+
+        .markdown-content blockquote {
+          border-left: 3px solid #9d4edd;
+          padding-left: 1rem;
+          margin: 1rem 0;
+          color: rgba(255, 255, 255, 0.7);
+          font-style: italic;
+        }
+
+        .markdown-content strong {
+          color: #39ff14;
+        }
+
+        .markdown-content em {
+          color: rgba(255, 255, 255, 0.7);
+        }
+
         @media (max-width: 768px) {
           .project-modal-overlay {
             padding: 0;
@@ -279,14 +398,20 @@ const ProjectModal = ({ project, onClose }) => {
           <div className="modal-header">
             <div>
               <h2 className="modal-title">{project.title}</h2>
+              {/* Status Badge */}
+              {project.status !== undefined && (
+                <span className={`status-pill ${project.status >= 100 ? 'complete' : 'progress'}`}>
+                  {project.status >= 100 ? '✓ Complete' : `${project.status}% In Progress`}
+                </span>
+              )}
             </div>
             <div className="modal-links">
-              {project.liveUrl && (
+              {project.liveUrl && project.liveUrl !== '#' && (
                 <PixelButton href={project.liveUrl} icon="🚀" size="small">
                   LIVE DEMO
                 </PixelButton>
               )}
-              {project.codeUrl && (
+              {project.codeUrl && project.codeUrl !== '#' && (
                 <PixelButton href={project.codeUrl} icon="💻" size="small" variant="outline">
                   CODE
                 </PixelButton>
@@ -296,25 +421,22 @@ const ProjectModal = ({ project, onClose }) => {
 
           <div className="modal-description">
             <p>{project.description}</p>
-            {project.details && (
-              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
-                <h4 style={{ 
-                  fontFamily: "'Press Start 2P', cursive", 
-                  fontSize: '0.7rem', 
-                  color: 'rgba(255,255,255,0.5)', 
-                  marginBottom: '0.75rem' 
-                }}>
-                  ARCHITECTURE.md
-                </h4>
-                <p style={{ whiteSpace: 'pre-wrap' }}>{project.details}</p>
-              </div>
-            )}
           </div>
+
+          {/* Architecture / Details (Markdown) */}
+          {project.details && (
+            <div className="modal-details">
+              <h3 className="modal-section-title">ARCHITECTURE.md</h3>
+              <div className="markdown-content">
+                <ReactMarkdown>{project.details}</ReactMarkdown>
+              </div>
+            </div>
+          )}
 
           {/* Tech Stack */}
           <h3 className="modal-section-title">TECH_STACK.json</h3>
           <div className="modal-tags">
-            {project.tags.map(tag => (
+            {project.tags && project.tags.map(tag => (
               <span key={tag} className="modal-tag">{tag}</span>
             ))}
           </div>
