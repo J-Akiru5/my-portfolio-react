@@ -127,11 +127,12 @@ export default function ProjectsSection() {
           min-height: 100vh;
           overflow: hidden;
           position: relative;
+          padding-top: 80px;
         }
         
         .projects-header {
           position: absolute;
-          top: 2rem;
+          top: 6rem;
           left: 2rem;
           z-index: 10;
         }
