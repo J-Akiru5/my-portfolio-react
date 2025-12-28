@@ -133,7 +133,7 @@ export default function ProjectsSection() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
-          end: '+=1500', // Pin duration
+          end: '+=2500', // INCREASED: More scroll room for breathing space
           pin: true,
           scrub: 1, // Smooth scrub
           refreshPriority: -1, // CRITICAL: Run calculation AFTER StorySection (0)
@@ -166,6 +166,8 @@ export default function ProjectsSection() {
         y: 0, 
         duration: 0.5 
       }, '-=0.4')
+      // 4. Breathing Room (Hold Phase)
+      .to({}, { duration: 1 }) // Empty tween = section stays pinned but nothing animates
 
     }, sectionRef)
 
