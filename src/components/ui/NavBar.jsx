@@ -40,26 +40,51 @@ const NavBar = () => {
       }
       
       // Detect active section based on scroll position
-      const sections = ['hero', 'about', 'story', 'projects', 'certificates', 'contact'];
-      const scrollY = window.scrollY + 100; // Offset for navbar height
+      // Only run on homepage
+      if (window.location.pathname !== '/') {
+        setActiveSection('');
+        return;
+      }
       
-      // Find the section we're currently in by checking bounds
+      const navSections = ['hero', 'about', 'projects', 'certificates', 'contact'];
+      const currentScrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const totalDocHeight = document.documentElement.scrollHeight;
+      
+      // If at bottom of page, highlight contact
+      if (currentScrollY + windowHeight >= totalDocHeight - 50) {
+        setActiveSection('contact');
+        return;
+      }
+      
+      // If near top, highlight hero
+      if (currentScrollY < 100) {
+        setActiveSection('hero');
+        return;
+      }
+      
+      // Find the section that's currently most visible
       let currentSection = 'hero';
-      for (const sectionId of sections) {
+      const offset = 150; // Navbar height + buffer
+      
+      for (const sectionId of navSections) {
         const element = document.getElementById(sectionId);
         if (element) {
-          const top = element.offsetTop;
-          const bottom = top + element.offsetHeight;
-          if (scrollY >= top && scrollY < bottom) {
+          const rect = element.getBoundingClientRect();
+          // Section is considered active if its top is above the offset point
+          if (rect.top <= offset) {
             currentSection = sectionId;
-            break;
           }
         }
       }
       
-      // Map story section to about for nav highlighting
-      if (currentSection === 'story') {
-        currentSection = 'about';
+      // Also check story section and map to about
+      const storyEl = document.getElementById('story');
+      if (storyEl) {
+        const storyRect = storyEl.getBoundingClientRect();
+        if (storyRect.top <= offset && storyRect.bottom > offset) {
+          currentSection = 'about';
+        }
       }
       
       setActiveSection(currentSection);
