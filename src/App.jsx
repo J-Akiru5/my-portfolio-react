@@ -17,6 +17,7 @@ import BlogPost from './pages/BlogPost'
 import ProjectDetail from './pages/ProjectDetail'
 import ServiceInquiry from './pages/ServiceInquiry'
 import Calendar from './pages/Calendar'
+import Payment from './pages/Payment'
 import AdminGateway from './pages/AdminGateway'
 
 // Admin pages
@@ -64,6 +65,9 @@ export default function App() {
 
               {/* Calendar (public) */}
               <Route path="/calendar" element={<Calendar />} />
+
+              {/* Payment page (public) */}
+              <Route path="/payment" element={<Payment />} />
 
               {/* Blog pages (public) */}
               <Route path="/blog" element={<Blog />} />
