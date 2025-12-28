@@ -30,13 +30,13 @@
 <summary>📸 Click to expand</summary>
 
 ### Hero Section
-![Hero](public/assets/Screenshot%202025-12-25%20122142.png)
+![Hero](public/assets/Screenshot%202025-12-25%20113451.png)
 
-### About / Skills
-![Skills](public/assets/Screenshot%202025-12-25%20113451.png)
+### Skills & Work
+![Skills](public/assets/Screenshot%202025-12-28%20152542.png)
 
 ### Blog Editor
-![Blog Editor](public/assets/Screenshot%202025-12-18%20222001.png)
+![Blog Editor](public/assets/Screenshot%202025-12-28%20152727.png)
 
 </details>
 
