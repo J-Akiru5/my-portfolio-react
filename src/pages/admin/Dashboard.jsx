@@ -134,6 +134,15 @@ export default function Dashboard() {
         </GlassCard>
         
         <GlassCard className="dashboard-card" hoverEffect={true}>
+          <div className="card-icon">🎮</div>
+          <h3 className="card-title">PROJECTS_MANAGER</h3>
+          <p className="card-desc">Add, edit, and organize portfolio projects displayed in the carousel.</p>
+          <PixelButton variant="filled" color="purple" onClick={() => navigate('/admin/projects')}>
+            MANAGE PROJECTS
+          </PixelButton>
+        </GlassCard>
+        
+        <GlassCard className="dashboard-card" hoverEffect={true}>
           <div className="card-icon">⚡</div>
           <h3 className="card-title">ANALYTICS</h3>
           <p className="card-desc">View site traffic, visitor stats, and engagement metrics via Firebase Analytics.</p>
