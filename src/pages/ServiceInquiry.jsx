@@ -106,11 +106,34 @@ export default function ServiceInquiry() {
     setFormData(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    // Construct mailto link with pre-filled data
-    const subject = `Inquiry: ${service.title}`
-    const body = `Hi Jeff,
+    setSubmitting(true)
+    
+    try {
+      // Save booking to Firestore
+      const { addDoc, collection } = await import('firebase/firestore')
+      const bookingsRef = collection(db, 'bookings')
+      
+      await addDoc(bookingsRef, {
+        serviceId: slug,
+        serviceName: service.title,
+        clientName: formData.name,
+        clientEmail: formData.email,
+        budget: formData.budget,
+        timeline: formData.timeline,
+        projectDescription: formData.description,
+        status: 'pending', // pending, quoted, accepted, in_progress, completed, cancelled
+        paymentStatus: 'unpaid', // unpaid, downpayment, paid
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      })
+      
+      // Open mailto as fallback/confirmation
+      const subject = `Inquiry: ${service.title}`
+      const body = `Hi Jeff,
 
 I'm interested in your ${service.title} service.
 
@@ -125,7 +148,16 @@ Contact Info:
 - Name: ${formData.name}
 - Email: ${formData.email}
 `
-    window.location.href = `mailto:jeffdev.studio@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+      window.location.href = `mailto:jeffdev.studio@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    } catch (error) {
+      console.error('Error saving booking:', error)
+      // Still open mailto even if Firestore fails
+      const subject = `Inquiry: ${service.title}`
+      const body = `Hi Jeff, I'm interested in your ${service.title} service.`
+      window.location.href = `mailto:jeffdev.studio@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   if (loading) {
@@ -432,8 +464,9 @@ Contact Info:
               variant="filled" 
               icon="🚀" 
               style={{ width: '100%', justifyContent: 'center' }}
+              disabled={submitting}
             >
-              SEND INQUIRY
+              {submitting ? 'SENDING...' : 'SEND INQUIRY'}
             </PixelButton>
             
             <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '1rem' }}>

@@ -15,7 +15,7 @@ const FALLBACK_SERVICES = [
     icon: '💻',
     title: 'Web Development',
     description: 'Full-stack web applications with Laravel + React + Inertia.js architecture.',
-    features: ['Laravel', 'React', 'Inertia.js', 'Tailwind CSS', 'Firebase'],
+    tech: ['Laravel', 'React', 'Inertia.js', 'Tailwind CSS', 'Firebase'],
     color: '#00d4ff',
     ctaText: 'START PROJECT',
     slug: 'web-development'
@@ -25,7 +25,7 @@ const FALLBACK_SERVICES = [
     icon: '🎨', 
     title: 'UI/UX Design',
     description: 'User-centered interfaces with Figma prototypes, design systems, and modern aesthetics.',
-    features: ['Figma', 'Design Systems', 'Prototyping', 'User Research'],
+    tech: ['Figma', 'Design Systems', 'Prototyping', 'User Research'],
     color: '#9d4edd',
     ctaText: 'VIEW PROCESS',
     slug: 'ui-ux-design'
@@ -35,7 +35,7 @@ const FALLBACK_SERVICES = [
     icon: '📱',
     title: 'Mobile Development',
     description: 'Native Android apps with Java and cross-platform solutions using React Native.',
-    features: ['Java', 'React Native', 'Firebase', 'Play Store Ready'],
+    tech: ['Java', 'React Native', 'Firebase', 'Play Store Ready'],
     color: '#39ff14',
     ctaText: 'DISCUSS APP',
     slug: 'mobile-apps'
@@ -259,13 +259,13 @@ export default function ServicesSection() {
               </h3>
               <p className="service-description">{service.description}</p>
               <div className="service-features">
-                {(service.features || service.tech || []).map((feature, idx) => (
+                {(service.tech || service.features || []).map((tag, idx) => (
                   <span 
                     key={idx} 
                     className="service-feature"
                     style={{ borderColor: `${service.color}40` }}
                   >
-                    {feature}
+                    {tag}
                   </span>
                 ))}
               </div>

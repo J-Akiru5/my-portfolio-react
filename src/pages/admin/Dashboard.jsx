@@ -152,6 +152,15 @@ export default function Dashboard() {
         </GlassCard>
         
         <GlassCard className="dashboard-card" hoverEffect={true}>
+          <div className="card-icon">📋</div>
+          <h3 className="card-title" style={{ color: '#ffc107' }}>BOOKINGS</h3>
+          <p className="card-desc">View and manage client inquiries, booking status, and payments.</p>
+          <PixelButton variant="filled" color="sunset" onClick={() => navigate('/admin/bookings')}>
+            VIEW BOOKINGS
+          </PixelButton>
+        </GlassCard>
+        
+        <GlassCard className="dashboard-card" hoverEffect={true}>
           <div className="card-icon">⚡</div>
           <h3 className="card-title">ANALYTICS</h3>
           <p className="card-desc">View site traffic, visitor stats, and engagement metrics via Firebase Analytics.</p>
