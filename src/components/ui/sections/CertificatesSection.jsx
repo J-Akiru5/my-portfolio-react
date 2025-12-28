@@ -7,15 +7,17 @@ import { certificates, getCertificatesByCategory } from '../../../data/certifica
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * CertificatesSection - Stagger reveal grid
+ * CertificatesSection - Stagger reveal grid with lightbox
  * 
  * Certificates animate in with staggered reveal as user scrolls.
+ * Clicking a certificate opens it in a full-screen lightbox.
  */
 export default function CertificatesSection() {
   const sectionRef = useRef(null)
   const gridRef = useRef(null)
   const [activeCategory, setActiveCategory] = useState('all')
   const [displayedCerts, setDisplayedCerts] = useState(certificates.slice(0, 8))
+  const [selectedCert, setSelectedCert] = useState(null)
 
   // Get unique categories
   const categories = ['all', ...new Set(certificates.map(c => c.category))]
@@ -44,6 +46,15 @@ export default function CertificatesSection() {
 
     return () => ctx.revert()
   }, [displayedCerts])
+
+  // Close modal on Escape key
+  useEffect(() => {
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') setSelectedCert(null)
+    }
+    window.addEventListener('keydown', handleEsc)
+    return () => window.removeEventListener('keydown', handleEsc)
+  }, [])
 
   return (
     <section id="certificates" ref={sectionRef} className="certificates-section">
@@ -182,6 +193,69 @@ export default function CertificatesSection() {
           background: rgba(0, 212, 255, 0.1);
           border-color: #00d4ff;
         }
+        
+        /* Lightbox Modal */
+        .cert-lightbox {
+          position: fixed;
+          inset: 0;
+          z-index: 9999;
+          background: rgba(0, 0, 0, 0.95);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 2rem;
+          animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        
+        .cert-lightbox-content {
+          position: relative;
+          max-width: 90vw;
+          max-height: 90vh;
+          animation: scaleIn 0.3s ease;
+        }
+        
+        @keyframes scaleIn {
+          from { transform: scale(0.9); opacity: 0; }
+          to { transform: scale(1); opacity: 1; }
+        }
+        
+        .cert-lightbox-content img {
+          max-width: 100%;
+          max-height: 85vh;
+          object-fit: contain;
+          border-radius: 8px;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+        
+        .cert-lightbox-title {
+          text-align: center;
+          margin-top: 1rem;
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.7rem;
+          color: #00d4ff;
+        }
+        
+        .cert-lightbox-close {
+          position: absolute;
+          top: -40px;
+          right: 0;
+          background: none;
+          border: none;
+          color: white;
+          font-size: 2rem;
+          cursor: pointer;
+          opacity: 0.7;
+          transition: opacity 0.3s;
+        }
+        
+        .cert-lightbox-close:hover {
+          opacity: 1;
+        }
       `}</style>
       
       <div className="certs-container">
@@ -206,7 +280,12 @@ export default function CertificatesSection() {
         
         <div ref={gridRef} className="certs-grid">
           {displayedCerts.map((cert) => (
-            <GlassCard key={cert.id} className="cert-card" hoverEffect={false}>
+            <GlassCard 
+              key={cert.id} 
+              className="cert-card" 
+              hoverEffect={false}
+              onClick={() => setSelectedCert(cert)}
+            >
               <div className="cert-image">
                 <img src={cert.image} alt={cert.title} />
               </div>
@@ -222,6 +301,29 @@ export default function CertificatesSection() {
           VIEW ALL {certificates.length} CERTIFICATES →
         </a>
       </div>
+      
+      {/* Lightbox Modal */}
+      {selectedCert && (
+        <div 
+          className="cert-lightbox" 
+          onClick={() => setSelectedCert(null)}
+        >
+          <div 
+            className="cert-lightbox-content"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button 
+              className="cert-lightbox-close"
+              onClick={() => setSelectedCert(null)}
+              aria-label="Close"
+            >
+              ×
+            </button>
+            <img src={selectedCert.image} alt={selectedCert.title} />
+            <p className="cert-lightbox-title">{selectedCert.title}</p>
+          </div>
+        </div>
+      )}
     </section>
   )
 }

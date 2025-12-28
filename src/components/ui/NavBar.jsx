@@ -46,7 +46,7 @@ const NavBar = () => {
         return;
       }
       
-      const navSections = ['hero', 'about', 'projects', 'certificates', 'contact'];
+      const navSections = ['hero', 'about', 'projects', 'certificates', 'services', 'contact'];
       const currentScrollY = window.scrollY;
       const windowHeight = window.innerHeight;
       const totalDocHeight = document.documentElement.scrollHeight;
@@ -126,6 +126,7 @@ const NavBar = () => {
     { id: 'about', label: 'ABOUT' },
     { id: 'projects', label: 'WORK' },
     { id: 'certificates', label: 'CERTS' },
+    { id: 'services', label: 'HIRE' },
     { id: 'contact', label: 'CONTACT' },
     { id: 'blog', label: 'BLOG', isRoute: true, path: '/blog' },
   ];

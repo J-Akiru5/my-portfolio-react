@@ -1,0 +1,255 @@
+import React, { useRef, useEffect } from 'react'
+import { gsap } from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { SectionTitle, GlassCard, PixelButton } from '..'
+
+gsap.registerPlugin(ScrollTrigger)
+
+/**
+ * ServicesSection - Freelance services showcase
+ * 
+ * Displays available freelance services with contact CTA.
+ */
+export default function ServicesSection() {
+  const sectionRef = useRef(null)
+  const cardsRef = useRef(null)
+
+  const services = [
+    {
+      id: 'webdev',
+      icon: '💻',
+      title: 'Web Development',
+      description: 'Full-stack web applications with modern React, responsive design, and optimized performance.',
+      features: ['React / Next.js', 'Firebase / Node.js', 'Responsive Design', 'SEO Optimization'],
+      accent: '#00d4ff',
+    },
+    {
+      id: 'uiux',
+      icon: '🎨',
+      title: 'UI/UX Design',
+      description: 'User-centered interfaces with modern aesthetics, smooth animations, and intuitive navigation.',
+      features: ['Figma Prototypes', 'Design Systems', 'Motion Design', 'User Research'],
+      accent: '#9d4edd',
+    },
+    {
+      id: 'android',
+      icon: '📱',
+      title: 'Android Development',
+      description: 'Native Android applications with modern architecture and seamless user experience.',
+      features: ['Kotlin / Java', 'Material Design', 'Firebase Integration', 'Play Store Ready'],
+      accent: '#39ff14',
+      comingSoon: true,
+    },
+  ]
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from('.service-card', {
+        opacity: 0,
+        y: 60,
+        stagger: 0.15,
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: cardsRef.current,
+          start: 'top 80%',
+        }
+      })
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
+
+  const scrollToContact = (e) => {
+    e.preventDefault()
+    const contactSection = document.getElementById('contact')
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' })
+    }
+  }
+
+  return (
+    <section id="services" ref={sectionRef} className="services-section">
+      <style>{`
+        .services-section {
+          min-height: 100vh;
+          padding: 6rem 2rem;
+          position: relative;
+        }
+        
+        .services-container {
+          max-width: 1200px;
+          margin: 0 auto;
+        }
+        
+        .services-intro {
+          text-align: center;
+          max-width: 600px;
+          margin: 0 auto 3rem;
+        }
+        
+        .services-intro p {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 1rem;
+          line-height: 1.6;
+        }
+        
+        .services-intro .highlight {
+          color: #00d4ff;
+          font-weight: 600;
+        }
+        
+        .services-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+          gap: 2rem;
+        }
+        
+        .service-card {
+          position: relative;
+          padding: 2rem !important;
+          text-align: center;
+          overflow: hidden;
+        }
+        
+        .service-card.coming-soon {
+          opacity: 0.6;
+        }
+        
+        .service-card.coming-soon::after {
+          content: 'COMING SOON';
+          position: absolute;
+          top: 1rem;
+          right: -2rem;
+          background: #ff6b35;
+          color: #0a0a12;
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.5rem;
+          padding: 0.3rem 2rem;
+          transform: rotate(45deg);
+        }
+        
+        .service-icon {
+          font-size: 3rem;
+          margin-bottom: 1rem;
+          display: block;
+        }
+        
+        .service-title {
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.9rem;
+          margin-bottom: 1rem;
+          color: white;
+        }
+        
+        .service-description {
+          color: rgba(255, 255, 255, 0.7);
+          font-size: 0.9rem;
+          line-height: 1.6;
+          margin-bottom: 1.5rem;
+        }
+        
+        .service-features {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.5rem;
+          justify-content: center;
+          margin-bottom: 1.5rem;
+        }
+        
+        .service-feature {
+          padding: 0.3rem 0.6rem;
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          border-radius: 4px;
+          font-size: 0.7rem;
+          color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .service-cta {
+          margin-top: auto;
+        }
+        
+        .services-footer {
+          text-align: center;
+          margin-top: 3rem;
+          padding: 2rem;
+          background: rgba(0, 212, 255, 0.05);
+          border: 1px solid rgba(0, 212, 255, 0.2);
+          border-radius: 12px;
+        }
+        
+        .services-footer p {
+          color: rgba(255, 255, 255, 0.7);
+          margin-bottom: 1rem;
+          font-size: 0.9rem;
+        }
+        
+        .services-footer .pixel-font {
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.7rem;
+          color: #00d4ff;
+        }
+        
+        @media (max-width: 768px) {
+          .services-grid {
+            grid-template-columns: 1fr;
+          }
+          
+          .service-title {
+            font-size: 0.75rem;
+          }
+        }
+      `}</style>
+      
+      <div className="services-container">
+        <SectionTitle title="SERVICES" extension=".hire" />
+        
+        <div className="services-intro">
+          <p>
+            Currently a <span className="highlight">student freelancer</span> passionate about 
+            crafting digital experiences. Let's build something awesome together!
+          </p>
+        </div>
+        
+        <div ref={cardsRef} className="services-grid">
+          {services.map((service) => (
+            <GlassCard 
+              key={service.id} 
+              className={`service-card ${service.comingSoon ? 'coming-soon' : ''}`}
+            >
+              <span className="service-icon">{service.icon}</span>
+              <h3 className="service-title" style={{ color: service.accent }}>
+                {service.title}
+              </h3>
+              <p className="service-description">{service.description}</p>
+              <div className="service-features">
+                {service.features.map((feature, idx) => (
+                  <span 
+                    key={idx} 
+                    className="service-feature"
+                    style={{ borderColor: `${service.accent}40` }}
+                  >
+                    {feature}
+                  </span>
+                ))}
+              </div>
+              {!service.comingSoon && (
+                <div className="service-cta">
+                  <PixelButton onClick={scrollToContact} size="small">
+                    GET IN TOUCH
+                  </PixelButton>
+                </div>
+              )}
+            </GlassCard>
+          ))}
+        </div>
+        
+        <div className="services-footer">
+          <p>Interested in working together?</p>
+          <p className="pixel-font">📩 Contact me for project discussion & pricing</p>
+        </div>
+      </div>
+    </section>
+  )
+}

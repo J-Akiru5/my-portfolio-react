@@ -7,6 +7,7 @@ import {
   StorySection,
   ProjectsSection,
   CertificatesSection,
+  ServicesSection,
   ContactSection,
 } from '../components/ui/sections'
 import Seo from '../components/Seo'
@@ -102,6 +103,7 @@ export default function SinglePage() {
       <StorySection />
       <ProjectsSection />
       <CertificatesSection />
+      <ServicesSection />
       <ContactSection />
     </div>
   )
