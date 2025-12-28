@@ -20,6 +20,12 @@ const PAYMENT_METHODS = {
     icon: '🏦',
     color: '#00843D',
     description: 'Bank transfer via online banking or branch'
+  },
+  paypal: {
+    name: 'PayPal',
+    icon: '🌐',
+    color: '#003087',
+    description: 'International payments via PayPal'
   }
 }
 
@@ -50,7 +56,7 @@ export default function Payment() {
     <div className="payment-page">
       <Seo 
         title="Payment | JeffDev Studio"
-        description="Pay for your project via GCash or Landbank"
+        description="Pay for your project via GCash, Landbank, or PayPal"
       />
 
       <style>{`
@@ -323,6 +329,61 @@ export default function Payment() {
                 <li>Enter the account number above</li>
                 <li>Enter payment amount</li>
                 <li>Screenshot your receipt!</li>
+              </ol>
+            </div>
+          </>
+        )}
+
+        {activeMethod === 'paypal' && (
+          <>
+            <div className="paypal-section" style={{ marginBottom: '2rem' }}>
+              <div style={{ 
+                fontSize: '4rem', 
+                marginBottom: '1rem' 
+              }}>
+                🌐
+              </div>
+              <h3 style={{ 
+                fontFamily: 'Press Start 2P', 
+                fontSize: '0.9rem', 
+                color: '#003087',
+                marginBottom: '0.5rem'
+              }}>
+                INTERNATIONAL PAYMENTS
+              </h3>
+              <p style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '2rem' }}>
+                Pay securely via PayPal from anywhere in the world
+              </p>
+              
+              <a 
+                href="https://paypal.me/JeffDevStudio" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+              >
+                <PixelButton variant="filled" color="blue" size="large">
+                  PAY WITH PAYPAL
+                </PixelButton>
+              </a>
+              
+              <p style={{ 
+                marginTop: '1.5rem', 
+                fontSize: '0.8rem', 
+                color: 'rgba(255,255,255,0.5)' 
+              }}>
+                You'll be redirected to PayPal to complete your payment
+              </p>
+            </div>
+
+            <div className="instructions">
+              <h4>HOW TO PAY</h4>
+              <ol>
+                <li>Click the <strong>PAY WITH PAYPAL</strong> button above</li>
+                <li>Log in to your PayPal account</li>
+                <li>Enter the payment amount (in USD or PHP)</li>
+                <li>Add a note with your project name</li>
+                <li>Complete the payment</li>
+                <li>You'll receive a confirmation email</li>
               </ol>
             </div>
           </>
