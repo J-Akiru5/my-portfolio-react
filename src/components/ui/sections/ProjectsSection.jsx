@@ -111,6 +111,25 @@ export default function ProjectsSection() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [activeIndex, selectedProject])
 
+  // Smooth card transition animation when switching projects
+  useEffect(() => {
+    if (!activeCardRef.current) return
+    // Quick scale-fade animation for card change
+    gsap.fromTo(activeCardRef.current,
+      { opacity: 0.5, scale: 0.95 },
+      { opacity: 1, scale: 1, duration: 0.4, ease: 'power2.out' }
+    )
+    // Animate side cards too
+    gsap.fromTo('.project-card-wrapper.prev',
+      { opacity: 0, x: -100 },
+      { opacity: 0.4, x: 0, duration: 0.4, ease: 'power2.out' }
+    )
+    gsap.fromTo('.project-card-wrapper.next',
+      { opacity: 0, x: 100 },
+      { opacity: 0.4, x: 0, duration: 0.4, ease: 'power2.out' }
+    )
+  }, [activeIndex])
+
   // GSAP Pinned Reveal Sequence
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
