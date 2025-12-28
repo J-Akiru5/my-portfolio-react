@@ -8,6 +8,20 @@ export default function Seo({
   type = 'website',
   twitterHandle = '' 
 }) {
+  // JSON-LD Organization schema for Google to recognize logo
+  const organizationSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "JeffDev Studio",
+    "url": "https://jeffdev.studio",
+    "logo": "https://jeffdev.studio/favicon/favicon-96x96.png",
+    "image": "https://jeffdev.studio/og-image.png",
+    "sameAs": [
+      "https://www.linkedin.com/in/jeff-edrick-martinez",
+      "https://github.com/jeffmartinez26"
+    ]
+  };
+
   return (
     <Helmet>
       {/* Standard Metadata */}
@@ -28,7 +42,10 @@ export default function Seo({
       <meta name="twitter:title" content={title} />
       <meta name="twitter:description" content={description} />
       
-      {/* Security: Prevent XSS in title/meta by letting Helmet handle escaping */}
+      {/* JSON-LD Organization Schema for Google Favicon */}
+      <script type="application/ld+json">
+        {JSON.stringify(organizationSchema)}
+      </script>
     </Helmet>
   );
 }
