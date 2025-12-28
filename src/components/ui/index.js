@@ -10,4 +10,6 @@ export { default as SocialIcon } from './SocialIcon';
 export { default as ImageUpload } from './ImageUpload';
 export { default as Toast, ToastProvider, useToast } from './Toast';
 export { default as ProjectModal } from './ProjectModal';
+export { default as VersionBadge } from './VersionBadge';
 export { CatIcon } from './CatIcon';
+

@@ -2,7 +2,7 @@ import React from 'react'
 import { Routes, Route } from 'react-router-dom'
 import { HelmetProvider } from 'react-helmet-async'
 import { AuthProvider } from './context/AuthContext'
-import { NavBar, FloatingStars, ToastProvider } from './components/ui'
+import { NavBar, FloatingStars, ToastProvider, VersionBadge } from './components/ui'
 import ProtectedRoute from './components/ProtectedRoute'
 
 // Main page
@@ -77,6 +77,9 @@ export default function App() {
               </Route>
             </Routes>
           </main>
+
+          {/* Version Badge (persistent) */}
+          <VersionBadge />
           </div>
         </ToastProvider>
       </AuthProvider>
