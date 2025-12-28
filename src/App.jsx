@@ -29,6 +29,8 @@ import BlogDashboard from './pages/admin/BlogDashboard'
 import BlogEditor from './pages/admin/BlogEditor'
 import ProjectsDashboard from './pages/admin/ProjectsDashboard'
 import ProjectEditor from './pages/admin/ProjectEditor'
+import ServicesDashboard from './pages/admin/ServicesDashboard'
+import ServiceEditor from './pages/admin/ServiceEditor'
 
 export default function App() {
   return (
@@ -82,6 +84,11 @@ export default function App() {
                 <Route path="/admin/projects" element={<ProjectsDashboard />} />
                 <Route path="/admin/projects/new" element={<ProjectEditor />} />
                 <Route path="/admin/projects/:projectId" element={<ProjectEditor />} />
+
+                {/* Services Admin */}
+                <Route path="/admin/services" element={<ServicesDashboard />} />
+                <Route path="/admin/services/new" element={<ServiceEditor />} />
+                <Route path="/admin/services/:serviceId" element={<ServiceEditor />} />
               </Route>
             </Routes>
           </main>
