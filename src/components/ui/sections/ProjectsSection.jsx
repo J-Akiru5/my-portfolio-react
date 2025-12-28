@@ -1,22 +1,27 @@
-import React, { useRef, useState, useEffect } from 'react'
+import React, { useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSwipeable } from 'react-swipeable'
-import { SectionTitle, GlassCard, ProjectModal } from '..'
+import { SectionTitle, ProjectModal } from '..'
 
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * ProjectsSection - Game Console Style Carousel
+ * ProjectsSection - Game Console Style Carousel with Pinned Reveal
  * 
- * 3D carousel with active center project, dimmed side projects,
- * retro controller navigation, and mobile swipe support.
+ * Locked reveal sequence with GSAP ScrollTrigger pinning.
+ * 3D carousel with retro controller navigation.
  */
 export default function ProjectsSection() {
   const sectionRef = useRef(null)
+  const titleRef = useRef(null)
+  const activeCardRef = useRef(null)
+  const prevCardRef = useRef(null)
+  const nextCardRef = useRef(null)
+  const controlsRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [selectedProject, setSelectedProject] = useState(null)
-  const [rotation, setRotation] = useState(0)
+  const [hasRevealed, setHasRevealed] = useState(false)
 
   const projects = [
     {
@@ -100,7 +105,7 @@ export default function ProjectsSection() {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (selectedProject) return // Disable nav when modal open
+      if (selectedProject) return
       if (e.key === 'ArrowRight') nextProject()
       if (e.key === 'ArrowLeft') prevProject()
       if (e.key === 'Enter') setSelectedProject(projects[activeIndex])
@@ -108,6 +113,71 @@ export default function ProjectsSection() {
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [activeIndex, selectedProject])
+
+  // GSAP Pinned Reveal Sequence
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      // Initial hidden states
+      gsap.set(titleRef.current, { opacity: 0, y: 30 })
+      gsap.set(activeCardRef.current, { opacity: 0, y: 100, scale: 0.8 })
+      gsap.set(prevCardRef.current, { opacity: 0, x: -200 })
+      gsap.set(nextCardRef.current, { opacity: 0, x: 200 })
+      gsap.set(controlsRef.current, { opacity: 0, y: 20 })
+
+      // Create timeline with ScrollTrigger pin
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: 'top top',
+          end: '+=1500',
+          pin: true,
+          scrub: 0.5,
+          onLeave: () => setHasRevealed(true),
+          onEnterBack: () => setHasRevealed(true),
+        }
+      })
+
+      // Sequence
+      tl.to(titleRef.current, { 
+        opacity: 1, 
+        y: 0, 
+        duration: 0.3,
+        ease: 'power2.out'
+      })
+      .to(activeCardRef.current, { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1, 
+        duration: 0.5,
+        ease: 'back.out(1.2)'
+      }, '+=0.1')
+      .to([prevCardRef.current, nextCardRef.current], { 
+        opacity: 1, 
+        x: 0, 
+        duration: 0.4,
+        stagger: 0.1,
+        ease: 'power3.out'
+      }, '-=0.2')
+      .to(controlsRef.current, { 
+        opacity: 1, 
+        y: 0, 
+        duration: 0.3,
+        ease: 'power2.out'
+      }, '-=0.1')
+      // Glitch effect on controls
+      .to(controlsRef.current, {
+        keyframes: [
+          { x: -3, duration: 0.05 },
+          { x: 3, duration: 0.05 },
+          { x: -2, duration: 0.05 },
+          { x: 0, duration: 0.05 },
+        ]
+      })
+
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [])
 
   // Get index for 3 visible cards
   const getVisibleProjects = () => {
@@ -123,7 +193,7 @@ export default function ProjectsSection() {
       <style>{`
         .projects-section {
           min-height: 100vh;
-          padding: 6rem 2rem 2rem;
+          padding: 5rem 2rem 2rem;
           position: relative;
           overflow: hidden;
           background: radial-gradient(circle at center, rgba(10, 20, 40, 0.8) 0%, rgba(5, 5, 10, 1) 100%);
@@ -132,18 +202,18 @@ export default function ProjectsSection() {
         .projects-header-container {
           position: relative;
           z-index: 10;
-          margin-bottom: 2rem;
+          margin-bottom: 1.5rem;
           padding-left: 2rem;
         }
 
         /* Console Frame */
         .console-frame {
-          max-width: 1200px;
+          max-width: 1400px;
           margin: 0 auto;
           position: relative;
-          perspective: 1000px;
-          height: 60vh;
-          min-height: 500px;
+          perspective: 1200px;
+          height: 55vh;
+          min-height: 450px;
           display: flex;
           align-items: center;
           justify-content: center;
@@ -153,7 +223,7 @@ export default function ProjectsSection() {
         .scanlines {
           position: absolute;
           inset: 0;
-          background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+          background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.08) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.02), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.02));
           background-size: 100% 2px, 3px 100%;
           pointer-events: none;
           z-index: 5;
@@ -170,65 +240,72 @@ export default function ProjectsSection() {
 
         .project-card-wrapper {
           position: absolute;
-          transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-          width: 60%;
-          max-width: 600px;
-          height: 350px;
-          cursor: pointer;
+          transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        /* Active Card (Center) */
+        /* Active Card (Center) - LARGER */
         .project-card-wrapper.active {
           z-index: 10;
+          width: 55%;
+          max-width: 700px;
+          height: 400px;
           transform: translateX(0) scale(1);
           opacity: 1;
-          filter: brightness(1.2);
+          filter: brightness(1.1);
+          cursor: pointer;
         }
 
         /* Active Glow */
         .project-card-wrapper.active::after {
           content: '';
           position: absolute;
-          inset: -3px;
+          inset: -4px;
           background: var(--glow-color);
           z-index: -1;
-          border-radius: 16px;
-          filter: blur(15px);
-          opacity: 0.6;
+          border-radius: 6px;
+          filter: blur(20px);
+          opacity: 0.7;
           animation: pulse-glow 2s infinite;
         }
 
         @keyframes pulse-glow {
-          0%, 100% { opacity: 0.6; }
-          50% { opacity: 0.3; }
+          0%, 100% { opacity: 0.7; }
+          50% { opacity: 0.35; }
         }
 
-        /* Prev Card (Left) */
-        .project-card-wrapper.prev {
-          z-index: 5;
-          transform: translateX(-55%) scale(0.7) rotateY(15deg);
-          opacity: 0.5;
-          filter: brightness(0.5) blur(1px);
-          pointer-events: none; /* Prevent clicking side cards */
-        }
-
-        /* Next Card (Right) */
+        /* Side Cards - SMALLER */
+        .project-card-wrapper.prev,
         .project-card-wrapper.next {
           z-index: 5;
-          transform: translateX(55%) scale(0.7) rotateY(-15deg);
-          opacity: 0.5;
-          filter: brightness(0.5) blur(1px);
+          width: 30%;
+          max-width: 350px;
+          height: 220px;
+          opacity: 0.4;
+          filter: brightness(0.4) saturate(0.5);
           pointer-events: none;
         }
+
+        .project-card-wrapper.prev {
+          transform: translateX(-65%) scale(0.6) rotateY(20deg);
+        }
+
+        .project-card-wrapper.next {
+          transform: translateX(65%) scale(0.6) rotateY(-20deg);
+        }
         
-        /* Main Visual */
+        /* Card Visual - Sharp Corners */
         .project-visual {
           width: 100%;
           height: 100%;
-          border-radius: 12px;
+          border-radius: 4px;
           overflow: hidden;
           position: relative;
           background: #000;
+          border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .project-card-wrapper.active .project-visual {
+          border-color: var(--glow-color);
         }
 
         .project-visual img {
@@ -242,73 +319,81 @@ export default function ProjectsSection() {
           bottom: 0;
           left: 0;
           width: 100%;
-          padding: 2rem;
-          background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+          padding: 1.5rem;
+          background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
           transform: translateY(20px);
           opacity: 0;
-          transition: all 0.3s;
+          transition: all 0.4s ease;
         }
 
-        .project-card-wrapper.active:hover .project-info-overlay {
+        .project-card-wrapper.active:hover .project-info-overlay,
+        .project-card-wrapper.active .project-info-overlay {
           transform: translateY(0);
           opacity: 1;
-        }
-        
-        /* Always show info on mobile active */
-        @media (max-width: 768px) {
-           .project-card-wrapper.active .project-info-overlay {
-            transform: translateY(0);
-            opacity: 1;
-          }
         }
 
         .project-title {
           font-family: 'Press Start 2P', cursive;
           color: white;
-          font-size: 1.2rem;
+          font-size: 1rem;
           margin-bottom: 0.5rem;
           text-shadow: 2px 2px 0px black;
         }
 
-        /* Controller Controls */
+        .click-hint {
+          color: rgba(255,255,255,0.6);
+          font-size: 0.8rem;
+          font-family: 'JetBrains Mono', monospace;
+        }
+
+        /* PIXEL CONTROLLER BUTTONS */
         .console-controls {
           display: flex;
           justify-content: space-between;
           align-items: center;
           width: 100%;
-          max-width: 900px;
-          margin: 2rem auto;
+          max-width: 800px;
+          margin: 2rem auto 0;
           padding: 0 2rem;
         }
         
         .d-pad {
           display: flex;
-          gap: 1rem;
+          gap: 0.5rem;
         }
 
+        /* Pixelated Button Style */
         .control-btn {
-          width: 60px;
-          height: 60px;
-          background: rgba(255, 255, 255, 0.1);
-          border: 2px solid rgba(255, 255, 255, 0.2);
-          border-radius: 50%;
-          color: white;
-          font-size: 1.5rem;
+          width: 50px;
+          height: 50px;
+          background: #1a1a2e;
+          border: 3px solid #333;
+          border-radius: 4px;
+          color: #888;
+          font-size: 1.2rem;
           cursor: pointer;
           display: flex;
           align-items: center;
           justify-content: center;
-          transition: all 0.2s;
-          box-shadow: 0 5px 0 rgba(0,0,0,0.5);
+          transition: all 0.15s;
+          box-shadow: 
+            inset -2px -2px 0 #0a0a12,
+            inset 2px 2px 0 #2a2a3e,
+            0 4px 0 #0a0a12;
+          image-rendering: pixelated;
+          font-family: 'Press Start 2P', cursive;
         }
 
         .control-btn:active {
-          transform: translateY(5px);
-          box-shadow: 0 0 0 rgba(0,0,0,0.5);
+          transform: translateY(4px);
+          box-shadow: 
+            inset -2px -2px 0 #0a0a12,
+            inset 2px 2px 0 #2a2a3e,
+            0 0 0 #0a0a12;
         }
 
         .control-btn:hover {
-          background: rgba(0, 212, 255, 0.2);
+          background: #2a2a4e;
           border-color: #00d4ff;
           color: #00d4ff;
         }
@@ -320,60 +405,76 @@ export default function ProjectsSection() {
           gap: 0.5rem;
         }
 
+        /* Pixelated SELECT Button */
         .select-btn {
-          padding: 0.8rem 2rem;
+          padding: 0.8rem 1.5rem;
           background: #ff0055;
-          border: none;
-          border-radius: 30px;
+          border: 3px solid #990033;
+          border-radius: 4px;
           color: white;
           font-family: 'Press Start 2P', cursive;
-          font-size: 0.8rem;
+          font-size: 0.65rem;
           cursor: pointer;
-          box-shadow: 0 5px 0 #990033;
-          transition: all 0.2s;
+          box-shadow: 
+            inset -2px -2px 0 #aa0044,
+            inset 2px 2px 0 #ff3377,
+            0 4px 0 #660022;
+          transition: all 0.15s;
           text-transform: uppercase;
         }
 
         .select-btn:active {
-          transform: translateY(5px);
-          box-shadow: 0 0 0 #990033;
+          transform: translateY(4px);
+          box-shadow: 
+            inset -2px -2px 0 #aa0044,
+            inset 2px 2px 0 #ff3377,
+            0 0 0 #660022;
         }
 
         .select-btn:hover {
-          filter: brightness(1.1);
+          background: #ff2266;
         }
 
         .mobile-hint {
            text-align: center;
            color: rgba(255,255,255,0.4);
            font-family: 'Press Start 2P', cursive;
-           font-size: 0.6rem;
-           margin-top: 1rem;
+           font-size: 0.55rem;
+           margin-top: 1.5rem;
            display: none;
         }
 
         @media (max-width: 768px) {
-           .project-card-wrapper {
-             width: 80%;
-             height: 300px;
+           .console-frame {
+             height: 45vh;
+             min-height: 350px;
+           }
+           
+           .project-card-wrapper.active {
+             width: 85%;
+             height: 280px;
            }
            
            .project-card-wrapper.prev, 
            .project-card-wrapper.next {
-             display: none; /* Hide side cards on mobile for cleaner look */
+             display: none;
            }
            
            .console-controls {
-             display: none; /* Hide buttons, use swipe */
+             display: none;
            }
            
            .mobile-hint {
              display: block;
            }
+           
+           .project-title {
+             font-size: 0.8rem;
+           }
         }
       `}</style>
       
-      <div className="projects-header-container">
+      <div className="projects-header-container" ref={titleRef}>
         <SectionTitle title="PROJECTS" extension=".work" />
       </div>
 
@@ -382,7 +483,7 @@ export default function ProjectsSection() {
         <div className="carousel-track">
           
           {/* Previous Project (Left) */}
-          <div className="project-card-wrapper prev">
+          <div className="project-card-wrapper prev" ref={prevCardRef}>
              <div className="project-visual">
                <img src={projects[prev].image} alt="" />
              </div>
@@ -391,6 +492,7 @@ export default function ProjectsSection() {
           {/* Active Project (Center) */}
           <div 
             className="project-card-wrapper active"
+            ref={activeCardRef}
             style={{ '--glow-color': projects[current].color }}
             onClick={() => setSelectedProject(projects[current])}
           >
@@ -398,15 +500,13 @@ export default function ProjectsSection() {
                <img src={projects[current].image} alt={projects[current].title} />
                <div className="project-info-overlay">
                  <h3 className="project-title">{projects[current].title}</h3>
-                 <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>
-                   Click for details
-                 </p>
+                 <p className="click-hint">[ PRESS A TO SELECT ]</p>
                </div>
              </div>
           </div>
 
           {/* Next Project (Right) */}
-          <div className="project-card-wrapper next">
+          <div className="project-card-wrapper next" ref={nextCardRef}>
              <div className="project-visual">
                <img src={projects[next].image} alt="" />
              </div>
@@ -415,7 +515,7 @@ export default function ProjectsSection() {
         </div>
       </div>
 
-      <div className="console-controls">
+      <div className="console-controls" ref={controlsRef}>
         <div className="d-pad">
           <button className="control-btn" onClick={prevProject} aria-label="Previous">
             ◀
@@ -427,13 +527,13 @@ export default function ProjectsSection() {
         
         <div className="action-btns">
           <button className="select-btn" onClick={() => setSelectedProject(projects[current])}>
-            SELECT (A)
+            [A] SELECT
           </button>
         </div>
       </div>
 
       <div className="mobile-hint">
-        SWIPE TO NAVIGATE • TAP FOR DETAILS
+        ◀ SWIPE ▶ • TAP TO SELECT
       </div>
 
       {/* Modal */}
