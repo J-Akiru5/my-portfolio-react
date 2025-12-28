@@ -65,11 +65,8 @@ const ProjectModal = ({ project, onClose }) => {
           z-index: 9999;
           background: rgba(10, 10, 18, 0.95);
           backdrop-filter: blur(8px);
-          display: flex;
-          align-items: center;
-          justify-content: center;
           padding: 2rem;
-          overflow: auto;
+          overflow-y: auto;
           overscroll-behavior: contain;
         }
 
@@ -79,10 +76,7 @@ const ProjectModal = ({ project, onClose }) => {
           border-radius: 20px;
           max-width: 900px;
           width: 100%;
-          max-height: calc(100vh - 4rem);
-          overflow-y: auto;
-          overscroll-behavior: contain;
-          overflow-x: hidden;
+          margin: 2rem auto;
           position: relative;
           box-shadow: 0 0 50px rgba(0, 212, 255, 0.15);
           scrollbar-width: thin;
