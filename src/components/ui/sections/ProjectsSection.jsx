@@ -1,10 +1,11 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, useCallback } from 'react'
+import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSwipeable } from 'react-swipeable'
 import { collection, query, orderBy, getDocs } from 'firebase/firestore'
 import { db } from '../../../firebase'
-import { SectionTitle, ProjectModal } from '..'
+import { SectionTitle } from '..'
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -93,7 +94,6 @@ export default function ProjectsSection() {
   const carouselRef = useRef(null)
   const controlsRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
-  const [selectedProject, setSelectedProject] = useState(null)
   const [projects, setProjects] = useState(FALLBACK_PROJECTS)
   const [controlsVisible, setControlsVisible] = useState(false)
 
@@ -139,14 +139,16 @@ export default function ProjectsSection() {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (selectedProject) return
       if (e.key === 'ArrowRight') nextProject()
       if (e.key === 'ArrowLeft') prevProject()
-      if (e.key === 'Enter') setSelectedProject(projects[activeIndex])
+      if (e.key === 'Enter') {
+        // Navigate to project detail page
+        window.location.href = `/projects/${projects[activeIndex].id}`
+      }
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [activeIndex, selectedProject, projects, nextProject, prevProject])
+  }, [activeIndex, projects, nextProject, prevProject])
 
   // GSAP Pinned Reveal Sequence
   useLayoutEffect(() => {
@@ -646,9 +648,9 @@ export default function ProjectsSection() {
         </div>
         
         <div className="action-btns">
-          <button className="select-btn" onClick={() => setSelectedProject(currentProject)}>
+          <Link to={`/projects/${currentProject.id}`} className="select-btn">
             [A] SELECT
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -661,14 +663,6 @@ export default function ProjectsSection() {
       <div className="mobile-hint">
         ◀ SWIPE ▶ • TAP SELECT
       </div>
-
-      {/* Modal */}
-      {selectedProject && (
-        <ProjectModal 
-          project={selectedProject} 
-          onClose={() => setSelectedProject(null)} 
-        />
-      )}
 
     </section>
   )

@@ -14,6 +14,7 @@ import Certifications from './pages/Certifications'
 // Blog pages
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
+import ProjectDetail from './pages/ProjectDetail'
 import AdminGateway from './pages/AdminGateway'
 
 // Admin pages
@@ -49,6 +50,9 @@ export default function App() {
               
               {/* Full certificates page */}
               <Route path="/certifications" element={<Certifications />} />
+              
+              {/* Project detail page */}
+              <Route path="/projects/:slug" element={<ProjectDetail />} />
               
               {/* Blog pages (public) */}
               <Route path="/blog" element={<Blog />} />

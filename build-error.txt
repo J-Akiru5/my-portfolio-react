@@ -1,0 +1,15 @@
+
+> profile-react@0.0.0 build
+> vite build
+
+[36mvite v7.1.5 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 80 modules transformed.
+Γ£ù Build failed in 419ms
+error during build:
+Could not resolve "../components" from "src/pages/ProjectDetail.jsx"
+file: C:/xampp/htdocs/profile-react/src/pages/ProjectDetail.jsx
+    at getRollupError (file:///C:/xampp/htdocs/profile-react/node_modules/rollup/dist/es/shared/parseAst.js:401:41)
+    at error (file:///C:/xampp/htdocs/profile-react/node_modules/rollup/dist/es/shared/parseAst.js:397:42)
+    at ModuleLoader.handleInvalidResolvedId (file:///C:/xampp/htdocs/profile-react/node_modules/rollup/dist/es/shared/node-entry.js:21539:24)
+    at file:///C:/xampp/htdocs/profile-react/node_modules/rollup/dist/es/shared/node-entry.js:21499:26
