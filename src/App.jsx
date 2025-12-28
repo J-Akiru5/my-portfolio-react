@@ -16,6 +16,7 @@ import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
 import ProjectDetail from './pages/ProjectDetail'
 import ServiceInquiry from './pages/ServiceInquiry'
+import Calendar from './pages/Calendar'
 import AdminGateway from './pages/AdminGateway'
 
 // Admin pages
@@ -60,6 +61,9 @@ export default function App() {
               
               {/* Service inquiry page */}
               <Route path="/services/:slug" element={<ServiceInquiry />} />
+
+              {/* Calendar (public) */}
+              <Route path="/calendar" element={<Calendar />} />
 
               {/* Blog pages (public) */}
               <Route path="/blog" element={<Blog />} />
