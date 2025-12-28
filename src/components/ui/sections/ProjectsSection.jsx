@@ -9,8 +9,11 @@ gsap.registerPlugin(ScrollTrigger)
 /**
  * ProjectsSection - Game Console Style Carousel
  * 
- * 3D carousel with retro controller navigation.
- * Uses pinned ScrollTrigger reveal with refreshPriority: -1 to avoid StorySection conflicts.
+ * 3D carousel with cinematic slide animation (Nintendo Switch style).
+ * Features:
+ * - Robust pinned reveal (no StorySection conflicts)
+ * - Physical slide movement (no instant swapping)
+ * - Animation locking to prevent spam
  */
 export default function ProjectsSection() {
   const sectionRef = useRef(null)
@@ -19,6 +22,7 @@ export default function ProjectsSection() {
   const controlsRef = useRef(null)
   const [activeIndex, setActiveIndex] = useState(0)
   const [selectedProject, setSelectedProject] = useState(null)
+  const [isAnimating, setIsAnimating] = useState(false)
 
   const projects = [
     {
@@ -83,13 +87,87 @@ export default function ProjectsSection() {
     },
   ]
 
-  const nextProject = () => {
-    setActiveIndex((prev) => (prev + 1) % projects.length)
+  // Cinematic Slide Animation: NEXT
+  const animateToNext = () => {
+    if (isAnimating) return
+    setIsAnimating(true)
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setActiveIndex((prev) => (prev + 1) % projects.length)
+        setIsAnimating(false)
+      }
+    })
+
+    // 1. Prev exiting left
+    tl.to('.project-card-wrapper.prev', {
+      x: '-100vw',
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power2.inOut'
+    }, 0)
+    // 2. Active becoming Prev
+    .to('.project-card-wrapper.active', {
+      x: '-35%', // Approx position of prev card
+      scale: 0.9,
+      filter: 'brightness(0.4) saturate(0.5)',
+      opacity: 0.4,
+      duration: 0.8,
+      ease: 'power2.inOut'
+    }, 0)
+    // 3. Next becoming Active (Center)
+    .to('.project-card-wrapper.next', {
+      x: '0%', // Center
+      scale: 1,
+      filter: 'brightness(1.1) saturate(1)',
+      opacity: 1,
+      duration: 0.8,
+      ease: 'power2.inOut'
+    }, 0)
   }
 
-  const prevProject = () => {
-    setActiveIndex((prev) => (prev - 1 + projects.length) % projects.length)
+  // Cinematic Slide Animation: PREV
+  const animateToPrev = () => {
+    if (isAnimating) return
+    setIsAnimating(true)
+
+    const tl = gsap.timeline({
+      onComplete: () => {
+        setActiveIndex((prev) => (prev - 1 + projects.length) % projects.length)
+        setIsAnimating(false)
+      }
+    })
+
+    // 1. Next exiting right
+    tl.to('.project-card-wrapper.next', {
+      x: '100vw',
+      opacity: 0,
+      duration: 0.8,
+      ease: 'power2.inOut'
+    }, 0)
+    // 2. Active becoming Next
+    .to('.project-card-wrapper.active', {
+      x: '35%', // Approx position of next card
+      scale: 0.9,
+      filter: 'brightness(0.4) saturate(0.5)',
+      opacity: 0.4,
+      duration: 0.8,
+      ease: 'power2.inOut'
+    }, 0)
+    // 3. Prev becoming Active (Center)
+    .to('.project-card-wrapper.prev', {
+      x: '0%', // Center
+      scale: 1,
+      filter: 'brightness(1.1) saturate(1)',
+      opacity: 1,
+      duration: 0.8,
+      ease: 'power2.inOut'
+    }, 0)
   }
+
+  // Handlers
+  const nextProject = () => animateToNext()
+  const prevProject = () => animateToPrev()
 
   // Mobile Swipe Handlers
   const handlers = useSwipeable({
@@ -102,32 +180,21 @@ export default function ProjectsSection() {
   // Keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e) => {
-      if (selectedProject) return
+      if (selectedProject || isAnimating) return
       if (e.key === 'ArrowRight') nextProject()
       if (e.key === 'ArrowLeft') prevProject()
       if (e.key === 'Enter') setSelectedProject(projects[activeIndex])
     }
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [activeIndex, selectedProject])
+  }, [activeIndex, selectedProject, isAnimating])
 
-  // Smooth card transition animation when switching projects
+  // Reset transforms after state update
   useEffect(() => {
-    if (!activeCardRef.current) return
-    // Quick scale-fade animation for card change
-    gsap.fromTo(activeCardRef.current,
-      { opacity: 0.5, scale: 0.95 },
-      { opacity: 1, scale: 1, duration: 0.4, ease: 'power2.out' }
-    )
-    // Animate side cards too
-    gsap.fromTo('.project-card-wrapper.prev',
-      { opacity: 0, x: -100 },
-      { opacity: 0.4, x: 0, duration: 0.4, ease: 'power2.out' }
-    )
-    gsap.fromTo('.project-card-wrapper.next',
-      { opacity: 0, x: 100 },
-      { opacity: 0.4, x: 0, duration: 0.4, ease: 'power2.out' }
-    )
+    // Immediate reset because React re-renders with new content
+    gsap.set('.project-card-wrapper', { 
+      clearProps: 'x,scale,filter,opacity' 
+    })
   }, [activeIndex])
 
   // GSAP Pinned Reveal Sequence
@@ -152,10 +219,10 @@ export default function ProjectsSection() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
-          end: '+=2500', // INCREASED: More scroll room for breathing space
+          end: '+=2500', // Pinned duration with breathing room
           pin: true,
           scrub: 1, // Smooth scrub
-          refreshPriority: -1, // CRITICAL: Run calculation AFTER StorySection (0)
+          refreshPriority: -1, 
           anticipatePin: 1
         }
       })
@@ -186,7 +253,7 @@ export default function ProjectsSection() {
         duration: 0.5 
       }, '-=0.4')
       // 4. Breathing Room (Hold Phase)
-      .to({}, { duration: 1 }) // Empty tween = section stays pinned but nothing animates
+      .to({}, { duration: 1 }) 
 
     }, sectionRef)
 
@@ -254,8 +321,9 @@ export default function ProjectsSection() {
 
         .project-card-wrapper {
           position: absolute;
-          transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), filter 0.6s ease;
-          /* Opacity is handled by GSAP exclusively now for reveal */
+          /* transition: transform 0.6s ... - REMOVED: GSAP controls movement now */
+          /* opacity is handled by GSAP */
+          will-change: transform, opacity; /* Optimize performance */
         }
 
         /* Active Card (Center) - LARGER */
@@ -266,7 +334,6 @@ export default function ProjectsSection() {
           height: 400px;
           left: 50%;
           transform: translateX(-50%) scale(1);
-          /* Opacity and brightness handled by GSAP/Dynamic styles */
           filter: brightness(1.1);
         }
 
@@ -297,7 +364,6 @@ export default function ProjectsSection() {
           height: 220px;
           top: 50%;
           margin-top: -110px; /* Half height to center vertically */
-          /* Note: Final opacity 0.4 set via GSAP to update later */
           opacity: 0.4;
           filter: brightness(0.4) saturate(0.5);
           pointer-events: none;
@@ -313,7 +379,7 @@ export default function ProjectsSection() {
           transform: perspective(1000px) rotateY(-25deg) scale(0.9);
         }
         
-        /* Card Visual - Sharp Corners */
+        /* Card Visual */
         .project-visual {
           width: 100%;
           height: 100%;
