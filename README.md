@@ -1,62 +1,79 @@
-# React + Vite
-## Current development stage
+# 🚀 JeffDev Studio
 
-This portfolio is in active development. The core React + Vite setup is complete and HMR is working. Key UI sections and routing are scaffolded; several components and styles are implemented, but content, responsive polish, and some accessibility improvements are still in progress.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-jeffdev.studio-00d4ff?style=for-the-badge&logo=vercel)](https://jeffdev.studio)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)](https://react.dev)
+[![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite)](https://vite.dev)
+[![Firebase](https://img.shields.io/badge/Firebase-Firestore-FFCA28?style=flat-square&logo=firebase)](https://firebase.google.com)
 
-## Implemented features
+> **A modern developer portfolio with an 8-bit retro aesthetic, featuring smooth scroll animations, an AI-powered blog editor, and glassmorphism UI.**
 
-- Routing and basic navigation
-- Home, About, Projects, and Contact pages (skeleton/content in place)
-- Component-driven layout with reusable header/footer
-- ESLint and Prettier configured for consistent code style
-- Vite dev server with fast refresh
+![OG Preview](public/og-image.png)
 
-## Running locally
+---
 
-1. Install dependencies:
-  `npm install` or `yarn`
-2. Start development server:
-  `npm run dev` or `yarn dev`
-3. Build for production:
-  `npm run build` or `yarn build`
-4. Preview production build:
-  `npm run preview` or `yarn preview`
+## ✨ Features
 
-## Available scripts
+| Feature | Description |
+|---------|-------------|
+| 🎮 **8-Bit Aesthetics** | Retro pixel fonts, neon accents, and CRT-inspired effects |
+| 🌊 **Smooth Animations** | GSAP + ScrollTrigger for parallax and reveal effects |
+| 🤖 **AI Blog Editor** | Markdown editor with Gemini AI integration for writing assistance |
+| 🔐 **Admin Dashboard** | Secure Firebase Auth with analytics and content management |
+| 📱 **Fully Responsive** | Mobile-first design that works on all devices |
+| 🔍 **SEO Optimized** | Open Graph, Twitter Cards, and sitemap support |
 
-- `dev` — start Vite dev server
-- `build` — create production build
-- `preview` — preview production build locally
-- `lint` — run ESLint
-- `format` — run Prettier
+---
 
-## Roadmap / TODO
+## 🖼️ Screenshots
 
-- Finalize project content and case studies
-- Responsive and accessibility improvements (ARIA, keyboard nav)
-- Add unit/integration tests
-- Integrate CMS or MDX for easier content updates
-- CI/CD pipeline and automated deployments
+<details>
+<summary>📸 Click to expand</summary>
 
-## Known issues
+### Hero Section
+![Hero](public/assets/Screenshot%202025-12-25%20122142.png)
 
-- Some components need layout refinement on small screens
-- Minor ESLint warnings remain for in-progress files
+### About / Skills
+![Skills](public/assets/Screenshot%202025-12-25%20113451.png)
 
-## Contributing
+### Blog Editor
+![Blog Editor](public/assets/Screenshot%202025-12-18%20222001.png)
 
-Fork the repo, create a branch for your feature/fix, and open a PR with a short description. Follow the existing lint and formatting rules.
+</details>
 
-## Contact
+---
 
-Open an issue or PR in this repository for feedback or questions.
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 🛠️ Tech Stack
 
-Currently, two official plugins are available:
+**Frontend:**
+- React 19 + Vite
+- GSAP (ScrollTrigger, animations)
+- Glassmorphism CSS
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**Backend:**
+- Firebase (Firestore, Auth)
+- Cloudflare R2 (Image storage)
+- Vercel (Hosting + Serverless Functions)
 
-## Expanding the ESLint configuration
+**AI Integration:**
+- Google Gemini API (Blog writing assistant)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+---
+
+## 🚀 Live Demo
+
+**[https://jeffdev.studio](https://jeffdev.studio)**
+
+---
+
+## 📬 Contact
+
+**Jeff Martinez**  
+📧 [jeffmartinez474@gmail.com](mailto:jeffmartinez474@gmail.com)  
+🔗 [LinkedIn](https://www.linkedin.com/in/jeff-edrick-martinez-888575300/)  
+🐙 [GitHub](https://github.com/J-Akiru5)
+
+---
+
+<p align="center">
+  Built with ❤️ and lots of ☕ in the 8-Bit Universe
+</p>
