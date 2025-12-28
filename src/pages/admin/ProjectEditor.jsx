@@ -2,12 +2,13 @@ import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
 import { collection, addDoc, doc, getDoc, updateDoc, serverTimestamp } from 'firebase/firestore'
 import { db } from '../../firebase'
-import { SectionTitle, GlassCard, PixelButton } from '../../components/ui'
+import { SectionTitle, GlassCard, PixelButton, ImageUpload } from '../../components/ui'
 
 /**
  * ProjectEditor - Create/Edit project form
  * 
  * Used for adding new projects or editing existing ones.
+ * Supports R2 image upload via ImageUpload component.
  */
 export default function ProjectEditor() {
   const { projectId } = useParams()
@@ -28,13 +29,14 @@ export default function ProjectEditor() {
   const [loading, setLoading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [useManualUrl, setUseManualUrl] = useState(false)
 
   // Load existing project if editing
   useEffect(() => {
     if (isEditing) {
       loadProject()
     }
-  }, [projectId])
+  }, [isEditing, projectId])
 
   async function loadProject() {
     setLoading(true)
@@ -52,6 +54,10 @@ export default function ProjectEditor() {
         setCodeUrl(data.codeUrl || '')
         setColor(data.color || '#00d4ff')
         setOrder(data.order || 0)
+        // If there's an existing image, show it
+        if (data.image && !data.image.startsWith('/api/image')) {
+          setUseManualUrl(true)
+        }
       } else {
         setError('Project not found')
       }
@@ -190,6 +196,35 @@ export default function ProjectEditor() {
           border: 2px solid rgba(255, 255, 255, 0.2);
         }
         
+        .image-section {
+          display: flex;
+          flex-direction: column;
+          gap: 0.75rem;
+        }
+        
+        .image-toggle {
+          display: flex;
+          gap: 0.5rem;
+          align-items: center;
+        }
+        
+        .image-toggle-btn {
+          padding: 0.4rem 0.8rem;
+          border: 1px solid rgba(255, 255, 255, 0.2);
+          background: transparent;
+          color: rgba(255, 255, 255, 0.6);
+          border-radius: 4px;
+          font-size: 0.75rem;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
+        
+        .image-toggle-btn.active {
+          border-color: #00d4ff;
+          color: #00d4ff;
+          background: rgba(0, 212, 255, 0.1);
+        }
+        
         .image-preview {
           margin-top: 0.5rem;
         }
@@ -220,6 +255,12 @@ export default function ProjectEditor() {
         .helper-text {
           font-size: 0.75rem;
           color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .upload-note {
+          font-size: 0.7rem;
+          color: rgba(255, 255, 255, 0.4);
+          font-style: italic;
         }
         
         @media (max-width: 600px) {
@@ -271,20 +312,54 @@ export default function ProjectEditor() {
               />
             </div>
 
-            <div className="form-group">
-              <label className="form-label">Image URL</label>
-              <input
-                type="text"
-                className="form-input"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-                placeholder="/assets/project-screenshot.png"
-              />
-              <span className="helper-text">Path to image in public/assets or external URL</span>
-              {image && (
-                <div className="image-preview">
-                  <img src={image} alt="Preview" onError={(e) => e.target.style.display = 'none'} />
-                </div>
+            {/* Image Section with Upload or Manual URL */}
+            <div className="form-group image-section">
+              <label className="form-label">Project Image</label>
+              
+              <div className="image-toggle">
+                <button 
+                  type="button" 
+                  className={`image-toggle-btn ${!useManualUrl ? 'active' : ''}`}
+                  onClick={() => setUseManualUrl(false)}
+                >
+                  📷 Upload
+                </button>
+                <button 
+                  type="button" 
+                  className={`image-toggle-btn ${useManualUrl ? 'active' : ''}`}
+                  onClick={() => setUseManualUrl(true)}
+                >
+                  🔗 URL
+                </button>
+              </div>
+
+              {useManualUrl ? (
+                <>
+                  <input
+                    type="text"
+                    className="form-input"
+                    value={image}
+                    onChange={(e) => setImage(e.target.value)}
+                    placeholder="/assets/project-screenshot.png"
+                  />
+                  <span className="helper-text">Path to image in public/assets or external URL</span>
+                  {image && (
+                    <div className="image-preview">
+                      <img src={image} alt="Preview" onError={(e) => e.target.style.display = 'none'} />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <>
+                  <ImageUpload
+                    value={image}
+                    onChange={setImage}
+                    placeholder="Drag & drop a screenshot or click to upload"
+                  />
+                  <span className="upload-note">
+                    ⚠️ Upload only works on Vercel deployment. For local dev, use URL mode.
+                  </span>
+                </>
               )}
             </div>
 
