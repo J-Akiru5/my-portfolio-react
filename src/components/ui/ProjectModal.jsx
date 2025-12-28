@@ -30,15 +30,9 @@ const ProjectModal = ({ project, onClose }) => {
     // Lock body scroll
     document.body.style.overflow = 'hidden'
 
-    const handleEsc = (e) => {
-      if (e.key === 'Escape') handleClose()
-    }
-    window.addEventListener('keydown', handleEsc)
-
     return () => {
       ctx.revert()
       document.body.style.overflow = ''
-      window.removeEventListener('keydown', handleEsc)
     }
   }, [])
 
@@ -62,7 +56,7 @@ const ProjectModal = ({ project, onClose }) => {
   if (!project) return null
 
   return (
-    <div className="project-modal-overlay" ref={modalRef} onClick={handleClose}>
+    <div className="project-modal-overlay" ref={modalRef}>
       <style>{`
         .project-modal-overlay {
           position: fixed;
@@ -71,9 +65,10 @@ const ProjectModal = ({ project, onClose }) => {
           background: rgba(10, 10, 18, 0.95);
           backdrop-filter: blur(8px);
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: center;
-          padding: 2rem;
+          padding: 5rem 2rem 2rem;
+          overflow-y: auto;
         }
 
         .project-modal-content {

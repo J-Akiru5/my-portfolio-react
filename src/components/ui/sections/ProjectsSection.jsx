@@ -120,8 +120,8 @@ export default function ProjectsSection() {
       // Initial hidden states
       gsap.set(titleRef.current, { opacity: 0, y: 30 })
       gsap.set(activeCardRef.current, { opacity: 0, y: 100, scale: 0.8 })
-      gsap.set(prevCardRef.current, { opacity: 0, x: -200 })
-      gsap.set(nextCardRef.current, { opacity: 0, x: 200 })
+      gsap.set(prevCardRef.current, { opacity: 0, x: '-100vw' })
+      gsap.set(nextCardRef.current, { opacity: 0, x: '100vw' })
       gsap.set(controlsRef.current, { opacity: 0, y: 20 })
 
       // Create timeline with ScrollTrigger pin
@@ -152,10 +152,10 @@ export default function ProjectsSection() {
         ease: 'back.out(1.2)'
       }, '+=0.1')
       .to([prevCardRef.current, nextCardRef.current], { 
-        opacity: 1, 
+        opacity: 0.5, 
         x: 0, 
-        duration: 0.4,
-        stagger: 0.1,
+        duration: 0.5,
+        stagger: 0.15,
         ease: 'power3.out'
       }, '-=0.2')
       .to(controlsRef.current, { 
@@ -202,8 +202,8 @@ export default function ProjectsSection() {
         .projects-header-container {
           position: relative;
           z-index: 10;
-          margin-bottom: 1.5rem;
-          padding-left: 2rem;
+          margin-bottom: 0.5rem;
+          text-align: center;
         }
 
         /* Console Frame */
@@ -494,7 +494,6 @@ export default function ProjectsSection() {
             className="project-card-wrapper active"
             ref={activeCardRef}
             style={{ '--glow-color': projects[current].color }}
-            onClick={() => setSelectedProject(projects[current])}
           >
              <div className="project-visual">
                <img src={projects[current].image} alt={projects[current].title} />
