@@ -2,6 +2,8 @@ import React, { useRef, useState, useEffect, useLayoutEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { useSwipeable } from 'react-swipeable'
+import { collection, query, orderBy, getDocs } from 'firebase/firestore'
+import { db } from '../../../firebase'
 import { SectionTitle, ProjectModal } from '..'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -10,12 +12,76 @@ gsap.registerPlugin(ScrollTrigger)
 // Active at -50 ensures it is perfectly centered (counteracting left: 50%)
 // Offset is 55% relative to card width
 const POSITIONS = {
-  farPrev: { xPercent: -160, scale: 0.8, opacity: 0, filter: 'brightness(0.3) blur(2px)', zIndex: 1 },
+  farPrev: { xPercent: -160, scale: 0.8, opacity: 0, filter: 'brightness(0.3)', zIndex: 1 },
   prev:    { xPercent: -105, scale: 0.9, opacity: 0.4, filter: 'brightness(0.4) saturate(0.5)', zIndex: 5 },
   active:  { xPercent: -50,  scale: 1,   opacity: 1,   filter: 'brightness(1.1) saturate(1)', zIndex: 10 },
   next:    { xPercent: 5,    scale: 0.9, opacity: 0.4, filter: 'brightness(0.4) saturate(0.5)', zIndex: 5 },
-  farNext: { xPercent: 60,   scale: 0.8, opacity: 0,   filter: 'brightness(0.3) blur(2px)', zIndex: 1 },
+  farNext: { xPercent: 60,   scale: 0.8, opacity: 0,   filter: 'brightness(0.3)', zIndex: 1 },
 }
+
+// Fallback projects (used if Firestore is empty or fails)
+const FALLBACK_PROJECTS = [
+  {
+    id: 'sineai-hub',
+    title: 'SineAI Hub',
+    description: 'AI-powered learning management system with real-time chat, collaboration features, and intelligent tutoring.',
+    image: '/assets/Screenshot 2025-12-16 094218.png',
+    tags: ['Laravel', 'Supabase', 'Gemini', 'Tailwind'],
+    liveUrl: 'https://sineai.tech',
+    codeUrl: 'https://github.com/J-Akiru5/sineai-hub',
+    color: '#00d4ff',
+  },
+  {
+    id: 'portfolio',
+    title: 'This Portfolio',
+    description: '8-bit Universe themed portfolio with GSAP animations, glassmorphism, and Firebase integration.',
+    image: '/assets/Screenshot 2025-12-25 113451.png',
+    tags: ['React', 'GSAP', 'Firebase', 'Lenis'],
+    liveUrl: '#',
+    codeUrl: 'https://github.com/J-Akiru5/my-portfolio-react',
+    color: '#39ff14',
+  },
+  {
+    id: 'cict-portal',
+    title: 'CICT Tech Portal',
+    description: 'Technology portal for the College of ICT with student resources and department management.',
+    image: '/assets/Screenshot 2025-12-25 122142.png',
+    tags: ['Laravel', 'TypeScript', 'Tailwind'],
+    liveUrl: '#',
+    codeUrl: 'https://github.com/J-Akiru5/cict-tech-portal',
+    color: '#9d4edd',
+  },
+  {
+    id: 'gsus',
+    title: 'GSUS',
+    description: 'General Services Unified System - comprehensive service management platform.',
+    image: '/assets/image copy 2.png',
+    tags: ['React', 'Vite', 'Vercel'],
+    liveUrl: '#',
+    codeUrl: 'https://github.com/J-Akiru5/GSUS-Hackathon-Project',
+    color: '#ff6b35',
+  },
+  {
+    id: 'ebhm-connect',
+    title: 'E-BHM Connect',
+    description: 'Electronic Barangay Health Management System for community healthcare.',
+    image: '/assets/Screenshot 2025-12-18 222001.png',
+    tags: ['PHP', 'MySQL', 'Bootstrap'],
+    liveUrl: '#',
+    codeUrl: 'https://github.com/J-Akiru5/e-bhm_connect',
+    color: '#00d4ff',
+  },
+  {
+    id: 'lingsarloka',
+    title: 'LingsarLoka',
+    description: 'High-fidelity Figma prototype with modern UI/UX design principles.',
+    image: '/assets/image.png',
+    tags: ['Figma', 'UI/UX'],
+    liveUrl: 'https://thick-break-42913670.figma.site/',
+    codeUrl: 'https://github.com/J-Akiru5/LingsarLoka',
+    color: '#39ff14',
+  },
+]
 
 /**
  * ProjectsSection - Game Console Style Carousel
@@ -23,7 +89,7 @@ const POSITIONS = {
  * 3D carousel with cinematic slide animation (Nintendo Switch style).
  * Features:
  * - 5-card rendering (farPrev, prev, active, next, farNext)
- * - Recalibrated GSAP positioning to handle centering conflicts
+ * - Dynamic data from Firestore (with fallback)
  * - Robust pinned reveal
  */
 export default function ProjectsSection() {
@@ -34,69 +100,31 @@ export default function ProjectsSection() {
   const [activeIndex, setActiveIndex] = useState(0)
   const [selectedProject, setSelectedProject] = useState(null)
   const [isAnimating, setIsAnimating] = useState(false)
+  const [projects, setProjects] = useState(FALLBACK_PROJECTS)
 
-  const projects = [
-    {
-      id: 'sineai-hub',
-      title: 'SineAI Hub',
-      description: 'AI-powered learning management system with real-time chat, collaboration features, and intelligent tutoring.',
-      image: '/assets/Screenshot 2025-12-16 094218.png',
-      tags: ['Laravel', 'Supabase', 'Gemini', 'Tailwind'],
-      liveUrl: 'https://sineai.tech',
-      codeUrl: 'https://github.com/J-Akiru5/sineai-hub',
-      color: '#00d4ff',
-    },
-    {
-      id: 'portfolio',
-      title: 'This Portfolio',
-      description: '8-bit Universe themed portfolio with GSAP animations, glassmorphism, and Firebase integration.',
-      image: '/assets/Screenshot 2025-12-25 113451.png',
-      tags: ['React', 'GSAP', 'Firebase', 'Lenis'],
-      liveUrl: '#',
-      codeUrl: 'https://github.com/J-Akiru5/my-portfolio-react',
-      color: '#39ff14',
-    },
-    {
-      id: 'cict-portal',
-      title: 'CICT Tech Portal',
-      description: 'Technology portal for the College of ICT with student resources and department management.',
-      image: '/assets/Screenshot 2025-12-25 122142.png',
-      tags: ['Laravel', 'TypeScript', 'Tailwind'],
-      liveUrl: '#',
-      codeUrl: 'https://github.com/J-Akiru5/cict-tech-portal',
-      color: '#9d4edd',
-    },
-    {
-      id: 'gsus',
-      title: 'GSUS',
-      description: 'General Services Unified System - comprehensive service management platform.',
-      image: '/assets/image copy 2.png',
-      tags: ['React', 'Vite', 'Vercel'],
-      liveUrl: '#',
-      codeUrl: 'https://github.com/J-Akiru5/GSUS-Hackathon-Project',
-      color: '#ff6b35',
-    },
-    {
-      id: 'ebhm-connect',
-      title: 'E-BHM Connect',
-      description: 'Electronic Barangay Health Management System for community healthcare.',
-      image: '/assets/Screenshot 2025-12-18 222001.png',
-      tags: ['PHP', 'MySQL', 'Bootstrap'],
-      liveUrl: '#',
-      codeUrl: 'https://github.com/J-Akiru5/e-bhm_connect',
-      color: '#00d4ff',
-    },
-    {
-      id: 'lingsarloka',
-      title: 'LingsarLoka',
-      description: 'High-fidelity Figma prototype with modern UI/UX design principles.',
-      image: '/assets/image.png',
-      tags: ['Figma', 'UI/UX'],
-      liveUrl: 'https://thick-break-42913670.figma.site/',
-      codeUrl: 'https://github.com/J-Akiru5/LingsarLoka',
-      color: '#39ff14',
-    },
-  ]
+  // Fetch projects from Firestore
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const projectsRef = collection(db, 'projects')
+        const q = query(projectsRef, orderBy('order', 'asc'))
+        const snapshot = await getDocs(q)
+        
+        if (!snapshot.empty) {
+          const projectsData = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+          }))
+          setProjects(projectsData)
+        }
+        // If empty, keep using FALLBACK_PROJECTS
+      } catch (error) {
+        console.warn('Firestore fetch failed, using fallback projects:', error.message)
+        // Keep using FALLBACK_PROJECTS
+      }
+    }
+    fetchProjects()
+  }, [])
 
   // Cinematic Slide Animation: NEXT
   const animateToNext = () => {

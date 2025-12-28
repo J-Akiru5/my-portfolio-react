@@ -25,6 +25,8 @@ import Messages from './pages/admin/Messages'
 import AdminSeed from './pages/AdminSeed'
 import BlogDashboard from './pages/admin/BlogDashboard'
 import BlogEditor from './pages/admin/BlogEditor'
+import ProjectsDashboard from './pages/admin/ProjectsDashboard'
+import ProjectEditor from './pages/admin/ProjectEditor'
 
 export default function App() {
   return (
@@ -67,6 +69,11 @@ export default function App() {
                 <Route path="/admin/blog" element={<BlogDashboard />} />
                 <Route path="/admin/blog/new" element={<BlogEditor />} />
                 <Route path="/admin/blog/edit/:id" element={<BlogEditor />} />
+
+                {/* Projects Admin */}
+                <Route path="/admin/projects" element={<ProjectsDashboard />} />
+                <Route path="/admin/projects/new" element={<ProjectEditor />} />
+                <Route path="/admin/projects/:projectId" element={<ProjectEditor />} />
               </Route>
             </Routes>
           </main>
