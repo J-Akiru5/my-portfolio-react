@@ -69,7 +69,8 @@ const ProjectModal = ({ project, onClose }) => {
           align-items: center;
           justify-content: center;
           padding: 2rem;
-          overflow: hidden;
+          overflow: auto;
+          overscroll-behavior: contain;
         }
 
         .project-modal-content {
@@ -80,6 +81,7 @@ const ProjectModal = ({ project, onClose }) => {
           width: 100%;
           max-height: calc(100vh - 4rem);
           overflow-y: auto;
+          overscroll-behavior: contain;
           overflow-x: hidden;
           position: relative;
           box-shadow: 0 0 50px rgba(0, 212, 255, 0.15);
@@ -358,6 +360,16 @@ const ProjectModal = ({ project, onClose }) => {
 
         .markdown-content em {
           color: rgba(255, 255, 255, 0.7);
+        }
+
+        .markdown-content img {
+          max-width: 100%;
+          height: auto;
+          border-radius: 8px;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          margin: 1.5rem 0;
+          display: block;
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
         }
 
         @media (max-width: 768px) {
