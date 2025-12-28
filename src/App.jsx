@@ -15,6 +15,7 @@ import Certifications from './pages/Certifications'
 import Blog from './pages/Blog'
 import BlogPost from './pages/BlogPost'
 import ProjectDetail from './pages/ProjectDetail'
+import ServiceInquiry from './pages/ServiceInquiry'
 import AdminGateway from './pages/AdminGateway'
 
 // Admin pages
@@ -54,6 +55,9 @@ export default function App() {
               {/* Project detail page */}
               <Route path="/projects/:slug" element={<ProjectDetail />} />
               
+              {/* Service inquiry page */}
+              <Route path="/services/:slug" element={<ServiceInquiry />} />
+
               {/* Blog pages (public) */}
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />

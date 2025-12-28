@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react'
+import { Link } from 'react-router-dom'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SectionTitle, GlassCard, PixelButton } from '..'
@@ -16,57 +17,61 @@ export default function ServicesSection() {
 
   const services = [
     {
-      id: 'webdev',
+      id: 'web-development',
       icon: '💻',
       title: 'Web Development',
-      description: 'Full-stack web applications with modern React, responsive design, and optimized performance.',
-      features: ['React / Next.js', 'Firebase / Node.js', 'Responsive Design', 'SEO Optimization'],
+      description: 'Full-stack web applications with Laravel + React + Inertia.js architecture.',
+      features: ['Laravel', 'React', 'Inertia.js', 'Tailwind CSS', 'Firebase'],
       accent: '#00d4ff',
+      ctaText: 'START PROJECT',
+      ctaLink: '/services/web-development'
     },
     {
-      id: 'uiux',
-      icon: '🎨',
+      id: 'ui-ux-design',
+      icon: '🎨', 
       title: 'UI/UX Design',
-      description: 'User-centered interfaces with modern aesthetics, smooth animations, and intuitive navigation.',
-      features: ['Figma Prototypes', 'Design Systems', 'Motion Design', 'User Research'],
+      description: 'User-centered interfaces with Figma prototypes, design systems, and modern aesthetics.',
+      features: ['Figma', 'Design Systems', 'Prototyping', 'User Research'],
       accent: '#9d4edd',
+      ctaText: 'VIEW PROCESS',
+      ctaLink: '/services/ui-ux-design'
     },
     {
-      id: 'android',
+      id: 'mobile-apps',
       icon: '📱',
-      title: 'Android Development',
-      description: 'Native Android applications with modern architecture and seamless user experience.',
-      features: ['Kotlin / Java', 'Material Design', 'Firebase Integration', 'Play Store Ready'],
+      title: 'Mobile Development',
+      description: 'Native Android apps with Java and cross-platform solutions using React Native.',
+      features: ['Java', 'React Native', 'Firebase', 'Play Store Ready'],
       accent: '#39ff14',
-      comingSoon: true,
-    },
+      ctaText: 'DISCUSS APP',
+      ctaLink: '/services/mobile-apps'
+    }
   ]
 
+  // Simplified animation for better INP
   useEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.from('.service-card', {
-        opacity: 0,
-        y: 60,
-        stagger: 0.15,
-        duration: 0.8,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: cardsRef.current,
-          start: 'top 80%',
-        }
+      // Use requestAnimationFrame to not block main thread
+      requestAnimationFrame(() => {
+        ScrollTrigger.batch('.service-card', {
+          onEnter: (batch) => {
+            gsap.to(batch, {
+              opacity: 1,
+              y: 0,
+              stagger: 0.1,
+              overwrite: true,
+              duration: 0.6
+            })
+          },
+          start: 'top 85%'
+        })
       })
     }, sectionRef)
 
     return () => ctx.revert()
   }, [])
 
-  const scrollToContact = (e) => {
-    e.preventDefault()
-    const contactSection = document.getElementById('contact')
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: 'smooth' })
-    }
-  }
+
 
   return (
     <section id="services" ref={sectionRef} className="services-section">
@@ -234,13 +239,13 @@ export default function ServicesSection() {
                   </span>
                 ))}
               </div>
-              {!service.comingSoon && (
-                <div className="service-cta">
-                  <PixelButton onClick={scrollToContact} size="small">
-                    GET IN TOUCH
+              <div className="service-cta">
+                <Link to={service.ctaLink} style={{ textDecoration: 'none' }}>
+                  <PixelButton size="small">
+                    {service.ctaText}
                   </PixelButton>
-                </div>
-              )}
+                </Link>
+              </div>
             </GlassCard>
           ))}
         </div>
