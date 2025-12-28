@@ -1,20 +1,22 @@
-import React, { useRef, useEffect } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
-import { SectionTitle, GlassCard, PixelButton } from '..'
+import { useSwipeable } from 'react-swipeable'
+import { SectionTitle, GlassCard, ProjectModal } from '..'
 
 gsap.registerPlugin(ScrollTrigger)
 
 /**
- * ProjectsSection - Horizontal scroll showcase
+ * ProjectsSection - Game Console Style Carousel
  * 
- * Pins the container and scrolls project cards horizontally
- * as the user scrolls down.
+ * 3D carousel with active center project, dimmed side projects,
+ * retro controller navigation, and mobile swipe support.
  */
 export default function ProjectsSection() {
   const sectionRef = useRef(null)
-  const trackRef = useRef(null)
-  const cardsRef = useRef(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [selectedProject, setSelectedProject] = useState(null)
+  const [rotation, setRotation] = useState(0)
 
   const projects = [
     {
@@ -79,270 +81,369 @@ export default function ProjectsSection() {
     },
   ]
 
+  const nextProject = () => {
+    setActiveIndex((prev) => (prev + 1) % projects.length)
+  }
+
+  const prevProject = () => {
+    setActiveIndex((prev) => (prev - 1 + projects.length) % projects.length)
+  }
+
+  // Mobile Swipe Handlers
+  const handlers = useSwipeable({
+    onSwipedLeft: nextProject,
+    onSwipedRight: prevProject,
+    preventDefaultTouchmoveEvent: true,
+    trackMouse: true
+  })
+
+  // Keyboard navigation
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      const cards = cardsRef.current
-      const track = trackRef.current
-      
-      if (!cards || !track) return
+    const handleKeyDown = (e) => {
+      if (selectedProject) return // Disable nav when modal open
+      if (e.key === 'ArrowRight') nextProject()
+      if (e.key === 'ArrowLeft') prevProject()
+      if (e.key === 'Enter') setSelectedProject(projects[activeIndex])
+    }
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [activeIndex, selectedProject])
 
-      // Use functional getter to ensure it recalculates
-      const getScrollWidth = () => cards.scrollWidth - window.innerWidth + 200
+  // Get index for 3 visible cards
+  const getVisibleProjects = () => {
+    const prev = (activeIndex - 1 + projects.length) % projects.length
+    const next = (activeIndex + 1) % projects.length
+    return { prev, current: activeIndex, next }
+  }
 
-      gsap.to(cards, {
-        x: () => -getScrollWidth(),
-        ease: 'none',
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top top',
-          end: () => `+=${getScrollWidth()}`,
-          pin: true,
-          scrub: 1,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        }
-      })
-
-      // Card reveal animations
-      gsap.from('.project-card', {
-        opacity: 0,
-        scale: 0.8,
-        stagger: 0.1,
-        duration: 0.6,
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: 'top 80%',
-        }
-      })
-
-    }, sectionRef)
-
-    return () => ctx.revert()
-  }, [])
+  const { prev, current, next } = getVisibleProjects()
 
   return (
     <section id="projects" ref={sectionRef} className="projects-section">
       <style>{`
         .projects-section {
           min-height: 100vh;
-          overflow: hidden;
+          padding: 6rem 2rem 2rem;
           position: relative;
-          padding-top: 80px;
+          overflow: hidden;
+          background: radial-gradient(circle at center, rgba(10, 20, 40, 0.8) 0%, rgba(5, 5, 10, 1) 100%);
         }
         
-        .projects-header {
-          position: absolute;
-          top: 6rem;
-          left: 2rem;
+        .projects-header-container {
+          position: relative;
           z-index: 10;
+          margin-bottom: 2rem;
+          padding-left: 2rem;
         }
-        
-        .horizontal-track {
+
+        /* Console Frame */
+        .console-frame {
+          max-width: 1200px;
+          margin: 0 auto;
+          position: relative;
+          perspective: 1000px;
+          height: 60vh;
+          min-height: 500px;
           display: flex;
           align-items: center;
-          height: 100vh;
-          padding: 0 4rem;
+          justify-content: center;
         }
-        
-        .projects-cards {
-          display: flex;
-          gap: 2rem;
-          padding: 6rem 4rem 4rem 4rem;
+
+        /* Scanlines */
+        .scanlines {
+          position: absolute;
+          inset: 0;
+          background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+          background-size: 100% 2px, 3px 100%;
+          pointer-events: none;
+          z-index: 5;
         }
-        
-        .project-card {
-          flex-shrink: 0;
-          width: 400px;
-          overflow: hidden;
-          padding: 0 !important;
-          transition: transform 0.3s;
-        }
-        
-        .project-card:hover {
-          transform: translateY(-10px);
-        }
-        
-        .project-image {
-          width: 100%;
-          height: 220px;
-          background: #1a1a2e;
+
+        .carousel-track {
           position: relative;
-          overflow: hidden;
-        }
-        
-        .project-image img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          transition: transform 0.5s;
-        }
-        
-        .project-card:hover .project-image img {
-          transform: scale(1.05);
-        }
-        
-        .project-image-placeholder {
           width: 100%;
           height: 100%;
           display: flex;
           align-items: center;
           justify-content: center;
-          font-size: 4rem;
-          background: linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(157, 78, 221, 0.1));
+        }
+
+        .project-card-wrapper {
+          position: absolute;
+          transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+          width: 60%;
+          max-width: 600px;
+          height: 350px;
+          cursor: pointer;
+        }
+
+        /* Active Card (Center) */
+        .project-card-wrapper.active {
+          z-index: 10;
+          transform: translateX(0) scale(1);
+          opacity: 1;
+          filter: brightness(1.2);
+        }
+
+        /* Active Glow */
+        .project-card-wrapper.active::after {
+          content: '';
+          position: absolute;
+          inset: -3px;
+          background: var(--glow-color);
+          z-index: -1;
+          border-radius: 16px;
+          filter: blur(15px);
+          opacity: 0.6;
+          animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+          0%, 100% { opacity: 0.6; }
+          50% { opacity: 0.3; }
+        }
+
+        /* Prev Card (Left) */
+        .project-card-wrapper.prev {
+          z-index: 5;
+          transform: translateX(-55%) scale(0.7) rotateY(15deg);
+          opacity: 0.5;
+          filter: brightness(0.5) blur(1px);
+          pointer-events: none; /* Prevent clicking side cards */
+        }
+
+        /* Next Card (Right) */
+        .project-card-wrapper.next {
+          z-index: 5;
+          transform: translateX(55%) scale(0.7) rotateY(-15deg);
+          opacity: 0.5;
+          filter: brightness(0.5) blur(1px);
+          pointer-events: none;
         }
         
-        .project-color-bar {
-          height: 4px;
+        /* Main Visual */
+        .project-visual {
           width: 100%;
-        }
-        
-        .project-content {
-          padding: 1.5rem;
-        }
-        
-        .project-title {
-          font-family: 'Press Start 2P', cursive;
-          font-size: 0.9rem;
-          color: white;
-          margin-bottom: 0.75rem;
-        }
-        
-        .project-description {
-          font-size: 0.9rem;
-          color: rgba(255, 255, 255, 0.7);
-          line-height: 1.6;
-          margin-bottom: 1rem;
-          display: -webkit-box;
-          -webkit-line-clamp: 3;
-          -webkit-box-orient: vertical;
+          height: 100%;
+          border-radius: 12px;
           overflow: hidden;
+          position: relative;
+          background: #000;
         }
-        
-        .project-tags {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          margin-bottom: 1.25rem;
+
+        .project-visual img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
         }
-        
-        .project-tag {
-          padding: 0.25rem 0.5rem;
-          background: rgba(0, 212, 255, 0.1);
-          border: 1px solid rgba(0, 212, 255, 0.3);
-          border-radius: 4px;
-          font-size: 0.65rem;
-          font-family: 'JetBrains Mono', monospace;
-          color: #00d4ff;
-        }
-        
-        .project-links {
-          display: flex;
-          gap: 0.75rem;
-        }
-        
-        .project-link {
-          flex: 1;
-          padding: 0.6rem;
-          text-align: center;
-          font-size: 0.65rem;
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          background: transparent;
-          color: white;
-          border-radius: 4px;
-          text-decoration: none;
-          font-family: 'Press Start 2P', cursive;
+
+        .project-info-overlay {
+          position: absolute;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+          padding: 2rem;
+          background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+          transform: translateY(20px);
+          opacity: 0;
           transition: all 0.3s;
         }
-        
-        .project-link:hover {
-          border-color: #00d4ff;
-          background: rgba(0, 212, 255, 0.1);
-          color: #00d4ff;
+
+        .project-card-wrapper.active:hover .project-info-overlay {
+          transform: translateY(0);
+          opacity: 1;
         }
         
-        .scroll-hint {
-          position: absolute;
-          bottom: 2rem;
-          left: 50%;
-          transform: translateX(-50%);
+        /* Always show info on mobile active */
+        @media (max-width: 768px) {
+           .project-card-wrapper.active .project-info-overlay {
+            transform: translateY(0);
+            opacity: 1;
+          }
+        }
+
+        .project-title {
+          font-family: 'Press Start 2P', cursive;
+          color: white;
+          font-size: 1.2rem;
+          margin-bottom: 0.5rem;
+          text-shadow: 2px 2px 0px black;
+        }
+
+        /* Controller Controls */
+        .console-controls {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          width: 100%;
+          max-width: 900px;
+          margin: 2rem auto;
+          padding: 0 2rem;
+        }
+        
+        .d-pad {
+          display: flex;
+          gap: 1rem;
+        }
+
+        .control-btn {
+          width: 60px;
+          height: 60px;
+          background: rgba(255, 255, 255, 0.1);
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          border-radius: 50%;
+          color: white;
+          font-size: 1.5rem;
+          cursor: pointer;
           display: flex;
           align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+          box-shadow: 0 5px 0 rgba(0,0,0,0.5);
+        }
+
+        .control-btn:active {
+          transform: translateY(5px);
+          box-shadow: 0 0 0 rgba(0,0,0,0.5);
+        }
+
+        .control-btn:hover {
+          background: rgba(0, 212, 255, 0.2);
+          border-color: #00d4ff;
+          color: #00d4ff;
+        }
+
+        .action-btns {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
           gap: 0.5rem;
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 0.75rem;
-          color: rgba(255, 255, 255, 0.4);
-          animation: pulse 2s infinite;
         }
-        
-        @keyframes pulse {
-          0%, 100% { opacity: 0.4; }
-          50% { opacity: 1; }
+
+        .select-btn {
+          padding: 0.8rem 2rem;
+          background: #ff0055;
+          border: none;
+          border-radius: 30px;
+          color: white;
+          font-family: 'Press Start 2P', cursive;
+          font-size: 0.8rem;
+          cursor: pointer;
+          box-shadow: 0 5px 0 #990033;
+          transition: all 0.2s;
+          text-transform: uppercase;
         }
-        
+
+        .select-btn:active {
+          transform: translateY(5px);
+          box-shadow: 0 0 0 #990033;
+        }
+
+        .select-btn:hover {
+          filter: brightness(1.1);
+        }
+
+        .mobile-hint {
+           text-align: center;
+           color: rgba(255,255,255,0.4);
+           font-family: 'Press Start 2P', cursive;
+           font-size: 0.6rem;
+           margin-top: 1rem;
+           display: none;
+        }
+
         @media (max-width: 768px) {
-          .project-card {
-            width: 320px;
-          }
-          
-          .projects-cards {
-            padding: 5rem 2rem 4rem 2rem;
-          }
+           .project-card-wrapper {
+             width: 80%;
+             height: 300px;
+           }
+           
+           .project-card-wrapper.prev, 
+           .project-card-wrapper.next {
+             display: none; /* Hide side cards on mobile for cleaner look */
+           }
+           
+           .console-controls {
+             display: none; /* Hide buttons, use swipe */
+           }
+           
+           .mobile-hint {
+             display: block;
+           }
         }
       `}</style>
       
-      <div className="projects-header">
+      <div className="projects-header-container">
         <SectionTitle title="PROJECTS" extension=".work" />
       </div>
-      
-      <div ref={trackRef} className="horizontal-track">
-        <div ref={cardsRef} className="projects-cards">
-          {projects.map((project) => (
-            <GlassCard key={project.id} className="project-card" hoverEffect={false}>
-              <div className="project-image">
-                {project.image ? (
-                  <img 
-                    src={project.image} 
-                    alt={project.title}
-                    onError={(e) => {
-                      e.target.style.display = 'none'
-                      e.target.nextSibling.style.display = 'flex'
-                    }}
-                  />
-                ) : null}
-                <div className="project-image-placeholder" style={{ display: project.image ? 'none' : 'flex' }}>
-                  🚀
-                </div>
-              </div>
-              <div className="project-color-bar" style={{ background: project.color }} />
-              <div className="project-content">
-                <h3 className="project-title">{project.title}</h3>
-                <p className="project-description">{project.description}</p>
-                <div className="project-tags">
-                  {project.tags.map((tag) => (
-                    <span key={tag} className="project-tag">{tag}</span>
-                  ))}
-                </div>
-                <div className="project-links">
-                  {project.liveUrl && (
-                    <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className="project-link">
-                      LIVE →
-                    </a>
-                  )}
-                  {project.codeUrl && (
-                    <a href={project.codeUrl} target="_blank" rel="noopener noreferrer" className="project-link">
-                      CODE
-                    </a>
-                  )}
-                </div>
-              </div>
-            </GlassCard>
-          ))}
+
+      <div className="console-frame" {...handlers}>
+        <div className="scanlines"></div>
+        <div className="carousel-track">
+          
+          {/* Previous Project (Left) */}
+          <div className="project-card-wrapper prev">
+             <div className="project-visual">
+               <img src={projects[prev].image} alt="" />
+             </div>
+          </div>
+
+          {/* Active Project (Center) */}
+          <div 
+            className="project-card-wrapper active"
+            style={{ '--glow-color': projects[current].color }}
+            onClick={() => setSelectedProject(projects[current])}
+          >
+             <div className="project-visual">
+               <img src={projects[current].image} alt={projects[current].title} />
+               <div className="project-info-overlay">
+                 <h3 className="project-title">{projects[current].title}</h3>
+                 <p style={{ color: 'rgba(255,255,255,0.8)', fontSize: '0.9rem' }}>
+                   Click for details
+                 </p>
+               </div>
+             </div>
+          </div>
+
+          {/* Next Project (Right) */}
+          <div className="project-card-wrapper next">
+             <div className="project-visual">
+               <img src={projects[next].image} alt="" />
+             </div>
+          </div>
+
         </div>
       </div>
-      
-      <div className="scroll-hint">
-        ← SCROLL TO EXPLORE →
+
+      <div className="console-controls">
+        <div className="d-pad">
+          <button className="control-btn" onClick={prevProject} aria-label="Previous">
+            ◀
+          </button>
+          <button className="control-btn" onClick={nextProject} aria-label="Next">
+             ▶
+          </button>
+        </div>
+        
+        <div className="action-btns">
+          <button className="select-btn" onClick={() => setSelectedProject(projects[current])}>
+            SELECT (A)
+          </button>
+        </div>
       </div>
+
+      <div className="mobile-hint">
+        SWIPE TO NAVIGATE • TAP FOR DETAILS
+      </div>
+
+      {/* Modal */}
+      {selectedProject && (
+        <ProjectModal 
+          project={selectedProject} 
+          onClose={() => setSelectedProject(null)} 
+        />
+      )}
+
     </section>
   )
 }
