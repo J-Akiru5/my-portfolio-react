@@ -6,14 +6,25 @@ import { SectionTitle, ProjectModal } from '..'
 
 gsap.registerPlugin(ScrollTrigger)
 
+// Animation Constants - Recalibrated for Center Origin
+// Active at -50 ensures it is perfectly centered (counteracting left: 50%)
+// Offset is 55% relative to card width
+const POSITIONS = {
+  farPrev: { xPercent: -160, scale: 0.8, opacity: 0, filter: 'brightness(0.3) blur(2px)', zIndex: 1 },
+  prev:    { xPercent: -105, scale: 0.9, opacity: 0.4, filter: 'brightness(0.4) saturate(0.5)', zIndex: 5 },
+  active:  { xPercent: -50,  scale: 1,   opacity: 1,   filter: 'brightness(1.1) saturate(1)', zIndex: 10 },
+  next:    { xPercent: 5,    scale: 0.9, opacity: 0.4, filter: 'brightness(0.4) saturate(0.5)', zIndex: 5 },
+  farNext: { xPercent: 60,   scale: 0.8, opacity: 0,   filter: 'brightness(0.3) blur(2px)', zIndex: 1 },
+}
+
 /**
  * ProjectsSection - Game Console Style Carousel
  * 
  * 3D carousel with cinematic slide animation (Nintendo Switch style).
  * Features:
- * - Robust pinned reveal (no StorySection conflicts)
- * - Physical slide movement (no instant swapping)
- * - Animation locking to prevent spam
+ * - 5-card rendering (farPrev, prev, active, next, farNext)
+ * - Recalibrated GSAP positioning to handle centering conflicts
+ * - Robust pinned reveal
  */
 export default function ProjectsSection() {
   const sectionRef = useRef(null)
@@ -99,31 +110,12 @@ export default function ProjectsSection() {
       }
     })
 
-    // 1. Prev exiting left
-    tl.to('.project-card-wrapper.prev', {
-      x: '-100vw',
-      opacity: 0,
-      duration: 0.8,
-      ease: 'power2.inOut'
-    }, 0)
-    // 2. Active becoming Prev
-    .to('.project-card-wrapper.active', {
-      x: '-35%', // Approx position of prev card
-      scale: 0.9,
-      filter: 'brightness(0.4) saturate(0.5)',
-      opacity: 0.4,
-      duration: 0.8,
-      ease: 'power2.inOut'
-    }, 0)
-    // 3. Next becoming Active (Center)
-    .to('.project-card-wrapper.next', {
-      x: '0%', // Center
-      scale: 1,
-      filter: 'brightness(1.1) saturate(1)',
-      opacity: 1,
-      duration: 0.8,
-      ease: 'power2.inOut'
-    }, 0)
+    // Cinematic movement: All cards shift LEFT
+    tl.to('.project-card-wrapper.far-prev', { ...POSITIONS.farPrev, x: '-100vw', duration: 0.8, ease: 'power2.inOut' }, 0) // Exit
+      .to('.project-card-wrapper.prev',     { ...POSITIONS.farPrev, duration: 0.8, ease: 'power2.inOut' }, 0)
+      .to('.project-card-wrapper.active',   { ...POSITIONS.prev,    duration: 0.8, ease: 'power2.inOut' }, 0)
+      .to('.project-card-wrapper.next',     { ...POSITIONS.active,  duration: 0.8, ease: 'power2.inOut' }, 0)
+      .to('.project-card-wrapper.far-next', { ...POSITIONS.next,    duration: 0.8, ease: 'power2.inOut' }, 0) // Enter
   }
 
   // Cinematic Slide Animation: PREV
@@ -138,31 +130,12 @@ export default function ProjectsSection() {
       }
     })
 
-    // 1. Next exiting right
-    tl.to('.project-card-wrapper.next', {
-      x: '100vw',
-      opacity: 0,
-      duration: 0.8,
-      ease: 'power2.inOut'
-    }, 0)
-    // 2. Active becoming Next
-    .to('.project-card-wrapper.active', {
-      x: '35%', // Approx position of next card
-      scale: 0.9,
-      filter: 'brightness(0.4) saturate(0.5)',
-      opacity: 0.4,
-      duration: 0.8,
-      ease: 'power2.inOut'
-    }, 0)
-    // 3. Prev becoming Active (Center)
-    .to('.project-card-wrapper.prev', {
-      x: '0%', // Center
-      scale: 1,
-      filter: 'brightness(1.1) saturate(1)',
-      opacity: 1,
-      duration: 0.8,
-      ease: 'power2.inOut'
-    }, 0)
+    // Cinematic movement: All cards shift RIGHT
+    tl.to('.project-card-wrapper.far-next', { ...POSITIONS.farNext, x: '100vw', duration: 0.8, ease: 'power2.inOut' }, 0) // Exit
+      .to('.project-card-wrapper.next',     { ...POSITIONS.farNext, duration: 0.8, ease: 'power2.inOut' }, 0)
+      .to('.project-card-wrapper.active',   { ...POSITIONS.next,    duration: 0.8, ease: 'power2.inOut' }, 0)
+      .to('.project-card-wrapper.prev',     { ...POSITIONS.active,  duration: 0.8, ease: 'power2.inOut' }, 0)
+      .to('.project-card-wrapper.far-prev', { ...POSITIONS.prev,    duration: 0.8, ease: 'power2.inOut' }, 0) // Enter
   }
 
   // Handlers
@@ -189,85 +162,78 @@ export default function ProjectsSection() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [activeIndex, selectedProject, isAnimating])
 
-  // Reset transforms after state update
-  useEffect(() => {
-    // Immediate reset because React re-renders with new content
-    gsap.set('.project-card-wrapper', { 
-      clearProps: 'x,scale,filter,opacity' 
-    })
-  }, [activeIndex])
+  // Reset GSAP transforms after state update & Force Initial Position
+  useLayoutEffect(() => {
+    if (isAnimating) return
 
-  // GSAP Pinned Reveal Sequence
+    // Immediately set all cards to their correct base positions
+    const ctx = gsap.context(() => {
+      gsap.set('.project-card-wrapper.far-prev', POSITIONS.farPrev)
+      gsap.set('.project-card-wrapper.prev',     POSITIONS.prev)
+      gsap.set('.project-card-wrapper.active',   POSITIONS.active)
+      gsap.set('.project-card-wrapper.next',     POSITIONS.next)
+      gsap.set('.project-card-wrapper.far-next', POSITIONS.farNext)
+    }, sectionRef)
+    
+    return () => ctx.revert()
+  }, [activeIndex, isAnimating])
+
+  // Initial Reveal Sequence (Pinned)
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      // 1. Initial Hidden States (Set by GSAP)
+      // 1. Initial Hidden States
       gsap.set([titleRef.current, activeCardRef.current, controlsRef.current], { 
         opacity: 0,
         y: 20
       })
-      gsap.set('.project-card-wrapper.prev', { 
-        opacity: 0, 
-        x: -400 // Off-screen left (GSAP relative)
-      })
-      gsap.set('.project-card-wrapper.next', { 
-        opacity: 0, 
-        x: 400 // Off-screen right (GSAP relative)
-      })
+      // Ensure hidden cards are actually hidden and off-screen
+      gsap.set('.project-card-wrapper.prev', { opacity: 0, x: -400 })
+      gsap.set('.project-card-wrapper.next', { opacity: 0, x: 400 })
+      gsap.set('.project-card-wrapper.far-prev', { opacity: 0 })
+      gsap.set('.project-card-wrapper.far-next', { opacity: 0 })
 
       // 2. Main Timeline with Pinning
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
           start: 'top top',
-          end: '+=2500', // Pinned duration with breathing room
+          end: '+=2500', 
           pin: true,
-          scrub: 1, // Smooth scrub
+          scrub: 1, 
           refreshPriority: -1, 
           anticipatePin: 1
         }
       })
 
-      // 3. Animation Sequence
-      tl.to(titleRef.current, { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.5 
-      })
-      .to(activeCardRef.current, { 
-        opacity: 1, 
-        y: 0, 
-        scale: 1, 
-        duration: 0.8,
-        ease: 'back.out(1.2)'
-      }, '-=0.3')
-      .to(['.project-card-wrapper.prev', '.project-card-wrapper.next'], { 
-        opacity: 0.4, // Match CSS final opacity
-        x: 0, // Animate to natural CSS position
-        duration: 0.8, 
-        stagger: 0.1,
-        ease: 'power2.out'
-      }, '<') // Start slightly overlap with active card
-      .to(controlsRef.current, { 
-        opacity: 1, 
-        y: 0, 
-        duration: 0.5 
-      }, '-=0.4')
-      // 4. Breathing Room (Hold Phase)
-      .to({}, { duration: 1 }) 
+      // 3. Reveal Sequence
+      tl.to(titleRef.current, { opacity: 1, y: 0, duration: 0.5 })
+        .to(activeCardRef.current, { 
+          ...POSITIONS.active, // Animate to CALIBRATED active position
+          y: 0, 
+          duration: 0.8, 
+          ease: 'back.out(1.2)' 
+        }, '-=0.3')
+        .to('.project-card-wrapper.prev', { ...POSITIONS.prev, duration: 0.8, ease: 'power2.out' }, '<')
+        .to('.project-card-wrapper.next', { ...POSITIONS.next, duration: 0.8, ease: 'power2.out' }, '<')
+        .to(controlsRef.current, { opacity: 1, y: 0, duration: 0.5 }, '-=0.4')
+        .to({}, { duration: 1 }) // Hold phase
 
     }, sectionRef)
 
     return () => ctx.revert()
   }, [])
 
-  // Get index for 3 visible cards
+  // Get index for 5 visible cards
   const getVisibleProjects = () => {
-    const prev = (activeIndex - 1 + projects.length) % projects.length
-    const next = (activeIndex + 1) % projects.length
-    return { prev, current: activeIndex, next }
+    const len = projects.length
+    const farPrev = (activeIndex - 2 + len) % len
+    const prev = (activeIndex - 1 + len) % len
+    const next = (activeIndex + 1) % len
+    const farNext = (activeIndex + 2) % len
+    return { farPrev, prev, current: activeIndex, next, farNext }
   }
 
-  const { prev, current, next } = getVisibleProjects()
+  const { farPrev, prev, current, next, farNext } = getVisibleProjects()
 
   return (
     <section id="projects" ref={sectionRef} className="projects-section">
@@ -276,7 +242,7 @@ export default function ProjectsSection() {
           min-height: 100vh;
           padding: 5rem 2rem 2rem;
           position: relative;
-          overflow: hidden; // Critical for pin
+          overflow: hidden;
           background: radial-gradient(circle at center, rgba(10, 20, 40, 0.8) 0%, rgba(5, 5, 10, 1) 100%);
         }
         
@@ -287,7 +253,6 @@ export default function ProjectsSection() {
           text-align: center;
         }
 
-        /* Console Frame */
         .console-frame {
           max-width: 1400px;
           margin: 0 auto;
@@ -300,7 +265,6 @@ export default function ProjectsSection() {
           justify-content: center;
         }
 
-        /* Scanlines */
         .scanlines {
           position: absolute;
           inset: 0;
@@ -319,22 +283,41 @@ export default function ProjectsSection() {
           justify-content: center;
         }
 
+        /* 
+         * CARD STYLES 
+         * All cards use absolute positioning centered at left: 50%
+         * GSAP xPercent handles the offset relative to this center.
+         */
         .project-card-wrapper {
           position: absolute;
-          /* transition: transform 0.6s ... - REMOVED: GSAP controls movement now */
-          /* opacity is handled by GSAP */
-          will-change: transform, opacity; /* Optimize performance */
+          left: 50%;
+          top: 50%;
+          margin-top: -110px; /* Vertically centered */
+          /* Note: We remove default translateX(-50%) here to let GSAP handle it fully via xPercent */
+          /* transform: translateX(-50%); <-- REMOVED to avoid conflict */
+          will-change: transform, opacity, filter;
         }
 
-        /* Active Card (Center) - LARGER */
         .project-card-wrapper.active {
-          z-index: 10;
           width: 55%;
           max-width: 700px;
           height: 400px;
-          left: 50%;
-          transform: translateX(-50%) scale(1);
-          filter: brightness(1.1);
+          margin-top: -200px; /* Vertically centered for larger card */
+          z-index: 10;
+        }
+
+        /* Side & Far Cards */
+        .project-card-wrapper:not(.active) {
+          width: 30%;
+          max-width: 350px;
+          height: 220px;
+          z-index: 5;
+        }
+
+        /* Far cards are lower z-index */
+        .project-card-wrapper.far-prev,
+        .project-card-wrapper.far-next {
+          z-index: 1;
         }
 
         /* Active Glow */
@@ -353,30 +336,6 @@ export default function ProjectsSection() {
         @keyframes pulse-glow {
           0%, 100% { opacity: 0.7; }
           50% { opacity: 0.35; }
-        }
-
-        /* Side Cards - SMALLER */
-        .project-card-wrapper.prev,
-        .project-card-wrapper.next {
-          z-index: 5;
-          width: 30%;
-          max-width: 350px;
-          height: 220px;
-          top: 50%;
-          margin-top: -110px; /* Half height to center vertically */
-          opacity: 0.4;
-          filter: brightness(0.4) saturate(0.5);
-          pointer-events: none;
-        }
-
-        .project-card-wrapper.prev {
-          left: 5%;
-          transform: perspective(1000px) rotateY(25deg) scale(0.9);
-        }
-
-        .project-card-wrapper.next {
-          right: 5%;
-          transform: perspective(1000px) rotateY(-25deg) scale(0.9);
         }
         
         /* Card Visual */
@@ -448,7 +407,6 @@ export default function ProjectsSection() {
           gap: 0.5rem;
         }
 
-        /* Pixelated Button Style */
         .control-btn {
           width: 50px;
           height: 50px;
@@ -462,20 +420,14 @@ export default function ProjectsSection() {
           align-items: center;
           justify-content: center;
           transition: all 0.15s;
-          box-shadow: 
-            inset -2px -2px 0 #0a0a12,
-            inset 2px 2px 0 #2a2a3e,
-            0 4px 0 #0a0a12;
+          box-shadow: inset -2px -2px 0 #0a0a12, inset 2px 2px 0 #2a2a3e, 0 4px 0 #0a0a12;
           image-rendering: pixelated;
           font-family: 'Press Start 2P', cursive;
         }
 
         .control-btn:active {
           transform: translateY(4px);
-          box-shadow: 
-            inset -2px -2px 0 #0a0a12,
-            inset 2px 2px 0 #2a2a3e,
-            0 0 0 #0a0a12;
+          box-shadow: inset -2px -2px 0 #0a0a12, inset 2px 2px 0 #2a2a3e, 0 0 0 #0a0a12;
         }
 
         .control-btn:hover {
@@ -491,7 +443,6 @@ export default function ProjectsSection() {
           gap: 0.5rem;
         }
 
-        /* Pixelated SELECT Button */
         .select-btn {
           padding: 0.8rem 1.5rem;
           background: #ff0055;
@@ -501,20 +452,14 @@ export default function ProjectsSection() {
           font-family: 'Press Start 2P', cursive;
           font-size: 0.65rem;
           cursor: pointer;
-          box-shadow: 
-            inset -2px -2px 0 #aa0044,
-            inset 2px 2px 0 #ff3377,
-            0 4px 0 #660022;
+          box-shadow: inset -2px -2px 0 #aa0044, inset 2px 2px 0 #ff3377, 0 4px 0 #660022;
           transition: all 0.15s;
           text-transform: uppercase;
         }
 
         .select-btn:active {
           transform: translateY(4px);
-          box-shadow: 
-            inset -2px -2px 0 #aa0044,
-            inset 2px 2px 0 #ff3377,
-            0 0 0 #660022;
+          box-shadow: inset -2px -2px 0 #aa0044, inset 2px 2px 0 #ff3377, 0 0 0 #660022;
         }
 
         .select-btn:hover {
@@ -535,25 +480,20 @@ export default function ProjectsSection() {
              height: 45vh;
              min-height: 350px;
            }
-           
            .project-card-wrapper.active {
              width: 85%;
              height: 280px;
+             margin-top: -140px;
            }
-           
-           .project-card-wrapper.prev, 
-           .project-card-wrapper.next {
+           .project-card-wrapper:not(.active) {
              display: none;
            }
-           
            .console-controls {
              display: none;
            }
-           
            .mobile-hint {
              display: block;
            }
-           
            .project-title {
              font-size: 0.8rem;
            }
@@ -568,14 +508,21 @@ export default function ProjectsSection() {
         <div className="scanlines"></div>
         <div className="carousel-track">
           
-          {/* Previous Project (Left) */}
+          {/* Far Previous (Off-screen left) */}
+          <div className="project-card-wrapper far-prev">
+             <div className="project-visual">
+               <img src={projects[farPrev].image} alt="" />
+             </div>
+          </div>
+
+          {/* Previous */}
           <div className="project-card-wrapper prev">
              <div className="project-visual">
                <img src={projects[prev].image} alt="" />
              </div>
           </div>
 
-          {/* Active Project (Center) */}
+          {/* Active (Center) */}
           <div 
             className="project-card-wrapper active"
             ref={activeCardRef}
@@ -590,10 +537,17 @@ export default function ProjectsSection() {
              </div>
           </div>
 
-          {/* Next Project (Right) */}
+          {/* Next */}
           <div className="project-card-wrapper next">
              <div className="project-visual">
                <img src={projects[next].image} alt="" />
+             </div>
+          </div>
+
+          {/* Far Next (Off-screen right) */}
+          <div className="project-card-wrapper far-next">
+             <div className="project-visual">
+               <img src={projects[farNext].image} alt="" />
              </div>
           </div>
 
