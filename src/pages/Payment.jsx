@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { collection, addDoc, query, where, getDocs } from 'firebase/firestore'
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
-import { db, storage } from '../firebase'
+import { db } from '../firebase'
 import Seo from '../components/Seo'
 import { PixelButton, GlassCard, useToast } from '../components/ui'
 
@@ -141,13 +140,34 @@ export default function Payment() {
         return
       }
       
-      // Upload screenshot if provided
+      // Upload screenshot to Cloudflare R2 if provided
       let screenshotUrl = null
       if (screenshot) {
-        const fileName = `payments/${Date.now()}_${screenshot.name}`
-        const storageRef = ref(storage, fileName)
-        await uploadBytes(storageRef, screenshot)
-        screenshotUrl = await getDownloadURL(storageRef)
+        // Convert file to base64
+        const reader = new FileReader()
+        const base64Data = await new Promise((resolve, reject) => {
+          reader.onload = () => resolve(reader.result)
+          reader.onerror = reject
+          reader.readAsDataURL(screenshot)
+        })
+        
+        // Upload via Cloudflare R2 API
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename: `payment_${Date.now()}_${screenshot.name}`,
+            contentType: screenshot.type,
+            data: base64Data
+          })
+        })
+        
+        if (uploadRes.ok) {
+          const uploadData = await uploadRes.json()
+          screenshotUrl = uploadData.url
+        } else {
+          console.warn('Screenshot upload failed, continuing without it')
+        }
       }
       
       // Create payment record

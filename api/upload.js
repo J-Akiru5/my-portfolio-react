@@ -67,7 +67,10 @@ export default async function handler(req, res) {
       .replace(/\s+/g, '_')           // Replace spaces with underlines
       .replace(/[^a-zA-Z0-9._-]/g, '') // Remove special characters
       .toLowerCase();
-    const uniqueFilename = `blog/${timestamp}-${sanitizedFilename}`;
+    
+    // Determine folder based on filename prefix
+    const folder = sanitizedFilename.startsWith('payment_') ? 'payments' : 'blog';
+    const uniqueFilename = `${folder}/${timestamp}-${sanitizedFilename}`;
 
     // Upload to R2
     await s3Client.send(new PutObjectCommand({
