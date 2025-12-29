@@ -138,6 +138,30 @@ export default function ServiceInquiry() {
       const refId = docRef.id.slice(0, 8).toUpperCase()
       showToast(`Inquiry sent! Reference: ${refId}`, 'success')
       
+      // Send confirmation email (non-blocking)
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'inquiry',
+            data: {
+              clientName: formData.name,
+              clientEmail: formData.email,
+              serviceName: service.title,
+              projectTitle: formData.projectTitle,
+              budget: formData.budget,
+              timeline: formData.timeline,
+              description: formData.description,
+              refId
+            }
+          })
+        })
+      } catch (emailError) {
+        console.warn('Email notification failed:', emailError)
+        // Don't show error to user - booking was saved successfully
+      }
+      
       // Reset form
       setFormData({
         name: '',

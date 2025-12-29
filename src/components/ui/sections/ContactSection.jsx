@@ -159,6 +159,25 @@ export default function ContactSection() {
       // Record submission for rate limiting
       recordSubmission()
       
+      // Send email notification (non-blocking)
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'contact',
+            data: {
+              name: sanitizedData.name,
+              email: sanitizedData.email,
+              subject: 'Contact Form',
+              message: sanitizedData.message
+            }
+          })
+        })
+      } catch (emailError) {
+        console.warn('Email notification failed:', emailError)
+      }
+      
       setSubmitStatus('✅ Message sent successfully!')
       setFormData({ name: '', email: '', message: '' })
     } catch (error) {
