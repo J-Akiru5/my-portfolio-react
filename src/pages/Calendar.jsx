@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { collection, query, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc } from 'firebase/firestore'
+import { collection, query, orderBy, getDocs, addDoc, updateDoc, deleteDoc, doc, where } from 'firebase/firestore'
 import { db } from '../firebase'
+import { useAuth } from '../context/AuthContext'
 import Seo from '../components/Seo'
 import { PixelButton, GlassCard, useToast } from '../components/ui'
 
 /**
  * Calendar - Full-screen retro calendar for project roadmaps
  * Displays: bookings, projects, tasks, and availability
+ * Admin users can add/edit/delete events, public users can only view
  */
 
 const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
@@ -23,6 +25,9 @@ const EVENT_TYPES = {
 }
 
 export default function Calendar() {
+  const { user } = useAuth()
+  const isAdmin = !!user // Logged in = admin
+  
   const [currentDate, setCurrentDate] = useState(new Date())
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
@@ -41,26 +46,48 @@ export default function Calendar() {
     allDay: true
   })
 
-  // Fetch events from Firestore
+  // Fetch events from Firestore + sync bookings
   useEffect(() => {
-    async function fetchEvents() {
+    async function fetchAllEvents() {
       try {
+        // Fetch calendar events
         const eventsRef = collection(db, 'calendar_events')
         const q = query(eventsRef, orderBy('date', 'asc'))
         const snapshot = await getDocs(q)
         
-        const eventsData = snapshot.docs.map(docSnap => ({
+        const calendarEvents = snapshot.docs.map(docSnap => ({
           id: docSnap.id,
+          source: 'calendar',
           ...docSnap.data()
         }))
-        setEvents(eventsData)
+
+        // Fetch bookings and convert to events
+        const bookingsRef = collection(db, 'bookings')
+        const bookingsQuery = query(bookingsRef, where('status', 'in', ['accepted', 'in_progress']))
+        const bookingsSnapshot = await getDocs(bookingsQuery)
+        
+        const bookingEvents = bookingsSnapshot.docs.map(docSnap => {
+          const data = docSnap.data()
+          return {
+            id: `booking-${docSnap.id}`,
+            source: 'booking',
+            title: data.projectTitle || data.serviceName,
+            type: 'booking',
+            date: data.createdAt?.split('T')[0] || new Date().toISOString().split('T')[0],
+            description: `Client: ${data.clientName}\nBudget: ${data.budget}\nTimeline: ${data.timeline}`,
+            allDay: true,
+            bookingId: docSnap.id
+          }
+        })
+
+        setEvents([...calendarEvents, ...bookingEvents])
       } catch (error) {
-        console.warn('Calendar events not found:', error.message)
+        console.warn('Error fetching events:', error.message)
       } finally {
         setLoading(false)
       }
     }
-    fetchEvents()
+    fetchAllEvents()
   }, [])
 
   // Calculate calendar grid
@@ -121,16 +148,20 @@ export default function Calendar() {
     setCurrentDate(new Date())
   }
 
-  // Handle date click
+  // Handle date click (admin only)
   function handleDateClick(date) {
+    if (!isAdmin) return // View-only for non-admin
     setNewEvent(prev => ({ ...prev, date: date.toISOString().split('T')[0] }))
     setShowModal(true)
     setEditingEvent(null)
   }
 
-  // Handle event click
+  // Handle event click (admin only, not for booking events)
   function handleEventClick(e, event) {
     e.stopPropagation()
+    if (!isAdmin) return // View-only for non-admin
+    if (event.source === 'booking') return // Can't edit booking events here
+    
     setEditingEvent(event)
     setNewEvent({
       title: event.title,

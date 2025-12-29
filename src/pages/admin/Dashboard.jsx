@@ -161,6 +161,15 @@ export default function Dashboard() {
         </GlassCard>
         
         <GlassCard className="dashboard-card" hoverEffect={true}>
+          <div className="card-icon">📅</div>
+          <h3 className="card-title" style={{ color: '#00d4ff' }}>CALENDAR</h3>
+          <p className="card-desc">Manage project milestones, availability, and schedule events.</p>
+          <PixelButton variant="filled" color="cyan" onClick={() => navigate('/calendar')}>
+            VIEW CALENDAR
+          </PixelButton>
+        </GlassCard>
+        
+        <GlassCard className="dashboard-card" hoverEffect={true}>
           <div className="card-icon">⚡</div>
           <h3 className="card-title">ANALYTICS</h3>
           <p className="card-desc">View site traffic, visitor stats, and engagement metrics via Firebase Analytics.</p>

@@ -129,6 +129,7 @@ const NavBar = () => {
     { id: 'services', label: 'HIRE' },
     { id: 'contact', label: 'CONTACT' },
     { id: 'blog', label: 'BLOG', isRoute: true, path: '/blog' },
+    { id: 'calendar', label: '📅', isRoute: true, path: '/calendar' },
   ];
 
   return (
