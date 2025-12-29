@@ -392,6 +392,21 @@ export default function BookingsDashboard() {
                 </div>
               </div>
 
+              {booking.projectTitle && (
+                <div style={{ 
+                  padding: '0.75rem', 
+                  background: 'rgba(0, 212, 255, 0.1)', 
+                  borderLeft: '3px solid #00d4ff',
+                  marginBottom: '0.5rem',
+                  borderRadius: '4px'
+                }}>
+                  <span style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.5)' }}>PROJECT: </span>
+                  <span style={{ fontFamily: 'Press Start 2P', fontSize: '0.7rem', color: '#00d4ff' }}>
+                    {booking.projectTitle}
+                  </span>
+                </div>
+              )}
+
               {booking.projectDescription && (
                 <div className="booking-description">
                   {booking.projectDescription}

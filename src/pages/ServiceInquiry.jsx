@@ -72,6 +72,7 @@ export default function ServiceInquiry() {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
+    projectTitle: '',
     budget: '1k-3k',
     timeline: '1-2 months',
     description: ''
@@ -121,6 +122,7 @@ export default function ServiceInquiry() {
       const docRef = await addDoc(bookingsRef, {
         serviceId: slug,
         serviceName: service.title,
+        projectTitle: formData.projectTitle,
         clientName: formData.name,
         clientEmail: formData.email,
         budget: formData.budget,
@@ -140,6 +142,7 @@ export default function ServiceInquiry() {
       setFormData({
         name: '',
         email: '',
+        projectTitle: '',
         budget: '',
         timeline: '',
         description: ''
@@ -404,6 +407,19 @@ export default function ServiceInquiry() {
                 placeholder="john@example.com"
                 required
                 value={formData.email}
+                onChange={handleInputChange}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label">PROJECT TITLE</label>
+              <input 
+                type="text" 
+                name="projectTitle"
+                className="form-input"
+                placeholder="My Awesome Project"
+                required
+                value={formData.projectTitle}
                 onChange={handleInputChange}
               />
             </div>
