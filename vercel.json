@@ -1,10 +1,5 @@
 {
   "installCommand": "npm install --legacy-peer-deps",
-  "build": {
-    "env": {
-      "VITE_VERCEL_GIT_COMMIT_SHA": "@vercel_git_commit_sha"
-    }
-  },
   "rewrites": [
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
