@@ -3,13 +3,16 @@ import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import {
   HeroSection,
+  ProductsSection,
+  ServicesSection,
+  ProjectsSection,
+  TestimonialsSection,
   AboutSection,
   StorySection,
-  ProjectsSection,
   CertificatesSection,
-  ServicesSection,
   ContactSection,
 } from '../components/ui/sections'
+import Footer from '../components/Footer'
 import Seo from '../components/Seo'
 
 gsap.registerPlugin(ScrollTrigger)
@@ -17,7 +20,8 @@ gsap.registerPlugin(ScrollTrigger)
 /**
  * SinglePage - Main one-page portfolio layout
  * 
- * Combines all sections with smooth scroll and GSAP animations.
+ * Startup-optimized section order:
+ * Hero → Products → Services → Portfolio → Testimonials → About → Contact
  */
 export default function SinglePage() {
   useEffect(() => {
@@ -48,8 +52,8 @@ export default function SinglePage() {
   return (
     <div className="single-page">
       <Seo 
-        title="JeffDev Studio | Vibecoder Developer"
-        description="Portfolio of Jeff Martinez - Specializing in High-Performance Web Applications, React Architecture, and 8-bit aesthetic designs."
+        title="JeffDev Studio | Enterprise Web Development"
+        description="We build digital products that scale. Enterprise web development, SaaS platforms, and digital innovation. DTI Registered: VLLP979818395984"
       />
       <style>{`
         .single-page {
@@ -97,14 +101,17 @@ export default function SinglePage() {
         />
       </div>
       
-      {/* Sections */}
+      {/* Sections - Startup Optimized Order */}
       <HeroSection />
+      <ProductsSection />
+      <ServicesSection />
+      <ProjectsSection />
+      <TestimonialsSection />
       <AboutSection />
       <StorySection />
-      <ProjectsSection />
       <CertificatesSection />
-      <ServicesSection />
       <ContactSection />
+      <Footer />
     </div>
   )
 }

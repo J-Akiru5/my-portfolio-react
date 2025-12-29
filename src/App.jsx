@@ -18,6 +18,8 @@ import ProjectDetail from './pages/ProjectDetail'
 import ServiceInquiry from './pages/ServiceInquiry'
 import Calendar from './pages/Calendar'
 import Payment from './pages/Payment'
+import TermsOfService from './pages/TermsOfService'
+import PrivacyPolicy from './pages/PrivacyPolicy'
 import AdminGateway from './pages/AdminGateway'
 
 // Admin pages
@@ -74,6 +76,10 @@ export default function App() {
               {/* Blog pages (public) */}
               <Route path="/blog" element={<Blog />} />
               <Route path="/blog/:slug" element={<BlogPost />} />
+              
+              {/* Legal pages */}
+              <Route path="/terms" element={<TermsOfService />} />
+              <Route path="/privacy" element={<PrivacyPolicy />} />
               
               {/* Secret Admin Gateway */}
               <Route path="/admin/gateway" element={<AdminGateway />} />

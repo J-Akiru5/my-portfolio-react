@@ -7,7 +7,7 @@ import { PixelButton } from '..'
 gsap.registerPlugin(ScrollTrigger)
 
 // Taglines for typing animation
-const TAGLINES = ['AI-Powered Developer', 'Vibecoder', 'Creative Director']
+const TAGLINES = ['Enterprise Web Development', 'SaaS Products', 'Digital Innovation']
 
 /**
  * HeroSection - Pinned hero with profile picture
@@ -328,32 +328,34 @@ export default function HeroSection() {
         
         <div className="hero-text">
           <h1 className="hero-title">
-            <span ref={firstNameRef} className="name-white">JEFF EDRICK</span>
-            <span ref={lastNameRef} className="name-green" style={{ color: '#39ff14', display: 'block', textShadow: '0 0 10px rgba(57, 255, 20, 0.5)' }}>MARTINEZ</span>
+            <span ref={firstNameRef} className="name-white">JEFFDEV</span>
+            <span ref={lastNameRef} className="name-green" style={{ color: '#39ff14', display: 'block', textShadow: '0 0 10px rgba(57, 255, 20, 0.5)' }}>STUDIO</span>
           </h1>
           
           <div className="hero-line" />
           
-          {/* <p className="hero-tagline">AI-Powered Developer</p> */}
+          <p className="hero-tagline" style={{ fontSize: '1rem', color: 'rgba(255,255,255,0.7)', marginBottom: '0.5rem' }}>
+            We build digital products that scale.
+          </p>
           <p className="hero-subtitle">
             <span className="typing-text" key={taglineIndex}>{TAGLINES[taglineIndex]}</span>
             <span className="typing-cursor" />
           </p>
           
           <div className="hero-buttons">
-            <Link to="/blog" style={{ textDecoration: 'none' }}>
-              <PixelButton variant="outline" color="electric">
-                EXPLORE MY BLOGS
+            <PixelButton variant="filled" color="electric" onClick={() => scrollToSection('services')}>
+              BUILD WITH US
+            </PixelButton>
+            <Link to="/#products" style={{ textDecoration: 'none' }}>
+              <PixelButton variant="outline" color="matrix">
+                OUR PRODUCTS
               </PixelButton>
             </Link>
-            <PixelButton variant="filled" color="matrix" onClick={() => scrollToSection('contact')}>
-              CONTACT
-            </PixelButton>
           </div>
         </div>
       </div>
       
-      <div className="scroll-indicator" onClick={() => scrollToSection('about')}>
+      <div className="scroll-indicator" onClick={() => scrollToSection('products')}>
         <span className="scroll-indicator-text">SCROLL</span>
         <span className="scroll-indicator-arrow">▼</span>
       </div>
