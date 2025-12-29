@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { collection, query, orderBy, getDocs, updateDoc, doc, deleteDoc } from 'firebase/firestore'
 import { db } from '../../firebase'
 import { SectionTitle, GlassCard, PixelButton, useToast } from '../../components/ui'
+import { logAction, AUDIT_ACTIONS } from '../../utils/auditLog'
 
 /**
  * BookingsDashboard - Admin page for managing client bookings
@@ -54,6 +55,9 @@ export default function BookingsDashboard() {
 
   // Update booking status
   async function updateStatus(bookingId, newStatus) {
+    const booking = bookings.find(b => b.id === bookingId)
+    const oldStatus = booking?.status
+    
     try {
       await updateDoc(doc(db, 'bookings', bookingId), {
         status: newStatus,
@@ -63,6 +67,16 @@ export default function BookingsDashboard() {
         b.id === bookingId ? { ...b, status: newStatus } : b
       ))
       showToast(`Status updated to ${newStatus}`, 'success')
+      
+      // Log action
+      logAction({
+        action: AUDIT_ACTIONS.BOOKING_STATUS_CHANGED,
+        entityType: 'booking',
+        entityId: bookingId,
+        details: `Status: ${oldStatus} → ${newStatus}`,
+        before: { status: oldStatus },
+        after: { status: newStatus }
+      })
     } catch (error) {
       console.error('Error updating status:', error)
       showToast('Failed to update status', 'error')
@@ -71,6 +85,9 @@ export default function BookingsDashboard() {
 
   // Update payment status
   async function updatePayment(bookingId, newPaymentStatus) {
+    const booking = bookings.find(b => b.id === bookingId)
+    const oldStatus = booking?.paymentStatus
+    
     try {
       await updateDoc(doc(db, 'bookings', bookingId), {
         paymentStatus: newPaymentStatus,
@@ -80,6 +97,16 @@ export default function BookingsDashboard() {
         b.id === bookingId ? { ...b, paymentStatus: newPaymentStatus } : b
       ))
       showToast(`Payment status updated to ${newPaymentStatus}`, 'success')
+      
+      // Log action
+      logAction({
+        action: AUDIT_ACTIONS.BOOKING_PAYMENT_CHANGED,
+        entityType: 'booking',
+        entityId: bookingId,
+        details: `Payment: ${oldStatus} → ${newPaymentStatus}`,
+        before: { paymentStatus: oldStatus },
+        after: { paymentStatus: newPaymentStatus }
+      })
     } catch (error) {
       console.error('Error updating payment:', error)
       showToast('Failed to update payment status', 'error')
@@ -90,10 +117,21 @@ export default function BookingsDashboard() {
   async function handleDelete(bookingId) {
     if (!window.confirm('Are you sure you want to delete this booking?')) return
     
+    const booking = bookings.find(b => b.id === bookingId)
+    
     try {
       await deleteDoc(doc(db, 'bookings', bookingId))
       setBookings(prev => prev.filter(b => b.id !== bookingId))
       showToast('Booking deleted', 'success')
+      
+      // Log action
+      logAction({
+        action: AUDIT_ACTIONS.BOOKING_DELETED,
+        entityType: 'booking',
+        entityId: bookingId,
+        details: `Deleted: ${booking?.clientName} - ${booking?.serviceName}`,
+        before: booking
+      })
     } catch (error) {
       console.error('Error deleting booking:', error)
       showToast('Failed to delete booking', 'error')

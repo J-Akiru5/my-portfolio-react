@@ -195,6 +195,15 @@ export default function Dashboard() {
             VIEW MESSAGES
           </PixelButton>
         </GlassCard>
+        
+        <GlassCard className="dashboard-card" hoverEffect={true}>
+          <div className="card-icon">📜</div>
+          <h3 className="card-title" style={{ color: '#9d4edd' }}>AUDIT_LOGS</h3>
+          <p className="card-desc">Track all admin actions, booking changes, and system events.</p>
+          <PixelButton variant="outline" color="purple" onClick={() => navigate('/admin/audit-logs')}>
+            VIEW LOGS
+          </PixelButton>
+        </GlassCard>
       </div>
     </section>
   )
