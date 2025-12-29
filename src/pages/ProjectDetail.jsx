@@ -511,7 +511,7 @@ export default function ProjectDetail() {
         </p>
         <div className="cta-buttons">
           <PixelButton 
-            href={`mailto:jeffdev.studio@gmail.com?subject=Interested%20in%20${encodeURIComponent(project.title)}&body=Hi%20Jeff!%0A%0AI%20saw%20your%20${encodeURIComponent(project.title)}%20project%20and%20would%20love%20to%20chat%20about%20working%20together.`}
+            href={`mailto:contact@jeffdev.studio?subject=Interested%20in%20${encodeURIComponent(project.title)}&body=Hi%20Jeff!%0A%0AI%20saw%20your%20${encodeURIComponent(project.title)}%20project%20and%20would%20love%20to%20chat%20about%20working%20together.`}
             icon="�"
             variant="filled"
             color="matrix"

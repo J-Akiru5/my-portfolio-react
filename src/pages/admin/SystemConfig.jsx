@@ -16,7 +16,7 @@ export default function SystemConfig() {
     siteTagline: 'AI-Powered Developer',
     heroTitle: 'Jeff Edrick Martinez',
     heroSubtitle: 'Vibecoder • Creative Director',
-    contactEmail: 'jeffmartinez474@gmail.com',
+    contactEmail: 'contact@jeffdev.studio',
     maintenanceMode: false,
     showAnimations: true,
     enableAnalytics: true,

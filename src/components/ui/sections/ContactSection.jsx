@@ -531,7 +531,7 @@ export default function ContactSection() {
                 For business inquiries or collaborations:
               </p>
               <a 
-                href="mailto:jeffmartinez474@gmail.com"
+                href="mailto:contact@jeffdev.studio"
                 style={{ 
                   display: 'block',
                   padding: '1rem',
@@ -544,7 +544,7 @@ export default function ContactSection() {
                   textAlign: 'center',
                 }}
               >
-                jeffmartinez474@gmail.com
+                contact@jeffdev.studio
               </a>
             </GlassCard>
           </div>

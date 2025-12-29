@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import Seo from '../components/Seo'
-import { PixelButton, GlassCard } from '../components/ui'
+import { PixelButton, GlassCard, useToast } from '../components/ui'
 
 /**
  * ServiceInquiry - Dedicated service page with tailored form
@@ -66,6 +66,7 @@ export default function ServiceInquiry() {
   const { slug } = useParams()
   const [service, setService] = useState(null)
   const [loading, setLoading] = useState(true)
+  const { showToast } = useToast()
   
   // Form State
   const [formData, setFormData] = useState({
@@ -117,7 +118,7 @@ export default function ServiceInquiry() {
       const { addDoc, collection } = await import('firebase/firestore')
       const bookingsRef = collection(db, 'bookings')
       
-      await addDoc(bookingsRef, {
+      const docRef = await addDoc(bookingsRef, {
         serviceId: slug,
         serviceName: service.title,
         clientName: formData.name,
@@ -131,30 +132,22 @@ export default function ServiceInquiry() {
         updatedAt: new Date().toISOString()
       })
       
-      // Open mailto as fallback/confirmation
-      const subject = `Inquiry: ${service.title}`
-      const body = `Hi Jeff,
-
-I'm interested in your ${service.title} service.
-
-Project Details:
-- Budget: ${formData.budget}
-- Timeline: ${formData.timeline}
-
-Description:
-${formData.description}
-
-Contact Info:
-- Name: ${formData.name}
-- Email: ${formData.email}
-`
-      window.location.href = `mailto:jeffdev.studio@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+      // Show success message with booking reference
+      const refId = docRef.id.slice(0, 8).toUpperCase()
+      showToast(`Inquiry sent! Reference: ${refId}`, 'success')
+      
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        budget: '',
+        timeline: '',
+        description: ''
+      })
+      
     } catch (error) {
       console.error('Error saving booking:', error)
-      // Still open mailto even if Firestore fails
-      const subject = `Inquiry: ${service.title}`
-      const body = `Hi Jeff, I'm interested in your ${service.title} service.`
-      window.location.href = `mailto:jeffdev.studio@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+      showToast('Failed to send inquiry. Please try again.', 'error')
     } finally {
       setSubmitting(false)
     }

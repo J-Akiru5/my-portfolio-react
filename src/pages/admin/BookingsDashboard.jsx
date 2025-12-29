@@ -245,12 +245,29 @@ export default function BookingsDashboard() {
 
         .action-select {
           padding: 0.5rem;
-          background: rgba(255, 255, 255, 0.05);
+          background: #1a1a24;
           border: 1px solid rgba(255, 255, 255, 0.2);
           border-radius: 4px;
           color: white;
           font-family: 'JetBrains Mono', monospace;
           font-size: 0.75rem;
+          cursor: pointer;
+          appearance: none;
+          background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff' d='M6 8L2 4h8z'/%3E%3C/svg%3E");
+          background-repeat: no-repeat;
+          background-position: right 8px center;
+          padding-right: 28px;
+        }
+
+        .action-select:focus {
+          outline: none;
+          border-color: #00d4ff;
+        }
+
+        .action-select option {
+          background: #1a1a24;
+          color: white;
+          padding: 0.5rem;
         }
 
         .action-btn {
@@ -328,6 +345,9 @@ export default function BookingsDashboard() {
                 <div className="booking-client">
                   <h3>{booking.clientName}</h3>
                   <p>{booking.clientEmail}</p>
+                  <p style={{ fontSize: '0.65rem', color: 'rgba(255,255,255,0.4)', marginTop: '0.25rem' }}>
+                    REF: {booking.id.slice(0, 8).toUpperCase()}
+                  </p>
                 </div>
                 <div className="booking-badges">
                   <span 
@@ -408,6 +428,24 @@ export default function BookingsDashboard() {
                 >
                   📧 EMAIL
                 </a>
+
+                <a 
+                  href={`mailto:${booking.clientEmail}?subject=Payment for ${booking.serviceName} (Ref: ${booking.id.slice(0, 8).toUpperCase()})&body=Hi ${booking.clientName},%0A%0AThank you for choosing JeffDev Studio!%0A%0APlease complete your payment at:%0Ahttps://jeffdev.studio/payment%0A%0ABooking Reference: ${booking.id.slice(0, 8).toUpperCase()}%0AService: ${booking.serviceName}%0ABudget: ${booking.budget}%0A%0ABest regards,%0AJeff`}
+                  className="action-btn"
+                  style={{ borderColor: '#39ff14', color: '#39ff14' }}
+                >
+                  💳 PAYMENT LINK
+                </a>
+
+                <button 
+                  className="action-btn"
+                  onClick={() => {
+                    navigator.clipboard.writeText(booking.clientEmail)
+                    showToast('Email copied!', 'success')
+                  }}
+                >
+                  📋 COPY
+                </button>
 
                 <button 
                   className="action-btn delete"

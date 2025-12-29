@@ -394,7 +394,7 @@ export default function Payment() {
             After payment, please send your receipt via email for verification.
           </p>
           <a 
-            href="mailto:jeffdev.studio@gmail.com?subject=Payment Confirmation&body=Hi Jeff, I have completed my payment. Please see attached receipt."
+            href="mailto:contact@jeffdev.studio?subject=Payment Confirmation&body=Hi Jeff, I have completed my payment. Please see attached receipt."
             style={{ textDecoration: 'none' }}
           >
             <PixelButton variant="filled" icon="📧">

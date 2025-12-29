@@ -108,7 +108,7 @@ const settings = {
   heroTitle: 'Jeff Edrick Martinez',
   heroSubtitle: 'Vibecoder • Creative Director',
   aboutText: 'Third-year IT student and President of the SineAI Guild. Passionate about blending AI technology with creative development.',
-  contactEmail: 'jeffmartinez474@gmail.com',
+  contactEmail: 'contact@jeffdev.studio',
 };
 
 /**
