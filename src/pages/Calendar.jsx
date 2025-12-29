@@ -151,6 +151,12 @@ export default function Calendar() {
   // Handle date click (admin only)
   function handleDateClick(date) {
     if (!isAdmin) return // View-only for non-admin
+    openAddModal(date)
+  }
+
+  // Open add modal with specific date (for admin button)
+  function openAddModal(date = new Date()) {
+    if (!isAdmin) return
     setNewEvent(prev => ({ ...prev, date: date.toISOString().split('T')[0] }))
     setShowModal(true)
     setEditingEvent(null)
@@ -245,19 +251,23 @@ export default function Calendar() {
 
       <style>{`
         .calendar-page {
-          min-height: 100vh;
-          padding: 2rem;
-          max-width: 1400px;
+          height: calc(100vh - 60px);
+          padding: 1rem 2rem;
+          max-width: 1600px;
           margin: 0 auto;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
         }
 
         .calendar-header {
           display: flex;
           justify-content: space-between;
           align-items: center;
-          margin-bottom: 2rem;
+          margin-bottom: 0.75rem;
           flex-wrap: wrap;
-          gap: 1rem;
+          gap: 0.5rem;
+          flex-shrink: 0;
         }
 
         .calendar-title {
@@ -321,10 +331,13 @@ export default function Calendar() {
         .calendar-grid {
           display: grid;
           grid-template-columns: repeat(7, 1fr);
+          grid-template-rows: auto repeat(6, 1fr);
           gap: 2px;
           background: rgba(255, 255, 255, 0.05);
           border-radius: 12px;
           overflow: hidden;
+          flex: 1;
+          min-height: 0;
         }
 
         .day-header {
@@ -337,12 +350,12 @@ export default function Calendar() {
         }
 
         .calendar-day {
-          min-height: 120px;
           padding: 0.5rem;
           background: rgba(0, 0, 0, 0.3);
           cursor: pointer;
           transition: all 0.2s;
           position: relative;
+          overflow: hidden;
         }
 
         .calendar-day:hover {
@@ -528,9 +541,10 @@ export default function Calendar() {
 
         .legend {
           display: flex;
-          gap: 1.5rem;
-          margin-top: 1.5rem;
+          gap: 1rem;
           flex-wrap: wrap;
+          flex-shrink: 0;
+          padding: 0.5rem 0;
         }
 
         .legend-item {
@@ -601,13 +615,25 @@ export default function Calendar() {
           >
             MONTH
           </button>
-          <PixelButton 
-            size="small"
-            onClick={() => handleDateClick(new Date())}
-          >
-            + ADD EVENT
-          </PixelButton>
+          {isAdmin && (
+            <PixelButton 
+              size="small"
+              onClick={() => openAddModal()}
+            >
+              + ADD EVENT
+            </PixelButton>
+          )}
         </div>
+      </div>
+
+      {/* Legend - Above Calendar */}
+      <div className="legend">
+        {Object.entries(EVENT_TYPES).map(([key, val]) => (
+          <div key={key} className="legend-item">
+            <div className="legend-dot" style={{ backgroundColor: val.color }} />
+            <span>{val.icon} {val.label}</span>
+          </div>
+        ))}
       </div>
 
       {loading ? (
@@ -652,15 +678,6 @@ export default function Calendar() {
                 </div>
               )
             })}
-          </div>
-
-          <div className="legend">
-            {Object.entries(EVENT_TYPES).map(([key, val]) => (
-              <div key={key} className="legend-item">
-                <div className="legend-dot" style={{ backgroundColor: val.color }} />
-                <span>{val.icon} {val.label}</span>
-              </div>
-            ))}
           </div>
         </>
       )}
