@@ -5,6 +5,7 @@ import { db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
 import Seo from '../components/Seo'
 import { PixelButton, GlassCard, useToast } from '../components/ui'
+import { logAction, AUDIT_ACTIONS } from '../utils/auditLog'
 
 /**
  * Calendar - Full-screen retro calendar for project roadmaps
@@ -198,6 +199,16 @@ export default function Calendar() {
           ev.id === editingEvent.id ? { ...ev, ...eventData } : ev
         ))
         showToast('Event updated!', 'success')
+        
+        // Audit log for update
+        logAction({
+          action: AUDIT_ACTIONS.CALENDAR_EVENT_UPDATED,
+          entityType: 'calendar',
+          entityId: editingEvent.id,
+          details: `Updated: ${eventData.title}`,
+          before: { title: editingEvent.title, date: editingEvent.date },
+          after: { title: eventData.title, date: eventData.date }
+        })
       } else {
         const docRef = await addDoc(collection(db, 'calendar_events'), {
           ...eventData,
@@ -205,6 +216,15 @@ export default function Calendar() {
         })
         setEvents(prev => [...prev, { id: docRef.id, ...eventData }])
         showToast('Event created!', 'success')
+        
+        // Audit log for create
+        logAction({
+          action: AUDIT_ACTIONS.CALENDAR_EVENT_CREATED,
+          entityType: 'calendar',
+          entityId: docRef.id,
+          details: `Created: ${eventData.title} (${eventData.type})`,
+          after: eventData
+        })
       }
 
       setShowModal(false)
@@ -223,6 +243,16 @@ export default function Calendar() {
       await deleteDoc(doc(db, 'calendar_events', editingEvent.id))
       setEvents(prev => prev.filter(ev => ev.id !== editingEvent.id))
       showToast('Event deleted', 'success')
+      
+      // Audit log for delete
+      logAction({
+        action: AUDIT_ACTIONS.CALENDAR_EVENT_DELETED,
+        entityType: 'calendar',
+        entityId: editingEvent.id,
+        details: `Deleted: ${editingEvent.title}`,
+        before: editingEvent
+      })
+      
       setShowModal(false)
       resetForm()
     } catch (error) {
