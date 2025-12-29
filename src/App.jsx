@@ -34,6 +34,7 @@ import ProjectEditor from './pages/admin/ProjectEditor'
 import ServicesDashboard from './pages/admin/ServicesDashboard'
 import ServiceEditor from './pages/admin/ServiceEditor'
 import BookingsDashboard from './pages/admin/BookingsDashboard'
+import PaymentsDashboard from './pages/admin/PaymentsDashboard'
 import AuditLogs from './pages/admin/AuditLogs'
 
 export default function App() {
@@ -102,6 +103,9 @@ export default function App() {
 
                 {/* Bookings Admin */}
                 <Route path="/admin/bookings" element={<BookingsDashboard />} />
+
+                {/* Payments Admin */}
+                <Route path="/admin/payments" element={<PaymentsDashboard />} />
 
                 {/* Audit Logs */}
                 <Route path="/admin/audit-logs" element={<AuditLogs />} />

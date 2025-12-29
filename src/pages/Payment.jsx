@@ -1,5 +1,8 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import React, { useState, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
+import { collection, addDoc, query, where, getDocs } from 'firebase/firestore'
+import { ref, uploadBytes, getDownloadURL } from 'firebase/storage'
+import { db, storage } from '../firebase'
 import Seo from '../components/Seo'
 import { PixelButton, GlassCard, useToast } from '../components/ui'
 
@@ -36,9 +39,165 @@ const LANDBANK_DETAILS = {
 }
 
 export default function Payment() {
+  const [searchParams] = useSearchParams()
+  const bookingRef = searchParams.get('ref') || ''
+  
   const [activeMethod, setActiveMethod] = useState('gcash')
   const [copied, setCopied] = useState('')
   const { showToast } = useToast()
+  
+  // Booking info (when ref is provided)
+  const [booking, setBooking] = useState(null)
+  const [loadingBooking, setLoadingBooking] = useState(false)
+  
+  // Confirmation form state
+  const [confirmData, setConfirmData] = useState({
+    amount: '',
+    referenceNumber: '',
+    notes: ''
+  })
+  const [screenshot, setScreenshot] = useState(null)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitted, setSubmitted] = useState(false)
+  
+  // Fetch booking if ref provided
+  useEffect(() => {
+    async function fetchBooking() {
+      if (!bookingRef || bookingRef.length < 8) return
+      
+      setLoadingBooking(true)
+      try {
+        // Search by ID prefix (first 8 chars uppercase match)
+        const bookingsRef = collection(db, 'bookings')
+        const snapshot = await getDocs(bookingsRef)
+        
+        const found = snapshot.docs.find(docSnap => 
+          docSnap.id.slice(0, 8).toUpperCase() === bookingRef.toUpperCase()
+        )
+        
+        if (found) {
+          setBooking({ id: found.id, ...found.data() })
+        }
+      } catch (error) {
+        console.error('Error fetching booking:', error)
+      } finally {
+        setLoadingBooking(false)
+      }
+    }
+    fetchBooking()
+  }, [bookingRef])
+  
+  // Validate reference number (min 8 chars for GCash/PayPal, 10 for bank)
+  function validateReferenceNumber(refNum) {
+    const minLength = activeMethod === 'landbank' ? 10 : 8
+    return refNum.trim().length >= minLength
+  }
+  
+  // Check for duplicate reference number
+  async function checkDuplicateRef(refNum) {
+    const paymentsRef = collection(db, 'payments')
+    const q = query(paymentsRef, where('referenceNumber', '==', refNum.trim()))
+    const snapshot = await getDocs(q)
+    return !snapshot.empty
+  }
+  
+  // Handle screenshot selection
+  function handleScreenshotChange(e) {
+    const file = e.target.files?.[0]
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) { // 5MB limit
+        showToast('Screenshot too large (max 5MB)', 'error')
+        return
+      }
+      setScreenshot(file)
+    }
+  }
+  
+  // Submit payment confirmation
+  async function handleSubmitPayment(e) {
+    e.preventDefault()
+    
+    // Validate amount
+    const amount = parseFloat(confirmData.amount)
+    if (isNaN(amount) || amount <= 0) {
+      showToast('Please enter a valid amount', 'error')
+      return
+    }
+    
+    // Validate reference number
+    if (!validateReferenceNumber(confirmData.referenceNumber)) {
+      showToast(`Reference number too short (min ${activeMethod === 'landbank' ? 10 : 8} characters)`, 'error')
+      return
+    }
+    
+    setSubmitting(true)
+    
+    try {
+      // Check for duplicate reference
+      const isDuplicate = await checkDuplicateRef(confirmData.referenceNumber)
+      if (isDuplicate) {
+        showToast('This reference number has already been used!', 'error')
+        setSubmitting(false)
+        return
+      }
+      
+      // Upload screenshot if provided
+      let screenshotUrl = null
+      if (screenshot) {
+        const fileName = `payments/${Date.now()}_${screenshot.name}`
+        const storageRef = ref(storage, fileName)
+        await uploadBytes(storageRef, screenshot)
+        screenshotUrl = await getDownloadURL(storageRef)
+      }
+      
+      // Create payment record
+      const paymentData = {
+        bookingId: booking?.id || null,
+        bookingRef: bookingRef || null,
+        amount,
+        method: activeMethod,
+        referenceNumber: confirmData.referenceNumber.trim(),
+        notes: confirmData.notes.trim(),
+        screenshotUrl,
+        status: 'pending', // pending | confirmed | rejected
+        submittedAt: new Date().toISOString(),
+        confirmedAt: null,
+        rejectedAt: null,
+        clientEmail: booking?.clientEmail || null,
+        clientName: booking?.clientName || null
+      }
+      
+      await addDoc(collection(db, 'payments'), paymentData)
+      
+      // Send notification email
+      try {
+        await fetch('/api/send-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            type: 'contact',
+            data: {
+              name: booking?.clientName || 'Client',
+              email: booking?.clientEmail || 'unknown',
+              subject: `💰 Payment Confirmation - ₱${amount.toLocaleString()}`,
+              message: `Payment submitted:\n\nAmount: ₱${amount.toLocaleString()}\nMethod: ${activeMethod.toUpperCase()}\nRef #: ${confirmData.referenceNumber}\nBooking: ${bookingRef || 'N/A'}\n\nPlease verify in the admin dashboard.`
+            }
+          })
+        })
+      } catch (emailError) {
+        console.warn('Email notification failed:', emailError)
+      }
+      
+      setSubmitted(true)
+      showToast('Payment confirmation submitted!', 'success')
+      
+    } catch (error) {
+      console.error('Error submitting payment:', error)
+      showToast('Failed to submit. Please try again.', 'error')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   // Copy to clipboard
   async function copyToClipboard(text, label) {
@@ -389,21 +548,155 @@ export default function Payment() {
           </>
         )}
 
-        <div className="confirm-section">
-          <p className="confirm-text">
-            After payment, please send your receipt via email for verification.
-          </p>
-          <a 
-            href="mailto:contact@jeffdev.studio?subject=Payment Confirmation&body=Hi Jeff, I have completed my payment. Please see attached receipt."
-            style={{ textDecoration: 'none' }}
-          >
-            <PixelButton variant="filled" icon="📧">
-              SEND RECEIPT
-            </PixelButton>
-          </a>
-          <p className="warning-text">
-            ⚠️ Payment will be verified within 24 hours
-          </p>
+        {/* Booking Info (if ref provided) */}
+        {booking && (
+          <div style={{
+            background: 'rgba(0, 212, 255, 0.1)',
+            border: '1px solid rgba(0, 212, 255, 0.3)',
+            borderRadius: '8px',
+            padding: '1.5rem',
+            marginBottom: '2rem'
+          }}>
+            <h4 style={{ color: '#00d4ff', marginBottom: '1rem', fontFamily: 'Press Start 2P', fontSize: '0.7rem' }}>
+              BOOKING DETAILS
+            </h4>
+            <div style={{ display: 'grid', gap: '0.5rem', fontFamily: 'JetBrains Mono' }}>
+              <div><span style={{ color: '#888' }}>Ref:</span> <span style={{ color: '#39ff14' }}>{bookingRef.toUpperCase()}</span></div>
+              <div><span style={{ color: '#888' }}>Service:</span> {booking.serviceName}</div>
+              <div><span style={{ color: '#888' }}>Client:</span> {booking.clientName}</div>
+              {booking.projectTitle && <div><span style={{ color: '#888' }}>Project:</span> {booking.projectTitle}</div>}
+              <div><span style={{ color: '#888' }}>Budget:</span> <span style={{ color: '#ffc107' }}>{booking.budget}</span></div>
+            </div>
+          </div>
+        )}
+
+        {loadingBooking && (
+          <div style={{ textAlign: 'center', color: '#00d4ff', marginBottom: '1rem' }}>
+            Loading booking...
+          </div>
+        )}
+
+        {/* Payment Confirmation Form */}
+        <div className="confirm-section" style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '2rem', marginTop: '1rem' }}>
+          {submitted ? (
+            <div style={{ textAlign: 'center', padding: '2rem' }}>
+              <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>✅</div>
+              <h3 style={{ color: '#39ff14', fontFamily: 'Press Start 2P', fontSize: '1rem', marginBottom: '1rem' }}>
+                PAYMENT SUBMITTED!
+              </h3>
+              <p style={{ color: 'rgba(255,255,255,0.7)' }}>
+                Your payment confirmation has been received.<br/>
+                We'll verify it within 24 hours.
+              </p>
+            </div>
+          ) : (
+            <>
+              <h4 style={{ 
+                color: '#00d4ff', 
+                fontFamily: 'Press Start 2P', 
+                fontSize: '0.8rem', 
+                marginBottom: '1.5rem',
+                textAlign: 'center' 
+              }}>
+                CONFIRM YOUR PAYMENT
+              </h4>
+              
+              <form onSubmit={handleSubmitPayment} style={{ maxWidth: '400px', margin: '0 auto' }}>
+                {/* Amount */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.7rem', fontFamily: 'Press Start 2P', marginBottom: '0.5rem' }}>
+                    AMOUNT PAID (₱) *
+                  </label>
+                  <input
+                    type="number"
+                    className="terminal-input"
+                    placeholder="e.g. 5000"
+                    value={confirmData.amount}
+                    onChange={e => setConfirmData(prev => ({ ...prev, amount: e.target.value }))}
+                    required
+                    min="1"
+                    step="0.01"
+                    style={{ width: '100%' }}
+                  />
+                </div>
+                
+                {/* Reference Number */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.7rem', fontFamily: 'Press Start 2P', marginBottom: '0.5rem' }}>
+                    REFERENCE NUMBER *
+                  </label>
+                  <input
+                    type="text"
+                    className="terminal-input"
+                    placeholder={`e.g. ${activeMethod === 'gcash' ? '1234567890123' : activeMethod === 'paypal' ? 'ABCD1234EFGH' : '12345678901234'}`}
+                    value={confirmData.referenceNumber}
+                    onChange={e => setConfirmData(prev => ({ ...prev, referenceNumber: e.target.value }))}
+                    required
+                    minLength={activeMethod === 'landbank' ? 10 : 8}
+                    style={{ width: '100%' }}
+                  />
+                  <small style={{ color: 'rgba(255,255,255,0.4)', fontSize: '0.7rem' }}>
+                    Min {activeMethod === 'landbank' ? '10' : '8'} characters. Found on your receipt.
+                  </small>
+                </div>
+                
+                {/* Screenshot Upload */}
+                <div style={{ marginBottom: '1.25rem' }}>
+                  <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.7rem', fontFamily: 'Press Start 2P', marginBottom: '0.5rem' }}>
+                    SCREENSHOT (optional)
+                  </label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleScreenshotChange}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      background: 'rgba(0,0,0,0.4)',
+                      border: '1px solid rgba(255,255,255,0.2)',
+                      borderRadius: '4px',
+                      color: 'white',
+                      fontSize: '0.85rem'
+                    }}
+                  />
+                  {screenshot && (
+                    <small style={{ color: '#39ff14', fontSize: '0.7rem' }}>
+                      ✓ {screenshot.name}
+                    </small>
+                  )}
+                </div>
+                
+                {/* Notes */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                  <label style={{ display: 'block', color: '#00d4ff', fontSize: '0.7rem', fontFamily: 'Press Start 2P', marginBottom: '0.5rem' }}>
+                    NOTES (optional)
+                  </label>
+                  <textarea
+                    className="terminal-input"
+                    placeholder="Any additional info..."
+                    value={confirmData.notes}
+                    onChange={e => setConfirmData(prev => ({ ...prev, notes: e.target.value }))}
+                    rows={2}
+                    style={{ width: '100%', resize: 'vertical' }}
+                  />
+                </div>
+                
+                {/* Submit Button */}
+                <PixelButton 
+                  variant="filled" 
+                  color="matrix"
+                  style={{ width: '100%' }}
+                  disabled={submitting}
+                >
+                  {submitting ? 'SUBMITTING...' : '✓ CONFIRM PAYMENT'}
+                </PixelButton>
+              </form>
+              
+              <p className="warning-text" style={{ marginTop: '1.5rem' }}>
+                ⚠️ Duplicate reference numbers will be flagged
+              </p>
+            </>
+          )}
         </div>
       </GlassCard>
     </div>

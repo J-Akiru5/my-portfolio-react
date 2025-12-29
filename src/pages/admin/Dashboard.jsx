@@ -197,6 +197,15 @@ export default function Dashboard() {
         </GlassCard>
         
         <GlassCard className="dashboard-card" hoverEffect={true}>
+          <div className="card-icon">💳</div>
+          <h3 className="card-title" style={{ color: '#39ff14' }}>PAYMENTS</h3>
+          <p className="card-desc">Verify and manage client payment confirmations.</p>
+          <PixelButton variant="outline" color="matrix" onClick={() => navigate('/admin/payments')}>
+            VERIFY PAYMENTS
+          </PixelButton>
+        </GlassCard>
+        
+        <GlassCard className="dashboard-card" hoverEffect={true}>
           <div className="card-icon">📜</div>
           <h3 className="card-title" style={{ color: '#9d4edd' }}>AUDIT_LOGS</h3>
           <p className="card-desc">Track all admin actions, booking changes, and system events.</p>
