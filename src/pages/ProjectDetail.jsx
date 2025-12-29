@@ -3,6 +3,8 @@ import { useParams, Link, useNavigate } from 'react-router-dom'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from '../firebase'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
+import rehypeRaw from 'rehype-raw'
 import Seo from '../components/Seo'
 import { PixelButton } from '../components/ui'
 
@@ -317,7 +319,24 @@ export default function ProjectDetail() {
           max-width: 100%;
           height: auto;
           border-radius: 8px;
-          margin: 1.5rem 0;
+          margin: 0.5rem 0;
+        }
+        
+        /* Shield.io badges - inline display */
+        .markdown-content p img[src*="shields.io"],
+        .markdown-content p img[src*="badge"] {
+          display: inline-block;
+          margin: 0.25rem 0.25rem;
+          vertical-align: middle;
+          border-radius: 4px;
+          height: auto;
+          max-height: 28px;
+        }
+        
+        /* Centered paragraphs from GitHub */
+        .markdown-content p[align="center"],
+        .markdown-content [align="center"] {
+          text-align: center;
         }
 
         .markdown-content a {
@@ -331,6 +350,39 @@ export default function ProjectDetail() {
           margin: 1rem 0;
           color: rgba(255, 255, 255, 0.7);
           font-style: italic;
+        }
+        
+        /* Tables */
+        .markdown-content table {
+          width: 100%;
+          border-collapse: collapse;
+          margin: 1.5rem 0;
+          background: rgba(0, 0, 0, 0.3);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        
+        .markdown-content th,
+        .markdown-content td {
+          border: 1px solid rgba(255, 255, 255, 0.15);
+          padding: 0.75rem 1rem;
+          text-align: left;
+        }
+        
+        .markdown-content th {
+          background: rgba(0, 212, 255, 0.15);
+          color: #00d4ff;
+          font-weight: bold;
+        }
+        
+        .markdown-content hr {
+          border: none;
+          border-top: 1px solid rgba(255, 255, 255, 0.2);
+          margin: 2rem 0;
+        }
+        
+        .markdown-content strong {
+          color: #39ff14;
         }
 
         .tech-tags {
@@ -489,7 +541,12 @@ export default function ProjectDetail() {
           <h2 className="section-title">ARCHITECTURE.md</h2>
           <div className="details-section">
             <div className="markdown-content">
-              <ReactMarkdown>{project.details}</ReactMarkdown>
+              <ReactMarkdown 
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+              >
+                {project.details}
+              </ReactMarkdown>
             </div>
           </div>
         </>
