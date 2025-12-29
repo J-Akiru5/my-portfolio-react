@@ -147,7 +147,7 @@ export default function PrivacyPolicy() {
         <h2>7. Contact Us</h2>
         <p>
           For privacy-related inquiries, contact us at:{' '}
-          <a href="mailto:jeffdevstudio@gmail.com">jeffdevstudio@gmail.com</a>
+          <a href="mailto:contact@jeffdev.studio">contact@jeffdev.studio</a>
         </p>
 
         <Link to="/" className="back-link">← Back to Home</Link>

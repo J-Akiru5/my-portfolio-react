@@ -147,7 +147,7 @@ export default function TermsOfService() {
         <h2>8. Contact</h2>
         <p>
           For questions about these Terms, contact us at:{' '}
-          <a href="mailto:jeffdevstudio@gmail.com">jeffdevstudio@gmail.com</a>
+          <a href="mailto:contact@jeffdev.studio">contact@jeffdev.studio</a>
         </p>
 
         <Link to="/" className="back-link">← Back to Home</Link>

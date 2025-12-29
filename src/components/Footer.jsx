@@ -182,6 +182,7 @@ export default function Footer() {
               <li><Link to="/services/web-development">Web Development</Link></li>
               <li><Link to="/services/ui-ux-design">UI/UX Design</Link></li>
               <li><Link to="/services/mobile-apps">Mobile Apps</Link></li>
+              <li><a href="mailto:hire@jeffdev.studio">hire@jeffdev.studio</a></li>
             </ul>
           </div>
 

@@ -384,26 +384,26 @@ export default function StorySection() {
         }
       `}</style>
 
-      {/* PANEL 1: THE ORIGIN */}
+      {/* PANEL 1: JEFFDEV ORIGIN */}
       <div className="panel-origin">
         <div className="panel-content">
-          <span className="panel-icon">🎮</span>
-          <p className="panel-subtitle">// WHERE IT ALL BEGAN</p>
-          <h2 className="panel-title">THE ORIGIN</h2>
+          <span className="panel-icon">🚀</span>
+          <p className="panel-subtitle">// EST. ILOILO CITY</p>
+          <h2 className="panel-title">DIGITAL CRAFTSMANSHIP</h2>
           <p className="panel-text">
-            It all started with curiosity. That thought came to my mind—"What if I can understand programming language, coding. That would be cool." And yes, the first programming language I learned was C#, and we developed a Snake game on the console.
+            JeffDev Studio is a cloud-native development shop based in Iloilo. We specialize in building high-performance B2B platforms using the same tech stack as Silicon Valley unicorns. We don't just write code; we architect digital assets that compound in value.
           </p>
         </div>
       </div>
 
-      {/* PANEL 2: THE AI AWAKENING (Clip Reveal) */}
+      {/* PANEL 2: VIBECODER ENGINE (Clip Reveal) */}
       <div id="panel-awakening" className="panel-awakening">
         <div className="panel-content">
           <span className="panel-icon">⚡</span>
-          <p className="panel-subtitle">// THE GAME CHANGER</p>
-          <h2 className="panel-title">THE AI AWAKENING</h2>
+          <p className="panel-subtitle">// PROPRIETARY IP</p>
+          <h2 className="panel-title">THE VIBECODER ENGINE</h2>
           <p className="panel-text">
-            Then came the shift. I discovered GitHub Copilot and VS Code. It wasn't about replacing code; it was about amplifying creativity. AI Agents handle the heavy lifting while I focus on architecture.
+            Speed is our currency. Our proprietary <strong>Vibecoder Engine</strong> allows us to deploy production-ready UI 3x faster than traditional agencies. By leveraging AI-augmented workflows, we deliver enterprise-grade software at startup speed.
           </p>
         </div>
       </div>
@@ -417,24 +417,24 @@ export default function StorySection() {
 
         <div id="filmstrip-inner" className="filmstrip-inner">
           
-          {/* SCENE 3: THE CREATIVE HYBRID */}
+          {/* SCENE 3: ENTERPRISE SERVICES */}
           <div className="film-panel film-panel-creative">
             <div 
               className="film-bg-parallax" 
               style={{ 
-                background: 'linear-gradient(135deg, rgba(255,107,157,0.1), rgba(157,78,221,0.1))',
+                background: 'linear-gradient(135deg, rgba(0, 212, 255, 0.1), rgba(57, 255, 20, 0.1))',
               }}
             />
             <div className="film-content">
-              <p className="film-scene">SCENE 03: THE HYBRID</p>
-              <h2 className="film-title">Filmmaker × Developer</h2>
+              <p className="film-scene">SCENE 03: SERVICES</p>
+              <h2 className="film-title">Technical Partnership</h2>
               <p className="film-text">
-                I'm not just a coder. I'm a <span className="highlight-creative">filmmaker</span> and <span className="highlight-creative">UI designer</span>. My hobbies—Music, Animation, Cinematography—bleed into my code. I don't just build apps; I <span className="highlight-creative">direct user experiences</span>.
+                We partner with ambitious founders to build <span className="highlight-leader">custom SaaS platforms</span>, <span className="highlight-leader">internal tooling</span>, and <span className="highlight-leader">AI integrations</span>. Our code is clean, documented, and built to scale on AWS.
               </p>
             </div>
           </div>
 
-          {/* SCENE 4: THE LEADER */}
+          {/* SCENE 4: COMMUNITY LEADERSHIP */}
           <div className="film-panel film-panel-leader">
             <div 
               className="film-bg-parallax" 
@@ -443,10 +443,10 @@ export default function StorySection() {
               }}
             />
             <div className="film-content">
-              <p className="film-scene">SCENE 04: THE LEADER</p>
-              <h2 className="film-title">President, SineAI Guild</h2>
+              <p className="film-scene">SCENE 04: LEADERSHIP</p>
+              <h2 className="film-title">SineAI Guild</h2>
               <p className="film-text">
-                Today, I lead as the President of the <span className="highlight-leader">SineAI Guild of Western Visayas</span>. We successfully deployed the <span className="highlight-leader">SineAI Hub</span>. I blend leadership with full-stack capability to drive innovation.
+                Beyond client work, we lead the <span className="highlight-creative">SineAI Guild of Western Visayas</span> using the <span className="highlight-creative">SineAI Hub</span> platform. We stay at the bleeding edge of AI to give our clients an unfair advantage.
               </p>
             </div>
           </div>
