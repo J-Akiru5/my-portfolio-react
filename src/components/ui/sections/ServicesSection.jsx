@@ -226,6 +226,18 @@ export default function ServicesSection() {
           color: #00d4ff;
         }
         
+        .contact-link {
+          text-decoration: none;
+          display: inline-block;
+          transition: all 0.3s ease;
+        }
+        
+        .contact-link:hover {
+          color: #39ff14;
+          transform: scale(1.05);
+          text-shadow: 0 0 10px rgba(57, 255, 20, 0.5);
+        }
+        
         @media (max-width: 768px) {
           .services-grid {
             grid-template-columns: 1fr;
@@ -242,7 +254,7 @@ export default function ServicesSection() {
         
         <div className="services-intro">
           <p>
-            Currently a <span className="highlight">student freelancer</span> passionate about 
+            A <span className="highlight">tech studio</span> passionate about 
             crafting digital experiences. Let's build something awesome together!
           </p>
         </div>
@@ -282,7 +294,7 @@ export default function ServicesSection() {
         
         <div className="services-footer">
           <p>Interested in working together?</p>
-          <p className="pixel-font">📩 Contact me for project discussion & pricing</p>
+          <a href="#contact" className="contact-link pixel-font">📩 Contact me for project discussion & pricing</a>
         </div>
       </div>
     </section>
