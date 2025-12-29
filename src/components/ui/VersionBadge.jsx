@@ -7,9 +7,10 @@ import React from 'react'
  * Displayed globally via App.jsx.
  */
 
-// Update this with each release
-const VERSION = 'v2.1.0'
-const BUILD_DATE = 'Dec 2025'
+// Dynamic versioning: Uses Vercel env vars when deployed, falls back to dev version
+const COMMIT_SHA = import.meta.env.VITE_VERCEL_GIT_COMMIT_SHA || 'local'
+const VERSION = COMMIT_SHA === 'local' ? 'v2.1.0-dev' : `v2.1.${COMMIT_SHA.slice(0, 4)}`
+const BUILD_DATE = new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
 
 export default function VersionBadge() {
   return (

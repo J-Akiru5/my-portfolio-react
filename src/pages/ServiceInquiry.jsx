@@ -501,10 +501,6 @@ export default function ServiceInquiry() {
             >
               {submitting ? 'SENDING...' : 'SEND INQUIRY'}
             </PixelButton>
-            
-            <p style={{ textAlign: 'center', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', marginTop: '1rem' }}>
-              This will open your default email client.
-            </p>
           </form>
         </div>
       </div>
