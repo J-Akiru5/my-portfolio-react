@@ -46,6 +46,18 @@ jobs:
         run: |
           gcloud auth configure-docker
 
+      # DEBUG: Verify secrets presence (safe log)
+      - name: Debug Secrets Availability
+        run: |
+          echo "----------------------------------------------"
+          echo "🔍 CHECKING GITHUB SECRETS AVAILABILITY"
+          echo "----------------------------------------------"
+          if [ -n "${{ secrets.VITE_FIREBASE_API_KEY }}" ]; then echo "✅ VITE_FIREBASE_API_KEY is PRESENT"; else echo "❌ VITE_FIREBASE_API_KEY is MISSING"; fi
+          if [ -n "${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}" ]; then echo "✅ VITE_FIREBASE_AUTH_DOMAIN is PRESENT"; else echo "❌ VITE_FIREBASE_AUTH_DOMAIN is MISSING"; fi
+          if [ -n "${{ secrets.VITE_FIREBASE_PROJECT_ID }}" ]; then echo "✅ VITE_FIREBASE_PROJECT_ID is PRESENT"; else echo "❌ VITE_FIREBASE_PROJECT_ID is MISSING"; fi
+          if [ -n "${{ secrets.VITE_FIREBASE_MESSAGING_SENDER_ID }}" ]; then echo "✅ VITE_FIREBASE_MESSAGING_SENDER_ID is PRESENT"; else echo "❌ VITE_FIREBASE_MESSAGING_SENDER_ID is MISSING"; fi
+          echo "----------------------------------------------"
+
       # Build Docker image with Firebase environment variables
       - name: Build Docker image
         run: |
