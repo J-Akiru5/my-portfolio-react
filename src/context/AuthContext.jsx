@@ -21,7 +21,7 @@ export function AuthProvider({ children }) {
   const auth = getAuth(app)
 
   // Explicit admin email whitelist
-  const ADMIN_EMAIL = 'jeffmartinez@isufst.edu.ph'
+  const ADMIN_EMAIL = 'jeffmartinez2474@gmail.com'
 
   function login(email, password) {
     return signInWithEmailAndPassword(auth, email, password)
