@@ -1,0 +1,80 @@
+# Google Cloud Build configuration
+# Automatically builds and deploys to Cloud Run
+
+steps:
+  # Step 1: Build the Docker image with build arguments for Firebase config
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'VITE_FIREBASE_API_KEY=AIzaSyCkpMw2u0bIRXNQ8dWjujrOL0S__myFJzU'
+      - '--build-arg'
+      - 'VITE_FIREBASE_AUTH_DOMAIN=portfolio-contest-2026.firebaseapp.com'
+      - '--build-arg'
+      - 'VITE_FIREBASE_PROJECT_ID=portfolio-contest-2026'
+      - '--build-arg'
+      - 'VITE_FIREBASE_STORAGE_BUCKET=portfolio-contest-2026.firebasestorage.app'
+      - '--build-arg'
+      - 'VITE_FIREBASE_MESSAGING_SENDER_ID=258559380421'
+      - '--build-arg'
+      - 'VITE_FIREBASE_APP_ID=1:258559380421:web:49c56034a44e4ec64b19ac'
+      - '--build-arg'
+      - 'VITE_FIREBASE_MEASUREMENT_ID=G-PKG8LRZWD5'
+      - '--build-arg'
+      - 'VITE_ADMIN_GATEWAY_KEY=j-akiru-2025'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/portfolio-react:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/portfolio-react:latest'
+      - '.'
+    id: 'build-image'
+
+  # Step 2: Push the image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/portfolio-react:$COMMIT_SHA'
+    id: 'push-image'
+    waitFor: ['build-image']
+
+  # Step 3: Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'portfolio-react'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/portfolio-react:$COMMIT_SHA'
+      - '--region'
+      - 'us-central1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--memory'
+      - '512Mi'
+      - '--cpu'
+      - '1'
+      - '--max-instances'
+      - '10'
+      - '--min-instances'
+      - '0'
+      - '--port'
+      - '8080'
+      - '--timeout'
+      - '300'
+    id: 'deploy-cloud-run'
+    waitFor: ['push-image']
+
+# Store images in Google Container Registry
+images:
+  - 'gcr.io/$PROJECT_ID/portfolio-react:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/portfolio-react:latest'
+
+# Build timeout
+timeout: '1200s'
+
+# Use higher CPU for faster builds
+options:
+  machineType: 'N1_HIGHCPU_8'
+  logging: CLOUD_LOGGING_ONLY

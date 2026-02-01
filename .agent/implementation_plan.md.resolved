@@ -1,0 +1,45 @@
+# Plan: Dual Deployment to Google Cloud Run
+
+This plan outlines the steps to deploy the existing Vite/Vercel project to Google Cloud Run while maintaining the current Vercel deployment and domain management.
+
+## Proposed Changes
+
+### [Component] Containerization (Docker)
+To run on Cloud Run, we need to containerize the application. Since Vercel uses serverless functions, we'll implement a lightweight Node.js/Express server to host both the static frontend and the API endpoints.
+
+#### [NEW] [Dockerfile](file:///c:/xampp/htdocs/profile-react/Dockerfile)
+Create a multi-stage Dockerfile:
+- **Build Stage**: Use Node.js to install dependencies and run `npm run build`.
+- **Run Stage**: Use a slim Node.js image, copy the `dist` folder and `api` folder, and start the Express server.
+
+#### [NEW] [server.js](file:///c:/xampp/htdocs/profile-react/server.js)
+A new entry point for the container:
+- Uses `express` to serve static files from `dist/`.
+- Dynamically maps files in the `api/` directory to `/api/*` routes using a wrapper that simulates the Vercel [(req, res)](file:///c:/xampp/htdocs/profile-react/api/analytics.js#10-88) signature.
+- Handles SPA routing (redirecting all non-API 404s to [index.html](file:///c:/xampp/htdocs/profile-react/index.html)).
+
+### [Component] Domain & DNS
+> [!IMPORTANT]
+> Since the main domain is managed by Vercel, we will create a new subdomain (e.g., `gcp.jeffdev.studio` or `ai.jeffdev.studio`) to point to the Google Cloud Run service via CNAME.
+
+### [Component] API Compatibility
+The Vercel functions in `api/` use the [(req, res)](file:///c:/xampp/htdocs/profile-react/api/analytics.js#10-88) signature. We will wrap these to be compatible with Express.
+
+#### [MODIFY] [package.json](file:///c:/xampp/htdocs/profile-react/package.json)
+Add `express` and `cors` to dependencies for the runtime container.
+
+## Verification Plan
+
+### Automated Tests
+- **Docker Build**: Run `docker build -t profile-react .` to ensure the container builds successfully.
+- **Local Container Test**: Run `docker run -p 8080:8080 profile-react` and verify:
+    - Frontend loads at `http://localhost:8080`.
+    - API endpoints (e.g., `/api/analytics`) return valid data (or expected errors if credentials are missing).
+
+### Manual Verification
+1. **Check SPA Routing**: Navigate to a sub-route (e.g., `/portfolio`) and refresh the page to ensure the server correctly serves [index.html](file:///c:/xampp/htdocs/profile-react/index.html).
+2. **Environment Variable Injection**: Verify that Cloud Run can access secrets via Google Secret Manager or environment variables.
+
+## Clarifications Required
+1. **New Subdomain Name**: Would you like `gcp.jeffdev.studio` or `ai.jeffdev.studio` for the new record?
+2. **Google Cloud Project**: Ensure you have a GCP project created and the Cloud Run API enabled.

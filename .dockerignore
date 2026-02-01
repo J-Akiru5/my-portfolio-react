@@ -1,0 +1,78 @@
+# Node modules
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs (will be created during Docker build)
+dist/
+build/
+.next/
+.nuxt/
+.cache/
+
+# Environment files (use Cloud Run env vars instead)
+# .env.local is allowed for Vite build-time variables
+.env
+.env.production
+.env.development
+.env.test
+!.env.example
+!.env.local
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Testing
+coverage/
+.nyc_output/
+*.test.js
+*.spec.js
+__tests__/
+test/
+tests/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+.circleci/
+
+# Documentation
+README.md
+LICENSE.txt
+*.md
+docs/
+
+# Vercel specific (not needed for Cloud Run)
+.vercel/
+vercel.json
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Agent files
+.agent/
+
+# Error logs
+build-error*.txt
+
+# Certificates (should be in environment/secrets)
+public/certs/

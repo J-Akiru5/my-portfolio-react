@@ -1,0 +1,232 @@
+# JeffDev Agency — Implementation Plan (Tailored)
+
+> **Aligned with existing scaffold** (Next.js 16.1.1 + Tailwind v4 + Lenis)
+
+---
+
+## Current State ✅
+
+| Layer | Status | Technology |
+|-------|--------|------------|
+| Framework | ✅ Ready | Next.js 16.1.1 (App Router) |
+| Styling | ✅ Ready | Tailwind v4 + CSS tokens |
+| Scroll | ✅ Ready | Lenis smooth scroll |
+| Utils | ✅ Ready | `cn()` utility |
+| Components | 🔲 Pending | Header, Hero, Services, etc. |
+| Backend | 🔲 Pending | Firebase, Resend, Admin |
+
+---
+
+## Pending Build Order
+
+### Phase 1: Core Components
+
+| # | Component | File | Priority |
+|---|-----------|------|----------|
+| 1 | **Header** | `src/components/layout/header.tsx` | 🔴 Critical |
+| 2 | **Footer** | `src/components/layout/footer.tsx` | 🔴 Critical |
+| 3 | **Hero** | `src/components/sections/hero.tsx` | 🔴 Critical |
+| 4 | **Services Grid** | `src/components/sections/services.tsx` | 🔴 Critical |
+| 5 | **Case Studies** | `src/components/sections/case-studies.tsx` | 🟡 High |
+| 6 | **Testimonials** | `src/components/sections/testimonials.tsx` | 🟡 High |
+| 7 | **About/Founder** | `src/components/sections/about.tsx` | 🟡 High |
+| 8 | **CTA Banner** | `src/components/sections/cta.tsx` | 🟢 Medium |
+
+### Phase 2: Pages
+
+```
+src/app/
+├── page.tsx              # Homepage (Hero + Services + CTA)
+├── services/
+│   ├── page.tsx          # Services grid
+│   └── [slug]/page.tsx   # Service detail
+├── work/
+│   ├── page.tsx          # Case studies
+│   └── [slug]/page.tsx   # Project detail
+├── about/page.tsx        # About Studio + Founder
+├── contact/page.tsx      # Contact + Quote form
+├── quote/page.tsx        # Multi-step quote form ⭐ NEW
+├── blog/
+│   ├── page.tsx
+│   └── [slug]/page.tsx
+├── terms/page.tsx
+├── privacy/page.tsx
+└── admin/                # Dedicated Admin Panel ⭐ NEW
+    ├── page.tsx          # Dashboard
+    ├── messages/page.tsx
+    ├── bookings/page.tsx
+    ├── projects/page.tsx
+    └── login/page.tsx
+```
+
+### Phase 3: Backend Integration
+
+| Feature | Implementation |
+|---------|----------------|
+| **Firebase** | Shared Firestore (same config as portfolio) |
+| **Admin Auth** | Firebase Auth (same users) |
+| **Email** | Resend API (existing) |
+| **Storage** | Cloudflare R2 (existing) |
+
+---
+
+## Multi-Step Quote Form Spec ⭐
+
+### Flow
+```
+Step 1: Project Type     → Step 2: Budget & Timeline → Step 3: Contact Info → Submit
+[Web/Mobile/SaaS/AI]        [₱50K-100K, 1-2 weeks]       [Name, Email, Company]
+```
+
+### Implementation
+
+```tsx
+// src/app/quote/page.tsx
+'use client'
+
+import { useState } from 'react'
+import { z } from 'zod'
+
+const quoteSchema = z.object({
+  projectType: z.enum(['web', 'mobile', 'saas', 'ai', 'other']),
+  budget: z.enum(['50k-100k', '100k-250k', '250k-500k', '500k+']),
+  timeline: z.enum(['1-2-weeks', '1-month', '2-3-months', 'flexible']),
+  name: z.string().min(2),
+  email: z.string().email(),
+  company: z.string().optional(),
+  details: z.string().min(20),
+})
+
+type QuoteData = z.infer<typeof quoteSchema>
+
+export default function QuotePage() {
+  const [step, setStep] = useState(1)
+  const [data, setData] = useState<Partial<QuoteData>>({})
+  
+  // Step navigation + Zod validation per step
+  // Save to Firestore: `quotes` collection
+  // Send email via Resend
+}
+```
+
+### Firestore Schema
+```ts
+// Collection: quotes
+{
+  id: string
+  projectType: 'web' | 'mobile' | 'saas' | 'ai' | 'other'
+  budget: string
+  timeline: string
+  name: string
+  email: string
+  company?: string
+  details: string
+  status: 'new' | 'contacted' | 'in-progress' | 'closed'
+  createdAt: Timestamp
+}
+```
+
+---
+
+## Dedicated Admin Panel ⭐
+
+### Structure
+```
+src/app/admin/
+├── layout.tsx            # Admin shell (sidebar + auth check)
+├── page.tsx              # Dashboard (stats overview)
+├── login/page.tsx        # Firebase Auth login
+├── messages/page.tsx     # Contact form submissions
+├── quotes/page.tsx       # Multi-step quote submissions ⭐
+├── bookings/page.tsx     # Calendar bookings
+├── projects/
+│   ├── page.tsx          # Projects list
+│   └── [id]/page.tsx     # Project editor
+├── services/
+│   ├── page.tsx
+│   └── [id]/page.tsx
+└── blog/
+    ├── page.tsx
+    └── [id]/page.tsx
+```
+
+### Auth Strategy
+- **Same Firebase Auth** as portfolio
+- **Same admin users** (check `admin_users` collection)
+- **ProtectedRoute** component wraps admin layout
+
+```tsx
+// src/app/admin/layout.tsx
+import { cookies } from 'next/headers'
+import { redirect } from 'next/navigation'
+import { verifySessionCookie } from '@/lib/firebase-admin'
+
+export default async function AdminLayout({ children }: { children: React.ReactNode }) {
+  const session = cookies().get('session')?.value
+  
+  if (!session) redirect('/admin/login')
+  
+  const user = await verifySessionCookie(session)
+  if (!user) redirect('/admin/login')
+  
+  return (
+    <div className="flex min-h-screen">
+      <AdminSidebar />
+      <main className="flex-1 p-6">{children}</main>
+    </div>
+  )
+}
+```
+
+---
+
+## Shared Firebase Strategy
+
+### Same Collections (Both Sites)
+| Collection | Agency | Portfolio |
+|------------|--------|-----------|
+| `projects` | `isClientWork: true` | All |
+| `services` | All | All |
+| `posts` | All | All |
+| `testimonials` | All | — |
+| `messages` | All | All |
+| `bookings` | All | All |
+| `quotes` | ✅ New | — |
+
+### Environment Variables
+```env
+# .env.local (Agency)
+NEXT_PUBLIC_FIREBASE_API_KEY=xxx
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=xxx
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=xxx
+FIREBASE_ADMIN_PRIVATE_KEY=xxx
+FIREBASE_ADMIN_CLIENT_EMAIL=xxx
+RESEND_API_KEY=xxx
+R2_ACCESS_KEY_ID=xxx
+R2_SECRET_ACCESS_KEY=xxx
+```
+
+---
+
+## Design Constraints (From Rules)
+
+| Constraint | Value |
+|------------|-------|
+| Background | `#050505` (--color-void) |
+| Border radius | `rounded-sm` or `rounded-md` only |
+| Language | B2B ("We partner..." not "I freelance...") |
+| Forms | Zod validation mandatory |
+| TypeScript | Strict mode, no `any` |
+
+---
+
+## Next Steps
+
+1. [ ] **Build Header component** (glass nav, logo, GET QUOTE CTA)
+2. [ ] **Build Hero section** (GSAP reveal, trust badges)
+3. [ ] **Build Services grid** (4 cards with icons)
+4. [ ] **Build Footer** (DTI number, legal links)
+5. [ ] **Build Quote form** (multi-step with Zod)
+6. [ ] **Set up Firebase** (shared config)
+7. [ ] **Build Admin shell** (sidebar, auth)
+8. [ ] **Migrate content** (services, projects from portfolio)
