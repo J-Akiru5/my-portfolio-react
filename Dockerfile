@@ -46,8 +46,7 @@ WORKDIR /app
 
 # Install production dependencies for Express server
 COPY package*.json ./
-RUN npm install --legacy-peer-deps --only=production && \
-    npm install express cors --legacy-peer-deps
+RUN npm install --legacy-peer-deps --only=production
 
 # Copy built assets from builder stage
 COPY --from=builder /app/dist ./dist
