@@ -1,0 +1,30 @@
+fix: add Firebase build arguments to Docker and GitHub Actions workflow
+
+# Conflicts:
+#	.github/workflows/deploy-cloud-run.yml
+#	Dockerfile
+#
+# It looks like you may be committing a cherry-pick.
+# If this is not correct, please run
+#	git update-ref -d CHERRY_PICK_HEAD
+# and try again.
+
+
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# Date:      Sun Feb 1 15:09:39 2026 +0800
+#
+# On branch main
+# Your branch is behind 'origin/main' by 9 commits, and can be fast-forwarded.
+#   (use "git pull" to update your local branch)
+#
+# You are currently cherry-picking commit 22c1dd7.
+#
+# Changes to be committed:
+#	new file:   .github/workflows/deploy-cloud-run.yml
+#	new file:   Dockerfile
+#
+# Untracked files:
+#	gcp-key.json
+#
