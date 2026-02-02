@@ -36,8 +36,18 @@ RUN npm install --legacy-peer-deps
 # Copy source code (but NOT .env.local - using build args instead)
 COPY . .
 
+# DEBUG: Verify environment variables are set before build
+RUN echo "🔍 Checking ENV vars before Vite build:" && \
+    echo "VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY:0:10}..." && \
+    echo "VITE_FIREBASE_PROJECT_ID=$VITE_FIREBASE_PROJECT_ID" && \
+    echo "VITE_FIREBASE_AUTH_DOMAIN=$VITE_FIREBASE_AUTH_DOMAIN"
+
 # Build the application (Vite reads ENV variables set above)
 RUN npm run build
+
+# DEBUG: Verify the built files contain the Firebase config
+RUN echo "🔍 Checking if Firebase config is in built files:" && \
+    grep -r "firebaseapp.com" dist/ || echo "⚠️  WARNING: Firebase domain NOT found in built files!"
 
 # Stage 2: Production runtime
 FROM node:20-alpine
