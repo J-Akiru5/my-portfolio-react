@@ -37,10 +37,26 @@ export default async function handler(req, res) {
     
     // Quick actions always return edits
     switch (action) {
-      case 'improve':
-        prompt = `You are a writing assistant. Improve the following text by enhancing clarity, flow, and engagement while maintaining the original meaning. Keep the same tone and format (markdown if present).
+      case 'vlog-script':
+        prompt = `You are an energetic Tech Vlogger (like MKBHD or MrWhoseTheBoss). Convert the following text into a YouTube Video Script.
+        
+Format Requirements:
+- Use [CAMERA] for visual cues
+- Use [B-ROLL] for overlay footage
+- Use [TRANSITION] for scene changes
+- tone: High energy, engaging, "Hey guys!" style
+- Maintain the core information but make it spoken-word friendly
 
-IMPORTANT: Return ONLY the improved text, no explanations, no preamble, no "Here's the improved version:" - just the improved content itself.
+TEXT TO CONVERT:
+${text}`;
+        responseType = 'edit';
+        break;
+
+      case 'improve':
+        prompt = `You are an energetic Tech Vlogger assistant. Improve the following text.
+- Tone: High energy, punchy, engaging.
+- Style: Conversational, spoke-word friendly (avoid complex sentences).
+- MAINTAIN LAYOUT: strictly preserve all existing markdown structure, headers, and spacing.
 
 TEXT TO IMPROVE:
 ${text}`;
@@ -48,9 +64,10 @@ ${text}`;
         break;
         
       case 'expand':
-        prompt = `You are a writing assistant. Expand and add more detail to the following text. Add relevant examples, explanations, or supporting points. Maintain the same style and format.
-
-IMPORTANT: Return ONLY the expanded text, no explanations, no preamble - just the expanded content itself.
+        prompt = `You are an energetic Tech Vlogger assistant. Expand the following text with more "sauce" and exciting details.
+- Add relevant examples or hype.
+- Keep the same format.
+- MAINTAIN LAYOUT: strictly preserve all existing markdown structure.
 
 TEXT TO EXPAND:
 ${text}`;
@@ -58,9 +75,9 @@ ${text}`;
         break;
         
       case 'summarize':
-        prompt = `You are a writing assistant. Summarize the following text concisely while keeping the key points and main ideas. Keep the same format.
-
-IMPORTANT: Return ONLY the summary, no explanations, no preamble - just the summarized content itself.
+        prompt = `You are a Tech Vlogger. Give me the TL;DR (Too Long; Didn't Read) of this text.
+- Keep it punchy and short.
+- MAINTAIN LAYOUT: strictly preserve all existing markdown structure.
 
 TEXT TO SUMMARIZE:
 ${text}`;
@@ -68,22 +85,21 @@ ${text}`;
         break;
         
       case 'generate':
-        prompt = `Generate a well-structured blog article about: "${title || text}". 
-Write in an engaging, conversational tone suitable for a developer portfolio blog.
-Include:
-- An engaging introduction
-- 2-3 main sections with clear headings (use ## for headings)
-- Relevant examples or insights
-- A conclusion
+        prompt = `Generate a high-energy Tech Vlog script about: "${title || text}". 
+Structure:
+- [INTRO]: Hook the viewer immediately.
+- [BODY]: 3 key points with [B-ROLL] suggestions.
+- [OUTRO]: Call to action (Like & Subscribe).
 
-IMPORTANT: Return ONLY the article content in Markdown format, no preamble.`;
+Format: Markdown.
+Tone: Super engaging, fast-paced.`;
         responseType = 'edit';
         break;
         
       case 'grammar':
-        prompt = `You are a grammar assistant. Fix all grammar, spelling, and punctuation errors in the following text. Only fix errors, do not change the style or content.
-
-IMPORTANT: Return ONLY the corrected text, no explanations, no preamble - just the corrected content itself.
+        prompt = `You are a grammar assistant. Fix errors but MAINTAIN the casual, vlog-style tone. 
+- Do NOT make it sound like a robot/professor.
+- Fix typos and punctuation only.
 
 TEXT TO CORRECT:
 ${text}`;
@@ -116,6 +132,7 @@ ${text}`;
           /make (it|this|the text) (more|less|shorter|longer|better)/i,
           /add (more|some)/i,
           /remove|delete/i,
+          /turn into script/i,
         ];
         
         const isQuestion = questionPatterns.some(p => p.test(lowerPrompt));
@@ -134,7 +151,7 @@ ${text}`;
             ).join('\n');
           }
           
-          prompt = `You are a helpful AI writing assistant integrated into a blog editor. The user is asking you a question about their content.
+          prompt = `You are a helpful Tech Vlogger AI assistant. The user is asking a question about their script.
 
 CURRENT CONTENT IN EDITOR:
 """
@@ -146,29 +163,26 @@ ${contextStr ? `RECENT CONVERSATION:\n${contextStr}\n` : ''}
 USER'S QUESTION: ${customPrompt}
 
 Instructions:
-- Answer the user's question helpfully and conversationally
-- If they're asking if something is correct/good, give honest feedback
-- Be concise but thorough
-- If they want you to make edits, tell them to use the quick action buttons or ask specifically to "fix/improve/expand" etc.
-- DO NOT randomly provide edited text unless explicitly asked to edit something`;
+- Answer helpfully with high energy ("Great question!", "Totally!")
+- Be concise.
+- If they want edits, tell them to use the quick actions.`;
 
         } else {
           // Edit mode
           responseType = 'edit';
-          prompt = `You are a writing assistant. The user has given you the following instruction for their content.
+          prompt = `You are an energetic Tech Vlogger assistant.
+User Instruction: ${customPrompt}
 
 CURRENT CONTENT:
 """
 ${text || '(No content yet)'}
 """
 
-USER'S INSTRUCTION: ${customPrompt}
-
 IMPORTANT: 
-- Execute the instruction on the content
-- Return ONLY the modified/new content
-- No explanations, no preamble, no "Here's the result:" - just the content itself
-- Maintain markdown formatting if present`;
+- Execute the instruction.
+- Tone: High Energy.
+- MAINTAIN LAYOUT strictly unless asked to change it.
+- Return ONLY the modified content.`;
         }
         break;
       }

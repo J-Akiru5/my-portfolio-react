@@ -189,36 +189,24 @@ export default function BlogEditor() {
   }, [chatMessages])
 
   // Track text selection (debounced)
-  useEffect(() => {
-    let timeoutId
+  // Track text selection directly from textarea
+  const handleSelect = (e) => {
+    const target = e.target
+    if (!target) return
     
-    const handleSelection = () => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        const selection = window.getSelection()
-        const text = selection?.toString() || ''
-        setSelectedText(text)
-        
-        if (text && selection.rangeCount > 0) {
-          const start = content.indexOf(text)
-          if (start !== -1) {
-            setSelectionRange({ start, end: start + text.length })
-          }
-        } else {
-          setSelectionRange(null)
-        }
-      }, 100) // Debounce by 100ms
-    }
-
-    document.addEventListener('mouseup', handleSelection)
-    document.addEventListener('keyup', handleSelection)
+    // Get exact selection range
+    const start = target.selectionStart
+    const end = target.selectionEnd
     
-    return () => {
-      clearTimeout(timeoutId)
-      document.removeEventListener('mouseup', handleSelection)
-      document.removeEventListener('keyup', handleSelection)
+    if (start !== end) {
+      const text = content.substring(start, end)
+      setSelectedText(text)
+      setSelectionRange({ start, end })
+    } else {
+      setSelectedText('')
+      setSelectionRange(null)
     }
-  }, [content])
+  }
 
   function handleTitleChange(e) {
     const val = e.target.value
@@ -467,7 +455,7 @@ export default function BlogEditor() {
       let newContent
       const range = pendingChanges.storedSelectionRange
       if (pendingChanges.isPartialEdit && range) {
-        // Use the stored range from when AI was called, not current selection
+        // Use the exact stored range indices - no guessing involved
         newContent = pendingChanges.fullOriginal.slice(0, range.start) + 
                     editableDiff + 
                     pendingChanges.fullOriginal.slice(range.end)
@@ -1250,11 +1238,18 @@ export default function BlogEditor() {
             
             <MDEditor
               value={content}
-              onChange={(val) => setContent(val || '')}
+              onChange={setContent}
               height="100%"
-              preview="live"
+              preview="edit"
               hideToolbar={false}
               visibleDragbar={false}
+              className="custom-md-editor"
+              textareaProps={{
+                placeholder: 'Start writing your amazing vlog content...',
+                onSelect: handleSelect,
+                onClick: handleSelect,
+                onKeyUp: handleSelect
+              }}
             />
           </div>
         </main>
@@ -1271,24 +1266,18 @@ export default function BlogEditor() {
           </div>
           
           {/* Quick Actions */}
-          <div className={`quick-actions ${selectedText ? '' : 'hidden'}`}>
-            <button className="quick-btn" onClick={() => handleQuickAction('improve')} disabled={aiLoading}>
-              ✨ Improve
-            </button>
-            <button className="quick-btn" onClick={() => handleQuickAction('expand')} disabled={aiLoading}>
-              📝 Expand
-            </button>
-            <button className="quick-btn" onClick={() => handleQuickAction('summarize')} disabled={aiLoading}>
-              📋 Summarize
-            </button>
-            <button className="quick-btn" onClick={() => handleQuickAction('grammar')} disabled={aiLoading}>
-              🔤 Fix Grammar
-            </button>
-          </div>
-
-          {!selectedText && (
-            <div className="selection-hint">Select text in editor for quick actions</div>
-          )}
+            {/* Quick Actions - Always visible now */}
+            <div className="quick-actions">
+              <button className="quick-btn" onClick={() => handleQuickAction('improve')} disabled={aiLoading || (!content && !selectedText)}>✨ Improve</button>
+              <button className="quick-btn" onClick={() => handleQuickAction('vlog-script')} disabled={aiLoading || (!content && !selectedText)}>📹 Vlog Script</button>
+              <button className="quick-btn" onClick={() => handleQuickAction('expand')} disabled={aiLoading || (!content && !selectedText)}>➕ Expand</button>
+              <button className="quick-btn" onClick={() => handleQuickAction('summarize')} disabled={aiLoading || (!content && !selectedText)}>📝 TL;DR</button>
+              <button className="quick-btn" onClick={() => handleQuickAction('grammar')} disabled={aiLoading || (!content && !selectedText)}>🔧 Fix Grammar</button>
+            </div>
+            
+            {!selectedText && content && (
+              <div className="selection-hint">Select text to edit logic, or use defaults for full doc</div>
+            )}
 
           {/* Chat Messages */}
           <div className="chat-messages">
