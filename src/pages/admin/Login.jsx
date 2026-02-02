@@ -150,6 +150,8 @@ export default function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="admin@system.local"
+              autoComplete="username email"
+              name="email"
             />
           </div>
           
@@ -163,12 +165,15 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
+                autoComplete="current-password"
+                name="password"
               />
               <button 
                 type="button"
                 className="password-toggle"
                 onClick={() => setShowPassword(!showPassword)}
                 title={showPassword ? 'Hide password' : 'Show password'}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
               >
                 {showPassword ? '🙈' : '👁️'}
               </button>
