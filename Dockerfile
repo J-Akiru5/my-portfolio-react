@@ -37,10 +37,7 @@ RUN npm install --legacy-peer-deps
 COPY . .
 
 # DEBUG: Verify environment variables are set before build
-RUN echo "🔍 Checking ENV vars before Vite build:" && \
-    echo "VITE_FIREBASE_API_KEY=${VITE_FIREBASE_API_KEY:0:10}..." && \
-    echo "VITE_FIREBASE_PROJECT_ID=$VITE_FIREBASE_PROJECT_ID" && \
-    echo "VITE_FIREBASE_AUTH_DOMAIN=$VITE_FIREBASE_AUTH_DOMAIN"
+RUN node check-env.js
 
 # Build the application (Vite reads ENV variables set above)
 RUN npm run build
