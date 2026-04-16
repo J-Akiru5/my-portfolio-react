@@ -34,10 +34,13 @@ export function SmoothScrollProvider({ children }) {
     // Connect Lenis to GSAP ScrollTrigger
     lenis.on('scroll', ScrollTrigger.update);
 
-    // Add Lenis's RAF to GSAP's ticker
-    gsap.ticker.add((time) => {
+    // Store the ticker function so we can remove it exactly on cleanup
+    const tickerFn = (time) => {
       lenis.raf(time * 1000);
-    });
+    };
+
+    // Add Lenis's RAF to GSAP's ticker
+    gsap.ticker.add(tickerFn);
 
     // Don't let GSAP ticker lag
     gsap.ticker.lagSmoothing(0);
@@ -47,7 +50,7 @@ export function SmoothScrollProvider({ children }) {
     // Cleanup
     return () => {
       lenis.destroy();
-      gsap.ticker.remove(lenis.raf);
+      gsap.ticker.remove(tickerFn);
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
     };
   }, []);

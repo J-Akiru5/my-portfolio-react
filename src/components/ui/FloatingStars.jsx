@@ -12,11 +12,15 @@ const FloatingStars = ({ count = 100 }) => {
     const container = containerRef.current;
     if (!container) return;
 
+    // Reduce star count on small screens to ease GPU load
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
+    const actualCount = isMobile ? Math.min(count, 30) : count;
+
     // Clear existing stars
     container.innerHTML = '';
 
     // Generate stars
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < actualCount; i++) {
       const star = document.createElement('div');
       star.className = 'floating-star';
       
@@ -51,6 +55,8 @@ const FloatingStars = ({ count = 100 }) => {
           pointer-events: none;
           z-index: 0;
           overflow: hidden;
+          /* Isolate repaints so star animations don't invalidate the rest of the page */
+          contain: strict;
         }
         
         .floating-star {

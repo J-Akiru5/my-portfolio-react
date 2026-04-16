@@ -10,10 +10,11 @@ const NavBar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('hero');
-  const [scrollProgress, setScrollProgress] = useState(0);
   const location = useLocation();
   const rafRef = useRef(null);
   const lastScrollTime = useRef(0);
+  // Direct DOM ref for the navbar's own progress bar – avoids React re-renders on every scroll
+  const progressBarRef = useRef(null);
 
   // Debounced scroll handler for INP optimization
   const handleScroll = useCallback(() => {
@@ -31,7 +32,11 @@ const NavBar = () => {
       // Calculate scroll progress
       const docHeight = document.documentElement.scrollHeight - window.innerHeight;
       const progress = docHeight > 0 ? (window.scrollY / docHeight) * 100 : 0;
-      setScrollProgress(progress);
+
+      // Update navbar progress bar directly – no React state update needed here
+      if (progressBarRef.current) {
+        progressBarRef.current.style.width = `${progress}%`;
+      }
       
       // Update SinglePage progress bar if it exists
       const progressBar = document.getElementById('scroll-progress-bar');
@@ -332,7 +337,7 @@ const NavBar = () => {
       `}</style>
       
       <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
-        <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
+        <div className="scroll-progress" ref={progressBarRef} />
         <Link to="/" className="navbar-brand">
           <span className="star">★</span>
           <span>JEFF</span>

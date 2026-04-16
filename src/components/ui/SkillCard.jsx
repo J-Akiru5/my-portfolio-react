@@ -18,7 +18,9 @@ export default function SkillCard({
 }) {
   const cardRef = useRef(null)
   const [isFlipped, setIsFlipped] = useState(false)
-  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  // Cached rect and RAF ref – avoids getBoundingClientRect on every mousemove
+  const cachedRect = useRef(null)
+  const rafId = useRef(null)
 
   // Get proficiency level
   const getProficiency = (percent) => {
@@ -30,23 +32,45 @@ export default function SkillCard({
 
   const proficiency = getProficiency(level)
 
-  // Handle mouse move for 3D tilt
+  // Cache the bounding rect once on enter – avoids layout reads on every mousemove
+  const handleMouseEnter = () => {
+    if (cardRef.current) {
+      cachedRect.current = cardRef.current.getBoundingClientRect()
+    }
+  }
+
+  // Handle mouse move for 3D tilt — RAF-throttled, direct CSS custom property update
   const handleMouseMove = (e) => {
-    if (!cardRef.current) return
-    const rect = cardRef.current.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-    const centerX = rect.width / 2
-    const centerY = rect.height / 2
-    
-    const rotateX = ((y - centerY) / centerY) * -10
-    const rotateY = ((x - centerX) / centerX) * 10
-    
-    setTilt({ x: rotateX, y: rotateY })
+    if (rafId.current) return
+    const clientX = e.clientX
+    const clientY = e.clientY
+    rafId.current = requestAnimationFrame(() => {
+      rafId.current = null
+      const rect = cachedRect.current
+      if (!rect || !cardRef.current) return
+      const x = clientX - rect.left
+      const y = clientY - rect.top
+      const centerX = rect.width / 2
+      const centerY = rect.height / 2
+      const rotateX = ((y - centerY) / centerY) * -10
+      const rotateY = ((x - centerX) / centerX) * 10
+      // Direct DOM update – no React re-render needed for tilt
+      cardRef.current.style.setProperty('--rotateX', `${rotateX}deg`)
+      cardRef.current.style.setProperty('--rotateY', `${rotateY}deg`)
+    })
   }
 
   const handleMouseLeave = () => {
-    setTilt({ x: 0, y: 0 })
+    // Cancel any pending RAF
+    if (rafId.current) {
+      cancelAnimationFrame(rafId.current)
+      rafId.current = null
+    }
+    cachedRect.current = null
+    if (cardRef.current) {
+      cardRef.current.style.setProperty('--rotateX', '0deg')
+      cardRef.current.style.setProperty('--rotateY', '0deg')
+    }
   }
 
   const handleClick = () => {
@@ -57,12 +81,11 @@ export default function SkillCard({
     <div 
       ref={cardRef}
       className={`skill-card ${featured ? 'featured' : ''} ${isFlipped ? 'flipped' : ''} ${className}`}
+      onMouseEnter={handleMouseEnter}
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onClick={handleClick}
       style={{
-        '--rotateX': `${tilt.x}deg`,
-        '--rotateY': `${tilt.y}deg`,
         '--skill-color': color,
         '--proficiency-color': proficiency.color,
       }}
