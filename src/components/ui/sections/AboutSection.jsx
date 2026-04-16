@@ -111,8 +111,8 @@ export default function AboutSection() {
   useEffect(() => {
     if (activeHobby && monitorContentRef.current) {
       gsap.fromTo(monitorContentRef.current,
-        { opacity: 0, scale: 0.95, filter: 'blur(5px)' },
-        { opacity: 1, scale: 1, filter: 'blur(0px)', duration: 0.4, ease: 'power2.out' }
+        { opacity: 0, scale: 0.95 },
+        { opacity: 1, scale: 1, duration: 0.4, ease: 'power2.out' }
       )
     }
   }, [activeHobby])

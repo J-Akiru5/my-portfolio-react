@@ -45,7 +45,7 @@ export default function App() {
           <div className="app-wrapper pixel-grid" style={{ minHeight: '100vh', position: 'relative' }}>
           
           {/* Background effects */}
-          <FloatingStars count={80} />
+          <FloatingStars count={50} />
           
           {/* Navigation */}
           <NavBar />
