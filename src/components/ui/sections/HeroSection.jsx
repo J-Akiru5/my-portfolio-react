@@ -317,6 +317,116 @@ export default function HeroSection() {
             transform: translateX(-50%) translateY(-5px);
           }
         }
+
+        /* ── Syntaxure floating card ── */
+        .syntaxure-card {
+          position: absolute;
+          right: 2.5rem;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 240px;
+          background: rgba(10, 10, 18, 0.88);
+          border: 1px solid rgba(0, 212, 255, 0.35);
+          border-radius: 12px;
+          overflow: hidden;
+          text-decoration: none;
+          color: inherit;
+          backdrop-filter: blur(12px);
+          box-shadow:
+            0 0 0 1px rgba(57, 255, 20, 0.08),
+            0 0 24px rgba(0, 212, 255, 0.15),
+            0 8px 32px rgba(0, 0, 0, 0.5);
+          transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+          z-index: 20;
+          display: flex;
+          flex-direction: column;
+        }
+
+        .syntaxure-card:hover {
+          transform: translateY(calc(-50% - 6px));
+          border-color: rgba(0, 212, 255, 0.7);
+          box-shadow:
+            0 0 0 1px rgba(57, 255, 20, 0.2),
+            0 0 40px rgba(0, 212, 255, 0.3),
+            0 12px 40px rgba(0, 0, 0, 0.6);
+        }
+
+        .syntaxure-card-img-wrap {
+          width: 100%;
+          height: 130px;
+          overflow: hidden;
+          border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .syntaxure-card-img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: top center;
+          display: block;
+          transition: transform 0.35s ease;
+        }
+
+        .syntaxure-card:hover .syntaxure-card-img {
+          transform: scale(1.04);
+        }
+
+        .syntaxure-card-body {
+          padding: 0.75rem 0.9rem 0.5rem;
+          flex: 1;
+        }
+
+        .syntaxure-card-domain {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.6rem;
+          color: #00d4ff;
+          text-transform: uppercase;
+          letter-spacing: 1px;
+        }
+
+        .syntaxure-card-title {
+          font-family: 'Space Grotesk', sans-serif;
+          font-size: 0.85rem;
+          font-weight: 700;
+          color: #fff;
+          margin: 0.3rem 0 0.25rem;
+          line-height: 1.3;
+        }
+
+        .syntaxure-card-desc {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 0.62rem;
+          color: rgba(255, 255, 255, 0.55);
+          margin: 0;
+          line-height: 1.5;
+        }
+
+        .syntaxure-card-arrow {
+          position: absolute;
+          top: 0.65rem;
+          right: 0.75rem;
+          font-size: 0.85rem;
+          color: #39ff14;
+          opacity: 0;
+          transition: opacity 0.2s ease;
+        }
+
+        .syntaxure-card:hover .syntaxure-card-arrow {
+          opacity: 1;
+        }
+
+        @media (max-width: 1200px) {
+          .syntaxure-card {
+            width: 200px;
+            right: 1rem;
+          }
+        }
+
+        @media (max-width: 900px) {
+          .syntaxure-card {
+            display: none;
+          }
+        }
       `}</style>
       
       <div ref={contentRef} className="hero-content">
@@ -353,6 +463,30 @@ export default function HeroSection() {
         </div>
       </div>
       
+      {/* Syntaxure floating card */}
+      <a
+        href="https://syntaxure.dev/"
+        target="_blank"
+        rel="noopener noreferrer nofollow"
+        className="syntaxure-card"
+        aria-label="Visit Syntaxure Labs"
+      >
+        <div className="syntaxure-card-img-wrap">
+          {/* OG preview image – save to /public/assets/syntaxure-og.png locally for production */}
+          <img
+            src="https://github.com/user-attachments/assets/785832b1-9786-4ff7-8377-cb743c1954b1"
+            alt="Syntaxure Labs – High-Performance Web Systems"
+            className="syntaxure-card-img"
+          />
+        </div>
+        <div className="syntaxure-card-body">
+          <span className="syntaxure-card-domain">syntaxure.dev</span>
+          <p className="syntaxure-card-title">Syntaxure Labs</p>
+          <p className="syntaxure-card-desc">We Build High-Performance Web Systems That Scale</p>
+        </div>
+        <span className="syntaxure-card-arrow">↗</span>
+      </a>
+
       <div className="scroll-indicator" onClick={() => scrollToSection('about')}>
         <span className="scroll-indicator-text">SCROLL</span>
         <span className="scroll-indicator-arrow">▼</span>
