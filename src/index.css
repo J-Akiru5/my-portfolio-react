@@ -92,6 +92,7 @@ a:hover {
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border);
     border-radius: 12px;
+    will-change: transform, opacity, box-shadow;
   }
   
   .glass-card-strong {
@@ -100,6 +101,7 @@ a:hover {
     -webkit-backdrop-filter: blur(16px);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 12px;
+    will-change: transform, opacity;
   }
   
   /* Pixel Button */

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useDeferredValue } from 'react'
 import { gsap } from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { SectionTitle, GlassCard } from '../components/ui'
@@ -23,6 +23,7 @@ export default function Certifications() {
   const [displayedCerts, setDisplayedCerts] = useState(certificates)
   const [selectedCert, setSelectedCert] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const deferredSearchTerm = useDeferredValue(searchTerm)
   const cardsRef = useRef(null)
   const pageRef = useRef(null)
   
@@ -32,8 +33,8 @@ export default function Certifications() {
   useEffect(() => {
     let filtered = getCertificatesByCategory(activeCategory)
     
-    if (searchTerm.trim()) {
-      const term = searchTerm.toLowerCase()
+    if (deferredSearchTerm.trim()) {
+      const term = deferredSearchTerm.toLowerCase()
       filtered = filtered.filter(
         c => c.title.toLowerCase().includes(term) || 
              c.provider.toLowerCase().includes(term)
@@ -41,7 +42,7 @@ export default function Certifications() {
     }
     
     setDisplayedCerts(filtered)
-  }, [activeCategory, searchTerm])
+  }, [activeCategory, deferredSearchTerm])
 
   useEffect(() => {
     const ctx = gsap.context(() => {

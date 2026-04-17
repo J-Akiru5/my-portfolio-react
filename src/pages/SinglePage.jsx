@@ -30,10 +30,16 @@ export default function SinglePage() {
       if (target) {
         e.preventDefault()
         const id = target.getAttribute('href').slice(1)
-        const element = document.getElementById(id)
-        if (element) {
-          element.scrollIntoView({ behavior: 'smooth' })
-        }
+        
+        // Defer scroll operation out of main synchronous task
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            const element = document.getElementById(id)
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth' })
+            }
+          }, 0)
+        })
       }
     }
 
