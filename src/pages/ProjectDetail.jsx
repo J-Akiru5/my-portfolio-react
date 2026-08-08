@@ -65,15 +65,15 @@ const FALLBACK_PROJECTS = {
   },
   'ebhm-connect': {
     id: 'ebhm-connect',
-    title: 'E-BHM Connect',
-    description: 'Electronic Barangay Health Management System for community healthcare.',
-    image: '/assets/Screenshot 2025-12-18 222001.png',
-    tags: ['PHP', 'MySQL', 'Bootstrap'],
-    liveUrl: '#',
+    title: 'E-BHM Telehealth',
+    description: 'Electronic Barangay Health Management System with AI-powered health chatbot Gabby, medicine inventory, and resident triage management.',
+    image: '/assets/telehealth.png',
+    tags: ['PHP', 'MySQL', 'AI', 'Bootstrap'],
+    liveUrl: 'https://health.syntaxure.dev/',
     codeUrl: 'https://github.com/J-Akiru5/e-bhm_connect',
     status: 100,
     color: '#00d4ff',
-    details: `## Overview\n\nE-BHM Connect digitizes barangay-level health management, enabling health workers to track patient records, vaccination schedules, and community health metrics from a single platform.\n\n## Key Features\n\n- **Patient Records** — Digital health profiles with medical history and vaccination tracking\n- **Appointment Scheduling** — Online booking for consultations and health programs\n- **Reporting Engine** — Automated health reports for barangay officials and the DOH\n- **Multi-role Access** — Separate dashboards for health workers, officials, and residents\n\n## Architecture\n\n- **Backend:** PHP with procedural and OOP patterns\n- **Database:** MySQL with normalized schema for patient data integrity\n- **Frontend:** Bootstrap 5 for responsive, mobile-friendly interface\n- **Auth:** Session-based authentication with role separation\n\n## Community Impact\n\nDeployed in a pilot barangay, reducing patient wait times by 40% and eliminating paper-based record duplication across health workers.`
+    details: `## Overview\n\nE-BHM Telehealth is an enhanced electronic barangay health management system designed for rural health workers. It covers medicine inventory, dispensing, and resident triage management, with an AI-powered health chatbot named "Gabby" for preliminary health assessments.\n\n## Key Features\n\n- **AI Health Chatbot (Gabby)** — Conversational AI assistant for symptom checking and health guidance\n- **Medicine Inventory** — Track stock levels, expiration dates, and dispensing history\n- **Resident Triage** — Priority-based patient queue with vital signs recording\n- **Telehealth Consultations** — Remote health consultations for underserved communities\n- **Reporting Engine** — Automated health reports for barangay officials and the DOH\n\n## Architecture\n\n- **Backend:** PHP with modular MVC structure\n- **Database:** MySQL with normalized schema for patient data integrity\n- **AI Layer:** Gabby chatbot for conversational health assessments\n- **Frontend:** Bootstrap 5 for responsive, mobile-friendly interface\n- **Auth:** Session-based authentication with role separation (health worker, official, resident)\n\n## Community Impact\n\nDeployed in pilot barangays, reducing patient wait times by 40% and providing AI-assisted health guidance to communities with limited access to medical professionals.`
   },
   'lingsarloka': {
     id: 'lingsarloka',
@@ -98,6 +98,54 @@ const FALLBACK_PROJECTS = {
     status: 100,
     color: '#8B7BFF',
     details: `## Overview\n\nPrism Context Engine is an AI-powered tool that captures, indexes, and retrieves contextual information across development workflows. It acts as a intelligent memory layer for developers, reducing context-switching overhead.\n\n## Key Features\n\n- **Context Capture** — Automatically indexes code, conversations, and documentation\n- **Semantic Search** — Natural language queries to find relevant context across your workspace\n- **Workflow Integration** — Works alongside existing dev tools without disruption\n- **Smart Suggestions** — Proactively surfaces relevant context based on current task\n\n## Architecture\n\n- **Frontend:** React with real-time updates and responsive dashboard\n- **Backend:** Node.js API with vector embedding pipeline\n- **AI Layer:** Semantic search powered by embedding models for contextual retrieval\n- **Deployment:** Hosted at prism.syntaxure.dev\n\n## Vision\n\nPrism aims to solve the "context amnesia" problem in software development — where developers spend 20-30% of their time re-discovering information they've already seen.`
+  },
+  'syntaxure-labs': {
+    id: 'syntaxure-labs',
+    title: 'Syntaxure Labs',
+    description: 'Startup enterprise web-development studio. SaaS monorepo with 8 apps and 5 shared packages including marketing site, Prism SaaS, admin dashboards, MCP server, and VS Code extension.',
+    image: '/assets/syntaxure-labs.png',
+    tags: ['Next.js', 'Turborepo', 'Supabase', 'TypeScript'],
+    liveUrl: 'https://www.syntaxure.dev/',
+    codeUrl: '#',
+    status: 100,
+    color: '#ff2e6c',
+    details: `## Overview\n\nSyntaxure Labs is a startup enterprise web-development studio incubated at KWADRA TBI (Cohort 5). The flagship product is a SaaS monorepo consisting of 8 apps and 5 shared packages, built for scalability and developer experience.\n\n## Monorepo Structure\n\n- **Marketing Site** — Public-facing website at syntaxure.dev\n- **Prism Context Engine** — AI coding-context manager SaaS\n- **Admin Dashboards** — Internal management tools for operations\n- **MCP Server** — Model Context Protocol server for AI integrations\n- **VS Code Extension** — IDE integration for the Prism ecosystem\n- **Shared Packages** — 5 reusable packages for auth, UI, utils, types, and config\n\n## Architecture\n\n- **Monorepo:** Turborepo for build orchestration and dependency management\n- **Framework:** Next.js 16 with App Router and Server Components\n- **Database:** Supabase (PostgreSQL) with real-time subscriptions\n- **Language:** TypeScript throughout for type safety\n- **Deployment:** Vercel with per-app deployment pipelines\n\n## Incubation\n\nCurrently incubated at KWADRA TBI (Cohort 5), a technology business incubator supporting early-stage startups in the Philippines.`
+  },
+  'lagavista': {
+    id: 'lagavista',
+    title: 'Lagavista',
+    description: 'Cultural-exchange platform connecting Indonesian and Philippine communities. Awarded Best Poster and 2nd place at INESCOM International Competition, Universitas Brawijaya.',
+    image: '/assets/lagavista.png',
+    tags: ['Next.js', 'Vercel', 'Cultural Exchange'],
+    liveUrl: 'https://lagavista-web.vercel.app/en',
+    codeUrl: '#',
+    status: 100,
+    color: '#ffd60a',
+    details: `## Overview\n\nLagavista is a cultural-exchange platform connecting Indonesian and Philippine communities through shared heritage, stories, and collaborative projects. Built as part of the INESCOM International Competition hosted by FACE-IT (FILKOM, Universitas Brawijaya).\n\n## Key Features\n\n- **Cultural Profiles** — Rich multimedia profiles showcasing traditions, cuisine, and art from both cultures\n- **Story Exchange** — Users share personal narratives connecting their cultural experiences\n- **Community Matching** — Algorithm pairs users with similar cultural interests across borders\n- **Multilingual Support** — Full Indonesian and English localization\n\n## Architecture\n\n- **Framework:** Next.js with App Router\n- **Deployment:** Vercel with edge functions for global performance\n- **Internationalization:** i18n routing with locale-based content delivery\n\n## Competition Results\n\nRepresented ISUFST as part of "Team 404: Problem Not Found" at INESCOM International Competition, Universitas Brawijaya:\n- **Best Poster Award** — Recognized for visual design and cultural presentation\n- **2nd Place, Essay Competition** — For the accompanying research paper on digital cultural exchange`
+  },
+  'ictirc': {
+    id: 'ictirc',
+    title: 'ICTIRC',
+    description: 'Full-stack research-repository and conference-management platform with dual hot/cold storage, multi-tier RBAC, paper submission workflows, plagiarism detection, and QR-based event registration.',
+    image: '/assets/ictirc.png',
+    tags: ['Next.js', 'Prisma', 'Supabase', 'TypeScript'],
+    liveUrl: 'https://irjict.isufstcict.com/',
+    codeUrl: '#',
+    status: 100,
+    color: '#00ff88',
+    details: `## Overview\n\nICTIRC (Information & Communication Technology International Research Conference) is a full-stack platform for managing research paper submissions, peer review workflows, and conference event logistics. Built as Lead Developer for the ICT department.\n\n## Key Features\n\n- **Paper Submission** — Multi-step submission workflow with file uploads and co-author management\n- **Peer Review** — Double-blind review system with reviewer assignment and scoring\n- **Plagiarism Detection** — Automated similarity checking on submitted manuscripts\n- **QR Registration** — QR-based event check-in for conference attendees\n- **Dual Storage** — Hot storage (Supabase) for active data, cold storage for archival\n- **Multi-tier RBAC** — Role-based access for authors, reviewers, editors, and admins\n\n## Architecture\n\n- **Framework:** Next.js 16 with App Router and Server Actions\n- **ORM:** Prisma with type-safe database queries\n- **Database:** Supabase (PostgreSQL) with hot/cold storage strategy\n- **Language:** TypeScript throughout\n- **Auth:** Multi-tier RBAC with role escalation workflows\n\n## Impact\n\nServed as the primary platform for the ICT department's international research conference, handling 100+ paper submissions and 300+ event registrations.`
+  },
+  'energy-monitoring': {
+    id: 'energy-monitoring',
+    title: 'Energy Monitoring',
+    description: 'Real-time IoT power-tracking system with PZEM-004T sensor and ESP32. Features telemetry ingestion, overvoltage/undervoltage alert detection, and configurable PHP/kWh billing engine.',
+    image: '/assets/energy-monitoring.png',
+    tags: ['ESP32', 'IoT', 'React', 'PHP'],
+    liveUrl: 'https://energy-monitoring-web.vercel.app/dashboard',
+    codeUrl: '#',
+    status: 100,
+    color: '#ff4444',
+    details: `## Overview\n\nEnergy Monitoring is a real-time IoT power-tracking system that integrates a PZEM-004T sensor with an ESP32 microcontroller to provide granular electricity monitoring, alert detection, and automated billing.\n\n## Key Features\n\n- **Real-time Telemetry** — Live voltage, current, power, and energy readings streamed via WebSocket\n- **Alert System** — Automatic detection of overvoltage, undervoltage, and blackout events with push notifications\n- **Billing Engine** — Configurable PHP/kWh rate calculation with daily, weekly, and monthly summaries\n- **Historical Analytics** — Interactive charts showing consumption trends and peak usage periods\n- **Device Management** — Register and monitor multiple ESP32 sensor nodes from a single dashboard\n\n## Architecture\n\n- **Hardware:** ESP32 microcontroller + PZEM-004T power meter sensor\n- **Firmware:** Arduino-based firmware with WiFi connectivity and MQTT telemetry\n- **Backend:** PHP API for data ingestion, alert processing, and billing calculations\n- **Frontend:** React dashboard with real-time WebSocket updates and Chart.js visualizations\n- **Deployment:** Vercel for the web dashboard, local server for MQTT broker\n\n## Use Case\n\nDesigned for households and small businesses in the Philippines seeking visibility into their electricity consumption and protection against power anomalies.`
   },
 }
 
