@@ -77,6 +77,17 @@ const FALLBACK_PROJECTS = [
     color: '#39ff14',
     status: 100,
   },
+  {
+    id: 'prism-context-engine',
+    title: 'Prism Context Engine',
+    description: 'AI-powered context engine for intelligent workflow management.',
+    image: '/assets/prism-context.png',
+    tags: ['React', 'Node.js', 'AI'],
+    liveUrl: 'https://prism.syntaxure.dev/',
+    codeUrl: '#',
+    color: '#8B7BFF',
+    status: 100,
+  },
 ]
 
 /**

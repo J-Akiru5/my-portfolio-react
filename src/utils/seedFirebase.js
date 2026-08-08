@@ -89,6 +89,19 @@ const projects = [
     linkedBlogId: null,
     order: 6,
   },
+  {
+    id: 'prism-context-engine',
+    title: 'Prism Context Engine',
+    description: 'AI-powered context engine for intelligent workflow management.',
+    image: '/assets/prism-context.png',
+    tags: ['React', 'Node.js', 'AI'],
+    liveUrl: 'https://prism.syntaxure.dev/',
+    codeUrl: '#',
+    color: '#8B7BFF',
+    status: 100,
+    linkedBlogId: null,
+    order: 7,
+  },
 ];
 
 // Social links data
