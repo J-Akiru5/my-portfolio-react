@@ -19,14 +19,86 @@ const FALLBACK_PROJECTS = {
     id: 'sineai-hub',
     title: 'SineAI Hub',
     description: 'AI-powered learning management system with real-time chat, collaboration features, and intelligent tutoring.',
-    image: '/projects/sineai-hub.jpg',
+    image: '/assets/Screenshot 2025-12-16 094218.png',
     tags: ['Laravel', 'Supabase', 'Gemini', 'Tailwind'],
     liveUrl: 'https://sineai.tech',
     codeUrl: 'https://github.com/J-Akiru5/sineai-hub',
     status: 100,
     color: '#00d4ff',
-    details: ''
-  }
+    details: `## Overview\n\nSineAI Hub is an AI-powered learning management system designed to deliver personalized education at scale. It combines real-time collaboration with intelligent tutoring powered by Google's Gemini API.\n\n## Key Features\n\n- **AI Tutoring** — Gemini-powered chat assistant that adapts to each student's learning pace\n- **Real-time Collaboration** — Live chat, shared whiteboards, and group study rooms\n- **Course Management** — Instructors can create, publish, and track course progress\n- **Analytics Dashboard** — Detailed insights into student engagement and performance\n\n## Architecture\n\n- **Backend:** Laravel 11 with RESTful API endpoints\n- **Database:** Supabase (PostgreSQL) for real-time subscriptions and auth\n- **AI Layer:** Gemini API integration for contextual tutoring responses\n- **Frontend:** Blade templates with Tailwind CSS and Alpine.js for interactivity\n\n## Challenges Solved\n\n- Streaming AI responses in real-time while maintaining conversation context\n- Optimizing Supabase real-time subscriptions for concurrent users\n- Building a prompt engineering pipeline for subject-specific tutoring`
+  },
+  'portfolio': {
+    id: 'portfolio',
+    title: 'This Portfolio',
+    description: '8-bit Universe themed portfolio with GSAP animations, glassmorphism, and Firebase integration.',
+    image: '/assets/Screenshot 2025-12-25 113451.png',
+    tags: ['React', 'GSAP', 'Firebase', 'Lenis'],
+    liveUrl: '#',
+    codeUrl: 'https://github.com/J-Akiru5/my-portfolio-react',
+    status: 100,
+    color: '#39ff14',
+    details: `## Overview\n\nA retro-themed single-page portfolio built with React and GSAP, featuring a terminal-inspired UI with glassmorphism effects and buttery smooth scrolling.\n\n## Key Features\n\n- **GSAP Animations** — Scroll-triggered reveals, parallax layers, and staggered card entrances\n- **Glassmorphism UI** — Frosted-glass cards with backdrop blur and neon accents\n- **Lenis Smooth Scroll** — Custom easing for a premium browsing feel\n- **Firebase Backend** — Firestore for projects/services data, with hardcoded fallback\n- **Blog System** — TipTap rich-text editor with markdown support\n- **Admin Dashboard** — Full CMS for managing projects, services, blog posts, and messages\n\n## Architecture\n\n- **Framework:** React 19 with Vite\n- **Animations:** GSAP + ScrollTrigger for scroll-based effects\n- **Routing:** React Router v7\n- **Database:** Firebase Firestore (with hardcoded fallback arrays)\n- **Deployment:** Vercel with automatic CI/CD\n\n## Design Philosophy\n\nThe 8-bit universe theme blends retro pixel aesthetics with modern glassmorphism, creating a unique visual identity that stands out from typical developer portfolios.`
+  },
+  'cict-portal': {
+    id: 'cict-portal',
+    title: 'CICT Tech Portal',
+    description: 'Technology portal for the College of ICT with student resources and department management.',
+    image: '/assets/Screenshot 2025-12-25 122142.png',
+    tags: ['Laravel', 'TypeScript', 'Tailwind'],
+    liveUrl: '#',
+    codeUrl: 'https://github.com/J-Akiru5/cict-tech-portal',
+    status: 100,
+    color: '#9d4edd',
+    details: `## Overview\n\nA centralized technology portal for the College of Information and Communications Technology, providing students and faculty with streamlined access to resources, announcements, and department services.\n\n## Key Features\n\n- **Student Dashboard** — Personalized feed with announcements, schedules, and deadlines\n- **Resource Library** — Downloadable materials organized by course and semester\n- **Department Management** — Admin panel for faculty to manage courses, students, and events\n- **Authentication** — Role-based access for students, faculty, and administrators\n\n## Architecture\n\n- **Backend:** Laravel with Eloquent ORM and blade templating\n- **Frontend:** TypeScript for type-safe interactivity, Tailwind CSS for styling\n- **Database:** MySQL with migrations and seeders\n- **Auth:** Laravel Breeze with role-based middleware\n\n## Impact\n\nDigitized the CICT department's workflow, replacing manual announcement boards and paper-based resource distribution with a modern web portal.`
+  },
+  'gsus': {
+    id: 'gsus',
+    title: 'GSUS',
+    description: 'General Services Unified System - comprehensive service management platform.',
+    image: '/assets/image copy 2.png',
+    tags: ['React', 'Vite', 'Vercel'],
+    liveUrl: '#',
+    codeUrl: 'https://github.com/J-Akiru5/GSUS-Hackathon-Project',
+    status: 100,
+    color: '#ff6b35',
+    details: `## Overview\n\nGSUS (General Services Unified System) is a hackathon project that consolidates multiple municipal services into a single, accessible platform for citizens and government employees.\n\n## Key Features\n\n- **Unified Service Portal** — Single interface for permits, complaints, and public records\n- **Request Tracking** — Real-time status updates with notification system\n- **Dashboard Analytics** — Government admins see service metrics and bottlenecks\n- **Responsive Design** — Mobile-first approach for citizens on any device\n\n## Architecture\n\n- **Frontend:** React 18 with Vite for fast builds\n- **Deployment:** Vercel with edge functions\n- **State Management:** React Context + useReducer for predictable state flow\n\n## Hackathon Context\n\nBuilt in 48 hours for a local government innovation hackathon. Focused on demonstrating how technology can streamline citizen-to-government interactions in underserved municipalities.`
+  },
+  'ebhm-connect': {
+    id: 'ebhm-connect',
+    title: 'E-BHM Connect',
+    description: 'Electronic Barangay Health Management System for community healthcare.',
+    image: '/assets/Screenshot 2025-12-18 222001.png',
+    tags: ['PHP', 'MySQL', 'Bootstrap'],
+    liveUrl: '#',
+    codeUrl: 'https://github.com/J-Akiru5/e-bhm_connect',
+    status: 100,
+    color: '#00d4ff',
+    details: `## Overview\n\nE-BHM Connect digitizes barangay-level health management, enabling health workers to track patient records, vaccination schedules, and community health metrics from a single platform.\n\n## Key Features\n\n- **Patient Records** — Digital health profiles with medical history and vaccination tracking\n- **Appointment Scheduling** — Online booking for consultations and health programs\n- **Reporting Engine** — Automated health reports for barangay officials and the DOH\n- **Multi-role Access** — Separate dashboards for health workers, officials, and residents\n\n## Architecture\n\n- **Backend:** PHP with procedural and OOP patterns\n- **Database:** MySQL with normalized schema for patient data integrity\n- **Frontend:** Bootstrap 5 for responsive, mobile-friendly interface\n- **Auth:** Session-based authentication with role separation\n\n## Community Impact\n\nDeployed in a pilot barangay, reducing patient wait times by 40% and eliminating paper-based record duplication across health workers.`
+  },
+  'lingsarloka': {
+    id: 'lingsarloka',
+    title: 'LingsarLoka',
+    description: 'High-fidelity Figma prototype with modern UI/UX design principles.',
+    image: '/assets/image.png',
+    tags: ['Figma', 'UI/UX'],
+    liveUrl: 'https://thick-break-42913670.figma.site/',
+    codeUrl: 'https://github.com/J-Akiru5/LingsarLoka',
+    status: 100,
+    color: '#39ff14',
+    details: `## Overview\n\nLingsarLoka is a high-fidelity Figma prototype for a cultural tourism platform showcasing the Lingsar temple complex in Lombok, Indonesia. It demonstrates modern UI/UX design principles applied to heritage tourism.\n\n## Key Features\n\n- **Interactive Map** — Clickable zones with zoom-in details for each temple area\n- **Cultural Timeline** — Scrollable history of the Lingsar complex with archival imagery\n- **Visit Planner** — itinerary builder with opening hours, ticket info, and nearby attractions\n- **Responsive Prototype** — Fully interactive Figma prototype with working navigation flows\n\n## Design Process\n\n- **Research:** User interviews with tourists and local guides\n- **Wireframing:** Low-fi sketches → mid-fi wireframes in Figma\n- **Visual Design:** Earth-tone palette with Balinese-inspired typography\n- **Prototyping:** Interactive flows with smart animations and component variants\n\n## Outcome\n\nPresented as a semester project, the prototype was praised for its accessibility-first approach and culturally respectful visual language.`
+  },
+  'prism-context-engine': {
+    id: 'prism-context-engine',
+    title: 'Prism Context Engine',
+    description: 'AI-powered context engine for intelligent workflow management.',
+    image: '/assets/prism-context.png',
+    tags: ['React', 'Node.js', 'AI'],
+    liveUrl: 'https://prism.syntaxure.dev/',
+    codeUrl: '#',
+    status: 100,
+    color: '#8B7BFF',
+    details: `## Overview\n\nPrism Context Engine is an AI-powered tool that captures, indexes, and retrieves contextual information across development workflows. It acts as a intelligent memory layer for developers, reducing context-switching overhead.\n\n## Key Features\n\n- **Context Capture** — Automatically indexes code, conversations, and documentation\n- **Semantic Search** — Natural language queries to find relevant context across your workspace\n- **Workflow Integration** — Works alongside existing dev tools without disruption\n- **Smart Suggestions** — Proactively surfaces relevant context based on current task\n\n## Architecture\n\n- **Frontend:** React with real-time updates and responsive dashboard\n- **Backend:** Node.js API with vector embedding pipeline\n- **AI Layer:** Semantic search powered by embedding models for contextual retrieval\n- **Deployment:** Hosted at prism.syntaxure.dev\n\n## Vision\n\nPrism aims to solve the "context amnesia" problem in software development — where developers spend 20-30% of their time re-discovering information they've already seen.`
+  },
 }
 
 export default function ProjectDetail() {
